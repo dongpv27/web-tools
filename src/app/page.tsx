@@ -1,65 +1,144 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, Zap, Shield, Globe } from 'lucide-react';
+import SearchBar from '@/components/ui/SearchBar';
+import ToolGrid from '@/components/tools/ToolGrid';
+import { tools } from '@/lib/tools';
+import { categories } from '@/lib/categories';
 
-export default function Home() {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Code,
+  FileText,
+  Image,
+  Youtube,
+  Palette,
+  ArrowLeftRight,
+  Wrench,
+};
+
+const features = [
+  {
+    icon: Zap,
+    title: 'Fast & Free',
+    description: 'All tools run instantly in your browser at no cost.',
+  },
+  {
+    icon: Shield,
+    title: '100% Private',
+    description: 'Your data never leaves your browser. Completely client-side.',
+  },
+  {
+    icon: Globe,
+    title: 'Works Everywhere',
+    description: 'No installation needed. Works on any device with a browser.',
+  },
+];
+
+export default function HomePage() {
+  const popularTools = tools.slice(0, 8);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Hero Section */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Free Online Tools
+        </h1>
+        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          100+ free tools for developers, designers, and everyone. Fast, private, and works in your browser.
+        </p>
+
+        {/* Search Bar */}
+        <div className="max-w-xl mx-auto mb-8">
+          <SearchBar placeholder="Search for tools..." className="w-full" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Quick Stats */}
+        <div className="flex justify-center gap-8 text-sm text-gray-500">
+          <span>{tools.length}+ Tools</span>
+          <span>{categories.length} Categories</span>
+          <span>100% Free</span>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        {features.map((feature) => (
+          <div
+            key={feature.title}
+            className="flex items-start gap-4 p-6 bg-white rounded-xl border border-gray-200"
+          >
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <feature.icon className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{feature.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{feature.description}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Popular Tools */}
+      <section className="mb-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Popular Tools</h2>
+          <Link
+            href="/tools"
+            className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
+          >
+            View all tools
+            <ArrowLeftRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <ToolGrid tools={popularTools} columns={4} />
+      </section>
+
+      {/* Categories */}
+      <section className="mb-16">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {categories.map((category) => {
+            const Icon = iconMap[category.icon];
+            return (
+              <Link
+                key={category.id}
+                href={`/tools/${category.slug}`}
+                className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all"
+              >
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  {Icon && <Icon className="w-6 h-6 text-blue-600" />}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  <p className="text-sm text-gray-500">{category.toolCount} tools</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* SEO Content */}
+      <section className="bg-white border border-gray-200 rounded-xl p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          About WebTools
+        </h2>
+        <p className="text-gray-600 mb-4">
+          WebTools is a collection of free online tools designed to help developers, designers, and everyday users
+          accomplish common tasks quickly and easily. Our tools run entirely in your browser, ensuring your data
+          stays private and secure.
+        </p>
+        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">
+          Why Choose WebTools?
+        </h3>
+        <ul className="list-disc list-inside text-gray-600 space-y-2">
+          <li><strong>100% Free:</strong> All tools are completely free to use with no hidden costs.</li>
+          <li><strong>Privacy First:</strong> Your data never leaves your browser. Everything is processed locally.</li>
+          <li><strong>No Registration:</strong> Start using tools immediately without creating an account.</li>
+          <li><strong>Mobile Friendly:</strong> Works perfectly on desktop, tablet, and mobile devices.</li>
+          <li><strong>Regular Updates:</strong> New tools are added regularly based on user feedback.</li>
+        </ul>
+      </section>
     </div>
   );
 }
