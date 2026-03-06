@@ -1,4 +1,9 @@
 {
+  "env": {
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
+  },
   "permissions": {
     "allow": [
       "Bash(npx create-next-app@latest:*)",
@@ -8,7 +13,12 @@
       "Bash(rm -rf D:/web-tools-temp)",
       "Bash(npm install:*)",
       "Bash(mkdir:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(taskkill:*)",
+      "Bash(test:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)"
     ]
   }
 }

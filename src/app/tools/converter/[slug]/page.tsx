@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import { SeoContent } from '@/components/seo/SeoContent';
@@ -15,7 +14,7 @@ interface ToolPageProps {
 
 export async function generateStaticParams() {
   return tools
-    .filter((tool) => tool.category === 'dev')
+    .filter((tool) => tool.category === 'converter')
     .map((tool) => ({
       slug: tool.slug,
     }));
@@ -54,7 +53,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   const breadcrumbItems = [
     { label: 'Tools', href: '/tools' },
-    { label: category?.name || 'Developer Tools', href: `/tools/${tool.category}` },
+    { label: category?.name || 'Converters', href: `/tools/${tool.category}` },
     { label: tool.name },
   ];
 
@@ -76,7 +75,6 @@ export default async function ToolPage({ params }: ToolPageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Tool Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
@@ -85,14 +83,10 @@ export default async function ToolPage({ params }: ToolPageProps) {
       <h1 className="text-3xl font-bold text-gray-900 mb-4">{tool.name}</h1>
       <p className="text-gray-600 mb-8">{tool.description}</p>
 
-      {/* Tool Card */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
-        <Suspense fallback={<div className="animate-pulse bg-gray-100 h-64 rounded-lg"></div>}>
-          <ToolRenderer slug={tool.slug} />
-        </Suspense>
+        <ToolRenderer slug={tool.slug} />
       </div>
 
-      {/* SEO Content */}
       <SeoContent.WhatIs
         name={tool.name}
         description={`${tool.name} is a free online tool that ${tool.shortDescription.toLowerCase()}. This tool processes your data entirely in your browser, ensuring your privacy and security. No data is ever sent to any server.`}
@@ -110,17 +104,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
       <SeoContent.HowToUse
         steps={tool.howToUse || [
-          `Enter your input in the ${tool.name.toLowerCase()} above`,
-          'Click the action button to process',
-          'View the result in the output area',
-          'Use the copy button to copy the result to your clipboard',
+          'Enter your input data',
+          'Click convert',
+          'Copy the result to clipboard',
         ]}
       />
 
-      {/* FAQ Section */}
       {tool.faq && <FaqSection items={tool.faq} />}
-
-      {/* Related Tools */}
       <RelatedTools tools={relatedTools} />
     </div>
   );
