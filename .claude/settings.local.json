@@ -18,7 +18,9 @@
       "Bash(test:*)",
       "Bash(rm:*)",
       "Bash(curl:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }

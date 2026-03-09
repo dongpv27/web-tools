@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench } from 'lucide-react';
+import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet } from 'lucide-react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import ToolGrid from '@/components/tools/ToolGrid';
@@ -15,6 +15,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Palette,
   ArrowLeftRight,
   Wrench,
+  FileSpreadsheet,
 };
 
 interface CategoryPageProps {

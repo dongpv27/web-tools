@@ -212,6 +212,38 @@ export const ImageBorderClient = dynamic(
   () => import('@/app/tools/image/[slug]/ImageBorderClient'),
   { ssr: false }
 );
+export const PngToJpgClient = dynamic(
+  () => import('@/app/tools/image/[slug]/PngToJpgClient'),
+  { ssr: false }
+);
+export const JpgToPngClient = dynamic(
+  () => import('@/app/tools/image/[slug]/JpgToPngClient'),
+  { ssr: false }
+);
+export const WebpToPngClient = dynamic(
+  () => import('@/app/tools/image/[slug]/WebpToPngClient'),
+  { ssr: false }
+);
+export const PngToWebpClient = dynamic(
+  () => import('@/app/tools/image/[slug]/PngToWebpClient'),
+  { ssr: false }
+);
+export const ResizeImagePercentageClient = dynamic(
+  () => import('@/app/tools/image/[slug]/ResizeImagePercentageClient'),
+  { ssr: false }
+);
+export const ExtractColorsClient = dynamic(
+  () => import('@/app/tools/image/[slug]/ExtractColorsClient'),
+  { ssr: false }
+);
+export const ImageToIcoClient = dynamic(
+  () => import('@/app/tools/image/[slug]/ImageToIcoClient'),
+  { ssr: false }
+);
+export const FaviconGeneratorClient = dynamic(
+  () => import('@/app/tools/image/[slug]/FaviconGeneratorClient'),
+  { ssr: false }
+);
 
 // YouTube Tools
 export const YoutubeThumbnailClient = dynamic(
@@ -377,6 +409,124 @@ export const BarcodeGeneratorClient = dynamic(
   { ssr: false }
 );
 
+// Office Tools
+export const ExcelToCsvClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExcelToCsvClient'),
+  { ssr: false }
+);
+export const CsvToExcelClient = dynamic(
+  () => import('@/app/tools/office/[slug]/CsvToExcelClient'),
+  { ssr: false }
+);
+export const ExcelToJsonClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExcelToJsonClient'),
+  { ssr: false }
+);
+export const JsonToExcelClient = dynamic(
+  () => import('@/app/tools/office/[slug]/JsonToExcelClient'),
+  { ssr: false }
+);
+export const ExcelToXmlClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExcelToXmlClient'),
+  { ssr: false }
+);
+export const ExcelToSqlClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExcelToSqlClient'),
+  { ssr: false }
+);
+export const MergeExcelClient = dynamic(
+  () => import('@/app/tools/office/[slug]/MergeExcelClient'),
+  { ssr: false }
+);
+export const WordToPdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/WordToPdfClient'),
+  { ssr: false }
+);
+export const PdfToWordClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PdfToWordClient'),
+  { ssr: false }
+);
+export const WordToTxtClient = dynamic(
+  () => import('@/app/tools/office/[slug]/WordToTxtClient'),
+  { ssr: false }
+);
+export const MergeWordClient = dynamic(
+  () => import('@/app/tools/office/[slug]/MergeWordClient'),
+  { ssr: false }
+);
+export const SplitWordClient = dynamic(
+  () => import('@/app/tools/office/[slug]/SplitWordClient'),
+  { ssr: false }
+);
+export const WordWordCounterClient = dynamic(
+  () => import('@/app/tools/office/[slug]/WordWordCounterClient'),
+  { ssr: false }
+);
+export const ExtractImagesWordClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExtractImagesWordClient'),
+  { ssr: false }
+);
+export const PdfPageCounterClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PdfPageCounterClient'),
+  { ssr: false }
+);
+export const ExtractTextPdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExtractTextPdfClient'),
+  { ssr: false }
+);
+export const ExtractImagesPdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExtractImagesPdfClient'),
+  { ssr: false }
+);
+export const PdfToExcelClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PdfToExcelClient'),
+  { ssr: false }
+);
+export const PdfToCsvClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PdfToCsvClient'),
+  { ssr: false }
+);
+export const PdfToPptClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PdfToPptClient'),
+  { ssr: false }
+);
+export const MergePdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/MergePdfClient'),
+  { ssr: false }
+);
+export const SplitPdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/SplitPdfClient'),
+  { ssr: false }
+);
+export const PptSlideCounterClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PptSlideCounterClient'),
+  { ssr: false }
+);
+export const ExtractTextPptClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExtractTextPptClient'),
+  { ssr: false }
+);
+export const ExtractImagesPptClient = dynamic(
+  () => import('@/app/tools/office/[slug]/ExtractImagesPptClient'),
+  { ssr: false }
+);
+export const PptToImagesClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PptToImagesClient'),
+  { ssr: false }
+);
+export const PptToPdfClient = dynamic(
+  () => import('@/app/tools/office/[slug]/PptToPdfClient'),
+  { ssr: false }
+);
+export const MergePptClient = dynamic(
+  () => import('@/app/tools/office/[slug]/MergePptClient'),
+  { ssr: false }
+);
+export const SplitPptClient = dynamic(
+  () => import('@/app/tools/office/[slug]/SplitPptClient'),
+  { ssr: false }
+);
+
 // Tool Component Map
 export const toolComponentMap: Record<string, ComponentType> = {
   // Developer Tools
@@ -434,6 +584,15 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'adjust-brightness': ImageBrightnessClient,
   'image-color-picker': ImageColorPickerClient,
   'image-border': ImageBorderClient,
+  'png-to-jpg': PngToJpgClient,
+  'jpg-to-png': JpgToPngClient,
+  'webp-to-png': WebpToPngClient,
+  'png-to-webp': PngToWebpClient,
+  'resize-image-percentage': ResizeImagePercentageClient,
+  'resize-image-dimensions': ImageResizeClient,
+  'extract-colors': ExtractColorsClient,
+  'image-to-ico': ImageToIcoClient,
+  'favicon-generator': FaviconGeneratorClient,
   // YouTube Tools
   'youtube-thumbnail': YoutubeThumbnailClient,
   'youtube-video-id-extractor': YoutubeVideoIdExtractorClient,
@@ -477,4 +636,37 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'percentage-calculator': PercentageCalculatorClient,
   'unit-converter': UnitConverterClient,
   'barcode-generator': BarcodeGeneratorClient,
+  // Office Tools - Excel
+  'excel-to-csv': ExcelToCsvClient,
+  'csv-to-excel': CsvToExcelClient,
+  'excel-to-json': ExcelToJsonClient,
+  'json-to-excel': JsonToExcelClient,
+  'excel-to-xml': ExcelToXmlClient,
+  'excel-to-sql': ExcelToSqlClient,
+  'merge-excel': MergeExcelClient,
+  // Office Tools - Word
+  'word-to-pdf': WordToPdfClient,
+  'pdf-to-word': PdfToWordClient,
+  'word-to-txt': WordToTxtClient,
+  'merge-word': MergeWordClient,
+  'split-word': SplitWordClient,
+  'word-word-counter': WordWordCounterClient,
+  'extract-images-word': ExtractImagesWordClient,
+  // Office Tools - PDF
+  'pdf-page-counter': PdfPageCounterClient,
+  'extract-text-pdf': ExtractTextPdfClient,
+  'extract-images-pdf': ExtractImagesPdfClient,
+  'pdf-to-excel': PdfToExcelClient,
+  'pdf-to-csv': PdfToCsvClient,
+  'pdf-to-ppt': PdfToPptClient,
+  'merge-pdf': MergePdfClient,
+  'split-pdf': SplitPdfClient,
+  // Office Tools - PowerPoint
+  'ppt-slide-counter': PptSlideCounterClient,
+  'extract-text-ppt': ExtractTextPptClient,
+  'extract-images-ppt': ExtractImagesPptClient,
+  'ppt-to-images': PptToImagesClient,
+  'ppt-to-pdf': PptToPdfClient,
+  'merge-ppt': MergePptClient,
+  'split-ppt': SplitPptClient,
 };

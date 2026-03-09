@@ -1,4 +1,4 @@
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench } from 'lucide-react';
+import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet } from 'lucide-react';
 
 export interface Category {
   id: string;
@@ -16,7 +16,7 @@ export const categories: Category[] = [
     description: 'Tools for developers: JSON, Base64, encoding, and more',
     icon: 'Code',
     slug: 'dev',
-    toolCount: 15,
+    toolCount: 20,
   },
   {
     id: 'text',
@@ -24,7 +24,7 @@ export const categories: Category[] = [
     description: 'Text manipulation, formatting, and conversion tools',
     icon: 'FileText',
     slug: 'text',
-    toolCount: 12,
+    toolCount: 20,
   },
   {
     id: 'image',
@@ -32,7 +32,7 @@ export const categories: Category[] = [
     description: 'Image conversion, resizing, and optimization tools',
     icon: 'Image',
     slug: 'image',
-    toolCount: 10,
+    toolCount: 21,
   },
   {
     id: 'youtube',
@@ -40,7 +40,7 @@ export const categories: Category[] = [
     description: 'YouTube thumbnail downloader, video tools, and more',
     icon: 'Youtube',
     slug: 'youtube',
-    toolCount: 5,
+    toolCount: 10,
   },
   {
     id: 'color',
@@ -48,7 +48,7 @@ export const categories: Category[] = [
     description: 'Color pickers, converters, and palette generators',
     icon: 'Palette',
     slug: 'color',
-    toolCount: 8,
+    toolCount: 10,
   },
   {
     id: 'converter',
@@ -56,7 +56,7 @@ export const categories: Category[] = [
     description: 'Unit converters, number converters, and more',
     icon: 'ArrowLeftRight',
     slug: 'converter',
-    toolCount: 15,
+    toolCount: 10,
   },
   {
     id: 'misc',
@@ -65,6 +65,14 @@ export const categories: Category[] = [
     icon: 'Wrench',
     slug: 'misc',
     toolCount: 10,
+  },
+  {
+    id: 'office',
+    name: 'Office Tools',
+    description: 'Word, Excel, PowerPoint, and PDF tools for document processing',
+    icon: 'FileSpreadsheet',
+    slug: 'office',
+    toolCount: 27,
   },
 ];
 
@@ -84,4 +92,5 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   Palette,
   ArrowLeftRight,
   Wrench,
+  FileSpreadsheet,
 };
