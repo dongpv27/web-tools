@@ -75,7 +75,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   ];
 
   return (
-    <MainLayout showTopBanner>
+    <MainLayout showTopBanner showMobileAnchor>
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="flex items-center gap-4 mb-4">

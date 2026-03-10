@@ -44,7 +44,7 @@ export default function HomePage() {
   const popularTools = tools.slice(0, 8);
 
   return (
-    <MainLayout showTopBanner showBottomBanner>
+    <MainLayout showTopBanner showBottomBanner showMobileAnchor>
       {/* Hero Section */}
       <section className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">

@@ -32,7 +32,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const filteredTools = searchQuery ? searchTools(searchQuery) : tools;
 
   return (
-    <MainLayout showTopBanner showBottomBanner>
+    <MainLayout showTopBanner showBottomBanner showMobileAnchor>
       <Breadcrumb items={[{ label: 'All Tools', href: '/tools' }]} />
 
       <h1 className="text-3xl font-bold text-gray-900 mb-4">

@@ -12,6 +12,8 @@ interface MainLayoutProps {
   showTopBanner?: boolean;
   /** Show bottom banner ad */
   showBottomBanner?: boolean;
+  /** Show mobile anchor ad (fixed at bottom on mobile) */
+  showMobileAnchor?: boolean;
   /** Show ad placeholders in development */
   showPlaceholders?: boolean;
 }
@@ -22,6 +24,7 @@ export default function MainLayout({
   sidebarContent,
   showTopBanner = false,
   showBottomBanner = false,
+  showMobileAnchor = false,
   showPlaceholders = false,
 }: MainLayoutProps) {
   return (
@@ -34,23 +37,23 @@ export default function MainLayout({
               slot="header-banner"
               format="horizontal"
               showPlaceholder={showPlaceholders}
-              className="mx-auto flex justify-center"
+              className="flex justify-center"
             />
           </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className={`flex gap-8 ${showSidebar ? 'flex-row' : 'flex-col'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className={`flex gap-6 lg:gap-8 ${showSidebar ? 'lg:flex-row' : 'flex-col'}`}>
           {/* Main Content */}
           <main className={`flex-1 min-w-0 ${showSidebar ? '' : 'w-full'}`}>
             {children}
           </main>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar - Only visible on desktop (lg:) */}
           {showSidebar && (
-            <aside className="hidden lg:block w-80 flex-shrink-0">
-              <div className="sticky top-24 space-y-6">
+            <aside className="hidden lg:block w-72 xl:w-80 flex-shrink-0">
+              <div className="sticky top-20 space-y-4">
                 {/* Custom sidebar content */}
                 {sidebarContent}
 
@@ -71,6 +74,19 @@ export default function MainLayout({
             </aside>
           )}
         </div>
+
+        {/* Mobile/Tablet In-Content Ads - Below main content area */}
+        {showSidebar && (
+          <div className="lg:hidden mt-8 pt-6 border-t border-gray-200">
+            <div className="flex justify-center">
+              <AdBanner
+                slot="in-content"
+                format="rectangle"
+                showPlaceholder={showPlaceholders}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Banner Ad */}
@@ -81,10 +97,19 @@ export default function MainLayout({
               slot="footer-banner"
               format="horizontal"
               showPlaceholder={showPlaceholders}
-              className="mx-auto flex justify-center"
+              className="flex justify-center"
             />
           </div>
         </div>
+      )}
+
+      {/* Mobile Anchor Ad - Fixed at bottom on mobile only */}
+      {showMobileAnchor && (
+        <AdBanner
+          slot="mobile-anchor"
+          format="horizontal"
+          showPlaceholder={showPlaceholders}
+        />
       )}
     </div>
   );

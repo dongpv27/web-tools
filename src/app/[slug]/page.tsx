@@ -96,6 +96,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
       showSidebar
       showTopBanner
       showBottomBanner
+      showMobileAnchor
       sidebarContent={sidebarContent}
     >
       <Breadcrumb items={breadcrumbItems} />
