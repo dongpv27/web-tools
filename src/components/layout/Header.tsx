@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-import { Menu, X, Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, LayoutGrid, ChevronDown } from 'lucide-react';
+import { Menu, X, Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, LayoutGrid, ChevronDown, Heart } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
+import TechHeartLogo from '@/components/ui/TechHeartLogo';
 import { categories } from '@/lib/categories';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -43,11 +44,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl text-blue-600 hover:text-blue-700 transition-colors">
-            <div className="p-1.5 bg-blue-600 rounded-lg">
-              <Code className="w-5 h-5 text-white" />
-            </div>
-            <span>WebTools</span>
+          <Link href="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity group">
+            <TechHeartLogo size={36} className="drop-shadow-sm" />
+            <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+              Love Web Tools
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -167,12 +168,10 @@ export default function Header() {
             <nav className="space-y-1">
               <Link
                 href="/"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Code className="w-4 h-4 text-blue-600" />
-                </div>
+                <TechHeartLogo size={28} />
                 <span className="font-medium">Home</span>
               </Link>
 

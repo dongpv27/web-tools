@@ -4,26 +4,26 @@ import dynamic from 'next/dynamic';
 import type { ComponentType } from 'react';
 
 // ==================== DEVELOPER TOOLS ====================
-export const JsonFormatterClient = dynamic(() => import('@/app/tools/dev/[slug]/JsonFormatterClient'), { ssr: false });
-export const JsonValidatorClient = dynamic(() => import('@/app/tools/dev/[slug]/JsonValidatorClient'), { ssr: false });
-export const Base64EncodeClient = dynamic(() => import('@/app/tools/dev/[slug]/Base64EncodeClient'), { ssr: false });
-export const Base64DecodeClient = dynamic(() => import('@/app/tools/dev/[slug]/Base64DecodeClient'), { ssr: false });
-export const UrlEncodeClient = dynamic(() => import('@/app/tools/dev/[slug]/UrlEncodeClient'), { ssr: false });
-export const UrlDecodeClient = dynamic(() => import('@/app/tools/dev/[slug]/UrlDecodeClient'), { ssr: false });
-export const JsonToYamlClient = dynamic(() => import('@/app/tools/dev/[slug]/JsonToYamlClient'), { ssr: false });
-export const YamlToJsonClient = dynamic(() => import('@/app/tools/dev/[slug]/YamlToJsonClient'), { ssr: false });
-export const UuidGeneratorClient = dynamic(() => import('@/app/tools/dev/[slug]/UuidGeneratorClient'), { ssr: false });
-export const TimestampConverterClient = dynamic(() => import('@/app/tools/dev/[slug]/TimestampConverterClient'), { ssr: false });
-export const RandomPasswordGeneratorClient = dynamic(() => import('@/app/tools/dev/[slug]/RandomPasswordGeneratorClient'), { ssr: false });
-export const RegexTesterClient = dynamic(() => import('@/app/tools/dev/[slug]/RegexTesterClient'), { ssr: false });
-export const JwtDecoderClient = dynamic(() => import('@/app/tools/dev/[slug]/JwtDecoderClient'), { ssr: false });
-export const Md5HashGeneratorClient = dynamic(() => import('@/app/tools/dev/[slug]/Md5HashGeneratorClient'), { ssr: false });
-export const Sha256HashGeneratorClient = dynamic(() => import('@/app/tools/dev/[slug]/Sha256HashGeneratorClient'), { ssr: false });
-export const HtmlFormatterClient = dynamic(() => import('@/app/tools/dev/[slug]/HtmlFormatterClient'), { ssr: false });
-export const CssFormatterClient = dynamic(() => import('@/app/tools/dev/[slug]/CssFormatterClient'), { ssr: false });
-export const SqlFormatterClient = dynamic(() => import('@/app/tools/dev/[slug]/SqlFormatterClient'), { ssr: false });
-export const IpAddressValidatorClient = dynamic(() => import('@/app/tools/dev/[slug]/IpAddressValidatorClient'), { ssr: false });
-export const CronExpressionParserClient = dynamic(() => import('@/app/tools/dev/[slug]/CronExpressionParserClient'), { ssr: false });
+export const JsonFormatterClient = dynamic(() => import('@/components/tool-clients/JsonFormatterClient'), { ssr: false });
+export const JsonValidatorClient = dynamic(() => import('@/components/tool-clients/JsonValidatorClient'), { ssr: false });
+export const Base64EncodeClient = dynamic(() => import('@/components/tool-clients/Base64EncodeClient'), { ssr: false });
+export const Base64DecodeClient = dynamic(() => import('@/components/tool-clients/Base64DecodeClient'), { ssr: false });
+export const UrlEncodeClient = dynamic(() => import('@/components/tool-clients/UrlEncodeClient'), { ssr: false });
+export const UrlDecodeClient = dynamic(() => import('@/components/tool-clients/UrlDecodeClient'), { ssr: false });
+export const JsonToYamlClient = dynamic(() => import('@/components/tool-clients/JsonToYamlClient'), { ssr: false });
+export const YamlToJsonClient = dynamic(() => import('@/components/tool-clients/YamlToJsonClient'), { ssr: false });
+export const UuidGeneratorClient = dynamic(() => import('@/components/tool-clients/UuidGeneratorClient'), { ssr: false });
+export const TimestampConverterClient = dynamic(() => import('@/components/tool-clients/TimestampConverterClient'), { ssr: false });
+export const RandomPasswordGeneratorClient = dynamic(() => import('@/components/tool-clients/RandomPasswordGeneratorClient'), { ssr: false });
+export const RegexTesterClient = dynamic(() => import('@/components/tool-clients/RegexTesterClient'), { ssr: false });
+export const JwtDecoderClient = dynamic(() => import('@/components/tool-clients/JwtDecoderClient'), { ssr: false });
+export const Md5HashGeneratorClient = dynamic(() => import('@/components/tool-clients/Md5HashGeneratorClient'), { ssr: false });
+export const Sha256HashGeneratorClient = dynamic(() => import('@/components/tool-clients/Sha256HashGeneratorClient'), { ssr: false });
+export const HtmlFormatterClient = dynamic(() => import('@/components/tool-clients/HtmlFormatterClient'), { ssr: false });
+export const CssFormatterClient = dynamic(() => import('@/components/tool-clients/CssFormatterClient'), { ssr: false });
+export const SqlFormatterClient = dynamic(() => import('@/components/tool-clients/SqlFormatterClient'), { ssr: false });
+export const IpAddressValidatorClient = dynamic(() => import('@/components/tool-clients/IpAddressValidatorClient'), { ssr: false });
+export const CronExpressionParserClient = dynamic(() => import('@/components/tool-clients/CronExpressionParserClient'), { ssr: false });
 
 export const devToolComponents: Record<string, ComponentType> = {
   'json-formatter': JsonFormatterClient,
@@ -49,26 +49,26 @@ export const devToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== TEXT TOOLS ====================
-export const WordCounterClient = dynamic(() => import('@/app/tools/text/[slug]/WordCounterClient'), { ssr: false });
-export const CharacterCounterClient = dynamic(() => import('@/app/tools/text/[slug]/CharacterCounterClient'), { ssr: false });
-export const TextCaseConverterClient = dynamic(() => import('@/app/tools/text/[slug]/TextCaseConverterClient'), { ssr: false });
-export const SlugGeneratorClient = dynamic(() => import('@/app/tools/text/[slug]/SlugGeneratorClient'), { ssr: false });
-export const RemoveDuplicateLinesClient = dynamic(() => import('@/app/tools/text/[slug]/RemoveDuplicateLinesClient'), { ssr: false });
-export const SortLinesAlphabeticallyClient = dynamic(() => import('@/app/tools/text/[slug]/SortLinesAlphabeticallyClient'), { ssr: false });
-export const ReverseTextClient = dynamic(() => import('@/app/tools/text/[slug]/ReverseTextClient'), { ssr: false });
-export const RemoveLineBreaksClient = dynamic(() => import('@/app/tools/text/[slug]/RemoveLineBreaksClient'), { ssr: false });
-export const LoremIpsumClient = dynamic(() => import('@/app/tools/text/[slug]/LoremIpsumClient'), { ssr: false });
-export const RandomTextGeneratorClient = dynamic(() => import('@/app/tools/text/[slug]/RandomTextGeneratorClient'), { ssr: false });
-export const TextDifferenceCheckerClient = dynamic(() => import('@/app/tools/text/[slug]/TextDifferenceCheckerClient'), { ssr: false });
-export const RemoveHtmlTagsClient = dynamic(() => import('@/app/tools/text/[slug]/RemoveHtmlTagsClient'), { ssr: false });
-export const FindAndReplaceClient = dynamic(() => import('@/app/tools/text/[slug]/FindAndReplaceClient'), { ssr: false });
-export const TextToListClient = dynamic(() => import('@/app/tools/text/[slug]/TextToListClient'), { ssr: false });
-export const ListToTextClient = dynamic(() => import('@/app/tools/text/[slug]/ListToTextClient'), { ssr: false });
-export const RandomNameGeneratorClient = dynamic(() => import('@/app/tools/text/[slug]/RandomNameGeneratorClient'), { ssr: false });
-export const RemoveExtraSpacesClient = dynamic(() => import('@/app/tools/text/[slug]/RemoveExtraSpacesClient'), { ssr: false });
-export const CapitalizeSentencesClient = dynamic(() => import('@/app/tools/text/[slug]/CapitalizeSentencesClient'), { ssr: false });
-export const TextCleanerClient = dynamic(() => import('@/app/tools/text/[slug]/TextCleanerClient'), { ssr: false });
-export const TextFormatterClient = dynamic(() => import('@/app/tools/text/[slug]/TextFormatterClient'), { ssr: false });
+export const WordCounterClient = dynamic(() => import('@/components/tool-clients/WordCounterClient'), { ssr: false });
+export const CharacterCounterClient = dynamic(() => import('@/components/tool-clients/CharacterCounterClient'), { ssr: false });
+export const TextCaseConverterClient = dynamic(() => import('@/components/tool-clients/TextCaseConverterClient'), { ssr: false });
+export const SlugGeneratorClient = dynamic(() => import('@/components/tool-clients/SlugGeneratorClient'), { ssr: false });
+export const RemoveDuplicateLinesClient = dynamic(() => import('@/components/tool-clients/RemoveDuplicateLinesClient'), { ssr: false });
+export const SortLinesAlphabeticallyClient = dynamic(() => import('@/components/tool-clients/SortLinesAlphabeticallyClient'), { ssr: false });
+export const ReverseTextClient = dynamic(() => import('@/components/tool-clients/ReverseTextClient'), { ssr: false });
+export const RemoveLineBreaksClient = dynamic(() => import('@/components/tool-clients/RemoveLineBreaksClient'), { ssr: false });
+export const LoremIpsumClient = dynamic(() => import('@/components/tool-clients/LoremIpsumClient'), { ssr: false });
+export const RandomTextGeneratorClient = dynamic(() => import('@/components/tool-clients/RandomTextGeneratorClient'), { ssr: false });
+export const TextDifferenceCheckerClient = dynamic(() => import('@/components/tool-clients/TextDifferenceCheckerClient'), { ssr: false });
+export const RemoveHtmlTagsClient = dynamic(() => import('@/components/tool-clients/RemoveHtmlTagsClient'), { ssr: false });
+export const FindAndReplaceClient = dynamic(() => import('@/components/tool-clients/FindAndReplaceClient'), { ssr: false });
+export const TextToListClient = dynamic(() => import('@/components/tool-clients/TextToListClient'), { ssr: false });
+export const ListToTextClient = dynamic(() => import('@/components/tool-clients/ListToTextClient'), { ssr: false });
+export const RandomNameGeneratorClient = dynamic(() => import('@/components/tool-clients/RandomNameGeneratorClient'), { ssr: false });
+export const RemoveExtraSpacesClient = dynamic(() => import('@/components/tool-clients/RemoveExtraSpacesClient'), { ssr: false });
+export const CapitalizeSentencesClient = dynamic(() => import('@/components/tool-clients/CapitalizeSentencesClient'), { ssr: false });
+export const TextCleanerClient = dynamic(() => import('@/components/tool-clients/TextCleanerClient'), { ssr: false });
+export const TextFormatterClient = dynamic(() => import('@/components/tool-clients/TextFormatterClient'), { ssr: false });
 
 export const textToolComponents: Record<string, ComponentType> = {
   'word-counter': WordCounterClient,
@@ -94,17 +94,17 @@ export const textToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== IMAGE TOOLS ====================
-export const ImageResizeClient = dynamic(() => import('@/app/tools/image/[slug]/ImageResizeClient'), { ssr: false });
-export const ImageToBase64Client = dynamic(() => import('@/app/tools/image/[slug]/ImageToBase64Client'), { ssr: false });
-export const Base64ToImageClient = dynamic(() => import('@/app/tools/image/[slug]/Base64ToImageClient'), { ssr: false });
-export const ImageRotateClient = dynamic(() => import('@/app/tools/image/[slug]/ImageRotateClient'), { ssr: false });
-export const ImageGrayscaleClient = dynamic(() => import('@/app/tools/image/[slug]/ImageGrayscaleClient'), { ssr: false });
-export const ImageBlurClient = dynamic(() => import('@/app/tools/image/[slug]/ImageBlurClient'), { ssr: false });
-export const ImageFlipClient = dynamic(() => import('@/app/tools/image/[slug]/ImageFlipClient'), { ssr: false });
-export const ImagePixelateClient = dynamic(() => import('@/app/tools/image/[slug]/ImagePixelateClient'), { ssr: false });
-export const ImageBrightnessClient = dynamic(() => import('@/app/tools/image/[slug]/ImageBrightnessClient'), { ssr: false });
-export const ImageColorPickerClient = dynamic(() => import('@/app/tools/image/[slug]/ImageColorPickerClient'), { ssr: false });
-export const ImageBorderClient = dynamic(() => import('@/app/tools/image/[slug]/ImageBorderClient'), { ssr: false });
+export const ImageResizeClient = dynamic(() => import('@/components/tool-clients/ImageResizeClient'), { ssr: false });
+export const ImageToBase64Client = dynamic(() => import('@/components/tool-clients/ImageToBase64Client'), { ssr: false });
+export const Base64ToImageClient = dynamic(() => import('@/components/tool-clients/Base64ToImageClient'), { ssr: false });
+export const ImageRotateClient = dynamic(() => import('@/components/tool-clients/ImageRotateClient'), { ssr: false });
+export const ImageGrayscaleClient = dynamic(() => import('@/components/tool-clients/ImageGrayscaleClient'), { ssr: false });
+export const ImageBlurClient = dynamic(() => import('@/components/tool-clients/ImageBlurClient'), { ssr: false });
+export const ImageFlipClient = dynamic(() => import('@/components/tool-clients/ImageFlipClient'), { ssr: false });
+export const ImagePixelateClient = dynamic(() => import('@/components/tool-clients/ImagePixelateClient'), { ssr: false });
+export const ImageBrightnessClient = dynamic(() => import('@/components/tool-clients/ImageBrightnessClient'), { ssr: false });
+export const ImageColorPickerClient = dynamic(() => import('@/components/tool-clients/ImageColorPickerClient'), { ssr: false });
+export const ImageBorderClient = dynamic(() => import('@/components/tool-clients/ImageBorderClient'), { ssr: false });
 
 export const imageToolComponents: Record<string, ComponentType> = {
   'image-resize': ImageResizeClient,
@@ -122,16 +122,16 @@ export const imageToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== YOUTUBE TOOLS ====================
-export const YoutubeThumbnailClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeThumbnailClient'), { ssr: false });
-export const YoutubeVideoIdExtractorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeVideoIdExtractorClient'), { ssr: false });
-export const YoutubeEmbedGeneratorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeEmbedGeneratorClient'), { ssr: false });
-export const YoutubeTimestampClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeTimestampClient'), { ssr: false });
-export const YoutubeTagExtractorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeTagExtractorClient'), { ssr: false });
-export const YoutubeTitleGeneratorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeTitleGeneratorClient'), { ssr: false });
-export const YoutubeDescriptionGeneratorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeDescriptionGeneratorClient'), { ssr: false });
-export const YoutubeHashtagGeneratorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeHashtagGeneratorClient'), { ssr: false });
-export const YoutubeChannelIdFinderClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubeChannelIdFinderClient'), { ssr: false });
-export const YoutubePlaylistIdExtractorClient = dynamic(() => import('@/app/tools/youtube/[slug]/YoutubePlaylistIdExtractorClient'), { ssr: false });
+export const YoutubeThumbnailClient = dynamic(() => import('@/components/tool-clients/YoutubeThumbnailClient'), { ssr: false });
+export const YoutubeVideoIdExtractorClient = dynamic(() => import('@/components/tool-clients/YoutubeVideoIdExtractorClient'), { ssr: false });
+export const YoutubeEmbedGeneratorClient = dynamic(() => import('@/components/tool-clients/YoutubeEmbedGeneratorClient'), { ssr: false });
+export const YoutubeTimestampClient = dynamic(() => import('@/components/tool-clients/YoutubeTimestampClient'), { ssr: false });
+export const YoutubeTagExtractorClient = dynamic(() => import('@/components/tool-clients/YoutubeTagExtractorClient'), { ssr: false });
+export const YoutubeTitleGeneratorClient = dynamic(() => import('@/components/tool-clients/YoutubeTitleGeneratorClient'), { ssr: false });
+export const YoutubeDescriptionGeneratorClient = dynamic(() => import('@/components/tool-clients/YoutubeDescriptionGeneratorClient'), { ssr: false });
+export const YoutubeHashtagGeneratorClient = dynamic(() => import('@/components/tool-clients/YoutubeHashtagGeneratorClient'), { ssr: false });
+export const YoutubeChannelIdFinderClient = dynamic(() => import('@/components/tool-clients/YoutubeChannelIdFinderClient'), { ssr: false });
+export const YoutubePlaylistIdExtractorClient = dynamic(() => import('@/components/tool-clients/YoutubePlaylistIdExtractorClient'), { ssr: false });
 
 export const youtubeToolComponents: Record<string, ComponentType> = {
   'youtube-thumbnail': YoutubeThumbnailClient,
@@ -147,16 +147,16 @@ export const youtubeToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== COLOR TOOLS ====================
-export const ColorPickerClient = dynamic(() => import('@/app/tools/color/[slug]/ColorPickerClient'), { ssr: false });
-export const HexToRgbClient = dynamic(() => import('@/app/tools/color/[slug]/HexToRgbClient'), { ssr: false });
-export const RgbToHexClient = dynamic(() => import('@/app/tools/color/[slug]/RgbToHexClient'), { ssr: false });
-export const ColorPaletteGeneratorClient = dynamic(() => import('@/app/tools/color/[slug]/ColorPaletteGeneratorClient'), { ssr: false });
-export const GradientGeneratorClient = dynamic(() => import('@/app/tools/color/[slug]/GradientGeneratorClient'), { ssr: false });
-export const RandomColorGeneratorClient = dynamic(() => import('@/app/tools/color/[slug]/RandomColorGeneratorClient'), { ssr: false });
-export const ColorContrastCheckerClient = dynamic(() => import('@/app/tools/color/[slug]/ColorContrastCheckerClient'), { ssr: false });
-export const CssGradientGeneratorClient = dynamic(() => import('@/app/tools/color/[slug]/CssGradientGeneratorClient'), { ssr: false });
-export const TailwindColorConverterClient = dynamic(() => import('@/app/tools/color/[slug]/TailwindColorConverterClient'), { ssr: false });
-export const ColorConverterClient = dynamic(() => import('@/app/tools/color/[slug]/ColorConverterClient'), { ssr: false });
+export const ColorPickerClient = dynamic(() => import('@/components/tool-clients/ColorPickerClient'), { ssr: false });
+export const HexToRgbClient = dynamic(() => import('@/components/tool-clients/HexToRgbClient'), { ssr: false });
+export const RgbToHexClient = dynamic(() => import('@/components/tool-clients/RgbToHexClient'), { ssr: false });
+export const ColorPaletteGeneratorClient = dynamic(() => import('@/components/tool-clients/ColorPaletteGeneratorClient'), { ssr: false });
+export const GradientGeneratorClient = dynamic(() => import('@/components/tool-clients/GradientGeneratorClient'), { ssr: false });
+export const RandomColorGeneratorClient = dynamic(() => import('@/components/tool-clients/RandomColorGeneratorClient'), { ssr: false });
+export const ColorContrastCheckerClient = dynamic(() => import('@/components/tool-clients/ColorContrastCheckerClient'), { ssr: false });
+export const CssGradientGeneratorClient = dynamic(() => import('@/components/tool-clients/CssGradientGeneratorClient'), { ssr: false });
+export const TailwindColorConverterClient = dynamic(() => import('@/components/tool-clients/TailwindColorConverterClient'), { ssr: false });
+export const ColorConverterClient = dynamic(() => import('@/components/tool-clients/ColorConverterClient'), { ssr: false });
 
 export const colorToolComponents: Record<string, ComponentType> = {
   'color-picker': ColorPickerClient,
@@ -172,15 +172,15 @@ export const colorToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== CONVERTER TOOLS ====================
-export const CsvToJsonClient = dynamic(() => import('@/app/tools/converter/[slug]/CsvToJsonClient'), { ssr: false });
-export const QrCodeGeneratorClient = dynamic(() => import('@/app/tools/converter/[slug]/QrCodeGeneratorClient'), { ssr: false });
-export const JsonToCsvClient = dynamic(() => import('@/app/tools/converter/[slug]/JsonToCsvClient'), { ssr: false });
-export const MarkdownToHtmlClient = dynamic(() => import('@/app/tools/converter/[slug]/MarkdownToHtmlClient'), { ssr: false });
-export const HtmlToMarkdownClient = dynamic(() => import('@/app/tools/converter/[slug]/HtmlToMarkdownClient'), { ssr: false });
-export const TextToBase64Client = dynamic(() => import('@/app/tools/converter/[slug]/TextToBase64Client'), { ssr: false });
-export const Base64ToTextClient = dynamic(() => import('@/app/tools/converter/[slug]/Base64ToTextClient'), { ssr: false });
-export const UnixTimeToDateClient = dynamic(() => import('@/app/tools/converter/[slug]/UnixTimeToDateClient'), { ssr: false });
-export const DateToUnixTimeClient = dynamic(() => import('@/app/tools/converter/[slug]/DateToUnixTimeClient'), { ssr: false });
+export const CsvToJsonClient = dynamic(() => import('@/components/tool-clients/CsvToJsonClient'), { ssr: false });
+export const QrCodeGeneratorClient = dynamic(() => import('@/components/tool-clients/QrCodeGeneratorClient'), { ssr: false });
+export const JsonToCsvClient = dynamic(() => import('@/components/tool-clients/JsonToCsvClient'), { ssr: false });
+export const MarkdownToHtmlClient = dynamic(() => import('@/components/tool-clients/MarkdownToHtmlClient'), { ssr: false });
+export const HtmlToMarkdownClient = dynamic(() => import('@/components/tool-clients/HtmlToMarkdownClient'), { ssr: false });
+export const TextToBase64Client = dynamic(() => import('@/components/tool-clients/TextToBase64Client'), { ssr: false });
+export const Base64ToTextClient = dynamic(() => import('@/components/tool-clients/Base64ToTextClient'), { ssr: false });
+export const UnixTimeToDateClient = dynamic(() => import('@/components/tool-clients/UnixTimeToDateClient'), { ssr: false });
+export const DateToUnixTimeClient = dynamic(() => import('@/components/tool-clients/DateToUnixTimeClient'), { ssr: false });
 
 export const converterToolComponents: Record<string, ComponentType> = {
   'csv-to-json': CsvToJsonClient,
@@ -195,16 +195,16 @@ export const converterToolComponents: Record<string, ComponentType> = {
 };
 
 // ==================== MISC TOOLS ====================
-export const RandomNumberGeneratorClient = dynamic(() => import('@/app/tools/misc/[slug]/RandomNumberGeneratorClient'), { ssr: false });
-export const DiceRollSimulatorClient = dynamic(() => import('@/app/tools/misc/[slug]/DiceRollSimulatorClient'), { ssr: false });
-export const CoinFlipClient = dynamic(() => import('@/app/tools/misc/[slug]/CoinFlipClient'), { ssr: false });
-export const PasswordStrengthCheckerClient = dynamic(() => import('@/app/tools/misc/[slug]/PasswordStrengthCheckerClient'), { ssr: false });
-export const AgeCalculatorClient = dynamic(() => import('@/app/tools/misc/[slug]/AgeCalculatorClient'), { ssr: false });
-export const BmiCalculatorClient = dynamic(() => import('@/app/tools/misc/[slug]/BmiCalculatorClient'), { ssr: false });
-export const CountdownTimerClient = dynamic(() => import('@/app/tools/misc/[slug]/CountdownTimerClient'), { ssr: false });
-export const PercentageCalculatorClient = dynamic(() => import('@/app/tools/misc/[slug]/PercentageCalculatorClient'), { ssr: false });
-export const UnitConverterClient = dynamic(() => import('@/app/tools/misc/[slug]/UnitConverterClient'), { ssr: false });
-export const BarcodeGeneratorClient = dynamic(() => import('@/app/tools/misc/[slug]/BarcodeGeneratorClient'), { ssr: false });
+export const RandomNumberGeneratorClient = dynamic(() => import('@/components/tool-clients/RandomNumberGeneratorClient'), { ssr: false });
+export const DiceRollSimulatorClient = dynamic(() => import('@/components/tool-clients/DiceRollSimulatorClient'), { ssr: false });
+export const CoinFlipClient = dynamic(() => import('@/components/tool-clients/CoinFlipClient'), { ssr: false });
+export const PasswordStrengthCheckerClient = dynamic(() => import('@/components/tool-clients/PasswordStrengthCheckerClient'), { ssr: false });
+export const AgeCalculatorClient = dynamic(() => import('@/components/tool-clients/AgeCalculatorClient'), { ssr: false });
+export const BmiCalculatorClient = dynamic(() => import('@/components/tool-clients/BmiCalculatorClient'), { ssr: false });
+export const CountdownTimerClient = dynamic(() => import('@/components/tool-clients/CountdownTimerClient'), { ssr: false });
+export const PercentageCalculatorClient = dynamic(() => import('@/components/tool-clients/PercentageCalculatorClient'), { ssr: false });
+export const UnitConverterClient = dynamic(() => import('@/components/tool-clients/UnitConverterClient'), { ssr: false });
+export const BarcodeGeneratorClient = dynamic(() => import('@/components/tool-clients/BarcodeGeneratorClient'), { ssr: false });
 
 export const miscToolComponents: Record<string, ComponentType> = {
   'random-number-generator': RandomNumberGeneratorClient,

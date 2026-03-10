@@ -20,7 +20,13 @@
       "Bash(curl:*)",
       "Bash(node:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(for cat in dev text image youtube color converter misc office)",
+      "Bash(do echo -n \"$cat: \")",
+      "Read(//d/web-tools/src/app/tools/**)",
+      "Bash(done)",
+      "Bash(npx tsc:*)",
+      "Bash(sed:*)"
     ]
   }
 }

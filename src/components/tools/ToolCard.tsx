@@ -25,12 +25,12 @@ interface ToolCardProps {
   icon: string;
 }
 
-export default function ToolCard({ name, description, category, slug, icon }: ToolCardProps) {
+export default function ToolCard({ name, description, slug, icon }: ToolCardProps) {
   const Icon = iconMap[icon] || Braces;
 
   return (
     <Link
-      href={`/tools/${category}/${slug}`}
+      href={`/${slug}`}
       className="block p-6 bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-blue-300 transition-all duration-200 group"
     >
       <div className="flex items-start gap-4">

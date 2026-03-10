@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Code, Github, Twitter, Mail } from 'lucide-react';
+import { Github, Twitter, Mail } from 'lucide-react';
 import { categories } from '@/lib/categories';
+import TechHeartLogo from '@/components/ui/TechHeartLogo';
 
 export default function Footer() {
   return (
@@ -9,9 +10,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white mb-4">
-              <Code className="w-6 h-6 text-blue-500" />
-              <span>WebTools</span>
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white mb-4 hover:opacity-80 transition-opacity group">
+              <TechHeartLogo size={32} className="drop-shadow-sm" />
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                Love Web Tools
+              </span>
             </Link>
             <p className="text-sm text-gray-400 mb-4">
               Free online tools for developers, designers, and everyone. 100% client-side processing for your privacy.
@@ -69,7 +72,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/tools/dev/json-formatter"
+                  href="/json-formatter"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   JSON Formatter
@@ -77,7 +80,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/tools/dev/base64-encode"
+                  href="/base64-encode"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Base64 Encoder
@@ -85,7 +88,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/tools/text/word-counter"
+                  href="/word-counter"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Word Counter
@@ -93,7 +96,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/tools/color/color-picker"
+                  href="/color-picker"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Color Picker
@@ -106,18 +109,18 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">
-            &copy; {new Date().getFullYear()} WebTools. All rights reserved.
+            &copy; {new Date().getFullYear()} Love Web Tools. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link href="/about" className="text-sm text-gray-400 hover:text-white transition-colors">
               About
             </Link>
-            <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">
+            <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">
+            </Link>
+            <Link href="/terms-of-service" className="text-sm text-gray-400 hover:text-white transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>
