@@ -4,6 +4,7 @@ import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSp
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import ToolGrid from '@/components/tools/ToolGrid';
+import MainLayout from '@/components/layout/MainLayout';
 import { getToolsByCategory } from '@/lib/tools';
 import { categories, getCategoryBySlug } from '@/lib/categories';
 
@@ -65,7 +66,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     },
     {
       question: `Are these ${category.name.toLowerCase()} free to use?`,
-      answer: `Yes, all ${category.name.toLowerCase()} on WebTools are completely free to use with no hidden costs or limitations.`,
+      answer: `Yes, all ${category.name.toLowerCase()} on Love Web Tools are completely free to use with no hidden costs or limitations.`,
     },
     {
       question: `Is my data safe when using these tools?`,
@@ -74,12 +75,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <MainLayout showTopBanner>
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="flex items-center gap-4 mb-4">
-        <div className="p-3 bg-blue-50 rounded-lg">
-          {Icon && <Icon className="w-8 h-8 text-blue-600" />}
+        <div className="p-3 bg-cyan-50 rounded-xl">
+          {Icon && <Icon className="w-8 h-8 text-cyan-600" />}
         </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
@@ -103,6 +104,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       {/* FAQ Section */}
       <FaqSection items={categoryFaqs} />
-    </div>
+    </MainLayout>
   );
 }

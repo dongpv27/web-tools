@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import TechHeartLogo from '@/components/ui/TechHeartLogo';
+import MainLayout from '@/components/layout/MainLayout';
+import Breadcrumb from '@/components/layout/Breadcrumb';
 
 export const metadata: Metadata = {
   title: 'About Us - Love Web Tools',
@@ -8,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <MainLayout>
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
@@ -155,6 +157,6 @@ export default function AboutPage() {
           </a>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

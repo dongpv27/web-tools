@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench } from 'lucide-react';
+import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet } from 'lucide-react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import ToolGrid from '@/components/tools/ToolGrid';
+import MainLayout from '@/components/layout/MainLayout';
 import { tools, searchTools } from '@/lib/tools';
 import { categories } from '@/lib/categories';
 
@@ -13,10 +14,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Palette,
   ArrowLeftRight,
   Wrench,
+  FileSpreadsheet,
 };
 
 export const metadata: Metadata = {
-  title: 'All Tools',
+  title: 'All Tools - Free Online Tools',
   description: 'Browse all free online tools. JSON formatter, Base64 encoder, color picker, and more.',
 };
 
@@ -30,7 +32,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const filteredTools = searchQuery ? searchTools(searchQuery) : tools;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <MainLayout showTopBanner showBottomBanner>
       <Breadcrumb items={[{ label: 'All Tools', href: '/tools' }]} />
 
       <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -77,6 +79,6 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
           </a>
         </div>
       )}
-    </div>
+    </MainLayout>
   );
 }

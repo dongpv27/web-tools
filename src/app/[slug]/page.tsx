@@ -6,6 +6,7 @@ import FaqSection from '@/components/seo/FaqSection';
 import { SeoContent } from '@/components/seo/SeoContent';
 import RelatedTools from '@/components/tools/RelatedTools';
 import ToolRenderer from '@/components/tools/ToolRenderer';
+import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
 import { getCategoryBySlug } from '@/lib/categories';
 
@@ -70,8 +71,33 @@ export default async function ToolPage({ params }: ToolPageProps) {
     },
   };
 
+  // Sidebar content with related tools
+  const sidebarContent = (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 className="font-semibold text-gray-900 mb-4">Related Tools</h3>
+        <div className="space-y-3">
+          {relatedTools.slice(0, 5).map((relatedTool) => (
+            <a
+              key={relatedTool.id}
+              href={`/${relatedTool.slug}`}
+              className="block text-sm text-gray-600 hover:text-blue-600 hover:underline"
+            >
+              {relatedTool.name}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <MainLayout
+      showSidebar
+      showTopBanner
+      showBottomBanner
+      sidebarContent={sidebarContent}
+    >
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Tool Schema */}
@@ -118,8 +144,10 @@ export default async function ToolPage({ params }: ToolPageProps) {
       {/* FAQ Section */}
       {tool.faq && <FaqSection items={tool.faq} />}
 
-      {/* Related Tools */}
-      <RelatedTools tools={relatedTools} />
-    </div>
+      {/* Related Tools - Full width at bottom */}
+      <div className="lg:hidden">
+        <RelatedTools tools={relatedTools} />
+      </div>
+    </MainLayout>
   );
 }

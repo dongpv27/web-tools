@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, Zap, Shield, Globe } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
 import ToolGrid from '@/components/tools/ToolGrid';
+import MainLayout from '@/components/layout/MainLayout';
 import { tools } from '@/lib/tools';
 import { categories } from '@/lib/categories';
 
@@ -43,9 +44,9 @@ export default function HomePage() {
   const popularTools = tools.slice(0, 8);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <MainLayout showTopBanner showBottomBanner>
       {/* Hero Section */}
-      <section className="text-center mb-16">
+      <section className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Free Online Tools
         </h1>
@@ -67,7 +68,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {features.map((feature) => (
           <div
             key={feature.title}
@@ -83,7 +84,7 @@ export default function HomePage() {
       </section>
 
       {/* Popular Tools */}
-      <section className="mb-16">
+      <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Popular Tools</h2>
           <Link
@@ -98,7 +99,7 @@ export default function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="mb-16">
+      <section className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {categories.map((category) => {
@@ -143,6 +144,6 @@ export default function HomePage() {
           <li><strong>Regular Updates:</strong> New tools are added regularly based on user feedback.</li>
         </ul>
       </section>
-    </div>
+    </MainLayout>
   );
 }
