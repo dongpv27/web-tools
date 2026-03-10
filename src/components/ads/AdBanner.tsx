@@ -1,9 +1,16 @@
-interface AdBannerProps {
-  slot: string;
-  format?: 'horizontal' | 'vertical' | 'rectangle' | 'auto';
-  className?: string;
-  showPlaceholder?: boolean;
-}
+'use client';
+
+import { useEffect, useState } from 'react';
+
+// AdSense Slot IDs - Replace with your actual slot IDs
+export const ADSENSE_SLOTS = {
+  'header-banner': '1234567890',
+  'sidebar-1': '2234567890',
+  'sidebar-2': '3234567890',
+  'footer-banner': '4234567890',
+  'in-content': '5234567890',
+  'mobile-anchor': '6234567890',
+} as const;
 
 // Toggle this to enable/disable ads globally
 const ADS_ENABLED = false;
@@ -11,8 +18,11 @@ const ADS_ENABLED = false;
 // Toggle this to show placeholder ads when ADS_ENABLED is false
 const SHOW_PLACEHOLDERS = true;
 
+// Your AdSense Publisher ID
+const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
+
 // Ad slot configurations with responsive sizes following Google AdSense standards
-const adSlots: Record<string, {
+const adSlots: Record<keyof typeof ADSENSE_SLOTS, {
   desktop: { width: number; height: number };
   mobile: { width: number; height: number };
   type: 'banner' | 'rectangle';
@@ -52,17 +62,55 @@ const adSlots: Record<string, {
   },
 };
 
+type AdSlotKey = keyof typeof ADSENSE_SLOTS;
+
+interface AdBannerProps {
+  slot: AdSlotKey;
+  format?: 'auto' | 'fluid' | 'rectangle' | 'horizontal' | 'vertical';
+  className?: string;
+  showPlaceholder?: boolean;
+}
+
+// Declare adsbygoogle on window object
+declare global {
+  interface Window {
+    adsbygoogle: unknown[];
+  }
+}
+
 export default function AdBanner({
   slot,
   format = 'auto',
   className = '',
   showPlaceholder = false,
 }: AdBannerProps) {
+  const [mounted, setMounted] = useState(false);
+
   const config = adSlots[slot] || {
     desktop: { width: 300, height: 250 },
     mobile: { width: 336, height: 280 },
     type: 'rectangle' as const,
   };
+
+  // Handle client-side mounting to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Push ad to AdSense when component mounts (client-side only)
+  useEffect(() => {
+    if (!mounted || !ADS_ENABLED) return;
+
+    try {
+      // Initialize adsbygoogle array if not exists
+      if (typeof window !== 'undefined') {
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.push({});
+      }
+    } catch (error) {
+      console.error('AdSense push error:', error);
+    }
+  }, [mounted]);
 
   // Show placeholder when ADS_ENABLED is false and SHOW_PLACEHOLDERS is true
   if (!ADS_ENABLED) {
@@ -76,7 +124,7 @@ export default function AdBanner({
               style={{ height: config.mobile.height, maxWidth: config.mobile.width }}
             >
               <div className="text-center px-4">
-                <span>📱 Mobile Anchor Ad (320x50)</span>
+                <span>📱 Mobile Anchor (320×50)</span>
               </div>
             </div>
           </div>
@@ -94,6 +142,7 @@ export default function AdBanner({
               <div className="text-center p-2">
                 <div className="text-[10px] text-cyan-400 mb-1">ADVERTISEMENT</div>
                 <span className="text-xs">{config.desktop.width}×{config.desktop.height}</span>
+                <div className="text-[9px] text-cyan-400 mt-1">slot: {slot}</div>
               </div>
             </div>
           </div>
@@ -112,6 +161,7 @@ export default function AdBanner({
               <div className="text-center p-2">
                 <div className="text-[10px] text-cyan-400 mb-1">ADVERTISEMENT</div>
                 <span className="text-xs">{config.desktop.width}×{config.desktop.height}</span>
+                <div className="text-[9px] text-cyan-400 mt-1">slot: {slot}</div>
               </div>
             </div>
 
@@ -139,6 +189,7 @@ export default function AdBanner({
             <div className="text-center p-2">
               <div className="text-[10px] text-cyan-400 mb-1">ADVERTISEMENT</div>
               <span className="text-xs">{config.mobile.width}×{config.mobile.height}</span>
+              <div className="text-[9px] text-cyan-400 mt-1">slot: {slot}</div>
             </div>
           </div>
         </div>
@@ -147,7 +198,14 @@ export default function AdBanner({
     return null;
   }
 
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null;
+  }
+
   // Google AdSense implementation with responsive ads
+  const slotId = ADSENSE_SLOTS[slot];
+
   return (
     <div className={`ad-container ${className}`}>
       {/* Desktop Ad */}
@@ -156,8 +214,8 @@ export default function AdBanner({
           <ins
             className="adsbygoogle"
             style={{ display: 'block', width: config.desktop.width, height: config.desktop.height }}
-            data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-            data-ad-slot={slot}
+            data-ad-client={ADSENSE_CLIENT_ID}
+            data-ad-slot={slotId}
             data-ad-format={format}
             data-full-width-responsive="false"
           />
@@ -170,8 +228,8 @@ export default function AdBanner({
           <ins
             className="adsbygoogle"
             style={{ display: 'block', width: config.mobile.width, height: config.mobile.height }}
-            data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-            data-ad-slot={slot}
+            data-ad-client={ADSENSE_CLIENT_ID}
+            data-ad-slot={slotId}
             data-ad-format={format}
             data-full-width-responsive="true"
           />

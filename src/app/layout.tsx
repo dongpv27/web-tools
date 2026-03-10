@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -8,6 +9,10 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 });
+
+// Toggle this to enable/disable AdSense
+const ADSENSE_ENABLED = false;
+const ADSENSE_CLIENT_ID = "ca-pub-XXXXXXXXXXXXXXXX";
 
 export const metadata: Metadata = {
   title: {
@@ -45,6 +50,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* Google AdSense Script - Only load when enabled */}
+      {ADSENSE_ENABLED && (
+        <Script
+          id="adsense-script"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          strategy="afterInteractive"
+          async
+          crossOrigin="anonymous"
+        />
+      )}
       <body className={`${inter.variable} font-sans antialiased bg-gray-50`}>
         <Header />
         <main className="min-h-screen">
