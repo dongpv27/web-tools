@@ -1,6 +1,14 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import {
+  Braces, CheckCircle, FileCode, Lock, Unlock, Link2, Unlink, Hash,
+  AlignLeft, Pipette, Image, Scaling, Clock, Key, Fingerprint, Text,
+  FileText, Type, CaseSensitive, Eraser, TextCursor, Binary, Code, Shield,
+  Film, Scissors, Camera, Minimize2, Crop, FileDown, FileImage, ArrowLeftRight,
+  Palette, Wind, Thermometer, Ruler, Scale, Dice5, Dices, Circle, Timer, Barcode, Percent,
+  Globe, Monitor, Server, ExternalLink, Terminal, Radio, Zap, Star, Frame,
+} from 'lucide-react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import { SeoContent } from '@/components/seo/SeoContent';
@@ -8,7 +16,7 @@ import RelatedTools from '@/components/tools/RelatedTools';
 import ToolRenderer from '@/components/tools/ToolRenderer';
 import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
-import { getCategoryBySlug } from '@/lib/categories';
+import { getCategoryById } from '@/lib/categories';
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
@@ -48,12 +56,12 @@ export default async function ToolPage({ params }: ToolPageProps) {
     notFound();
   }
 
-  const category = getCategoryBySlug(tool.category);
+  const category = getCategoryById(tool.category);
   const relatedTools = getRelatedTools(tool.id);
 
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
-    { label: category?.name || 'Tools', href: `/tools/${tool.category}` },
+    { label: category?.name || 'Tools', href: category ? `/tools/${category.slug}` : '/tools' },
     { label: tool.name },
   ];
 
@@ -71,17 +79,17 @@ export default async function ToolPage({ params }: ToolPageProps) {
     },
   };
 
-  // Sidebar content with related tools
-  const sidebarContent = (
+  // Sidebar content with related tools (simple list)
+  const sidebarContent = relatedTools.length > 0 ? (
     <div className="space-y-6">
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <h3 className="font-semibold text-gray-900 mb-4">Related Tools</h3>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {relatedTools.slice(0, 5).map((relatedTool) => (
             <a
               key={relatedTool.id}
               href={`/${relatedTool.slug}`}
-              className="block text-sm text-gray-600 hover:text-blue-600 hover:underline"
+              className="block text-sm text-gray-600 hover:text-blue-600 hover:underline py-1"
             >
               {relatedTool.name}
             </a>
@@ -89,7 +97,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 
   return (
     <MainLayout
@@ -142,13 +150,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
         ]}
       />
 
+      {/* Related Tools */}
+      {relatedTools.length > 0 && (
+        <RelatedTools tools={relatedTools} />
+      )}
+
       {/* FAQ Section */}
       {tool.faq && <FaqSection items={tool.faq} />}
-
-      {/* Related Tools - Full width at bottom */}
-      <div className="lg:hidden">
-        <RelatedTools tools={relatedTools} />
-      </div>
     </MainLayout>
   );
 }

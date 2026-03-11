@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, Zap, Shield, Globe } from 'lucide-react';
+import { Code, FileText, Image, Video, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Zap, Shield, Globe } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
 import ToolGrid from '@/components/tools/ToolGrid';
 import MainLayout from '@/components/layout/MainLayout';
@@ -10,10 +10,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
   FileText,
   Image,
-  Youtube,
+  Video,
   Palette,
   ArrowLeftRight,
   Wrench,
+  FileSpreadsheet,
 };
 
 const features = [

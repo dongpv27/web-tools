@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-import { Menu, X, Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, LayoutGrid, ChevronDown, Heart } from 'lucide-react';
+import { Menu, X, Code, FileText, Image, Video, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, LayoutGrid, ChevronDown, Heart } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
 import TechHeartLogo from '@/components/ui/TechHeartLogo';
 import { categories } from '@/lib/categories';
@@ -11,7 +11,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
   FileText,
   Image,
-  Youtube,
+  Video,
   Palette,
   ArrowLeftRight,
   Wrench,
@@ -19,7 +19,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 // Popular categories to show in main nav
-const popularCategoryIds = ['dev', 'text', 'image', 'office'];
+const popularCategoryIds = ['dev', 'text', 'image', 'video'];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

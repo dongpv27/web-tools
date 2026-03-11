@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet } from 'lucide-react';
+import { Code, FileText, Image, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Video } from 'lucide-react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import ToolGrid from '@/components/tools/ToolGrid';
@@ -12,11 +12,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
   FileText,
   Image,
-  Youtube,
   Palette,
   ArrowLeftRight,
   Wrench,
   FileSpreadsheet,
+  Video,
 };
 
 interface CategoryPageProps {

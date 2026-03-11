@@ -1,4 +1,4 @@
-import { Code, FileText, Image, Youtube, Palette, ArrowLeftRight, Wrench, FileSpreadsheet } from 'lucide-react';
+import { Code, FileText, Image, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Video } from 'lucide-react';
 
 export interface Category {
   id: string;
@@ -16,7 +16,7 @@ export const categories: Category[] = [
     description: 'Tools for developers: JSON, Base64, encoding, and more',
     icon: 'Code',
     slug: 'developer-tools',
-    toolCount: 20,
+    toolCount: 35,
   },
   {
     id: 'text',
@@ -24,7 +24,7 @@ export const categories: Category[] = [
     description: 'Text manipulation, formatting, and conversion tools',
     icon: 'FileText',
     slug: 'text',
-    toolCount: 20,
+    toolCount: 24,
   },
   {
     id: 'image',
@@ -32,15 +32,15 @@ export const categories: Category[] = [
     description: 'Image conversion, resizing, and optimization tools',
     icon: 'Image',
     slug: 'image',
-    toolCount: 21,
+    toolCount: 28,
   },
   {
-    id: 'youtube',
-    name: 'YouTube Tools',
-    description: 'YouTube thumbnail downloader, video tools, and more',
-    icon: 'Youtube',
-    slug: 'youtube',
-    toolCount: 10,
+    id: 'video',
+    name: 'Video Tools',
+    description: 'Free online video editing tools. Convert, compress, trim, and edit videos directly in your browser.',
+    icon: 'Video',
+    slug: 'video-tools',
+    toolCount: 21,
   },
   {
     id: 'color',
@@ -48,7 +48,7 @@ export const categories: Category[] = [
     description: 'Color pickers, converters, and palette generators',
     icon: 'Palette',
     slug: 'color',
-    toolCount: 10,
+    toolCount: 13,
   },
   {
     id: 'converter',
@@ -56,7 +56,7 @@ export const categories: Category[] = [
     description: 'Unit converters, number converters, and more',
     icon: 'ArrowLeftRight',
     slug: 'converter',
-    toolCount: 10,
+    toolCount: 17,
   },
   {
     id: 'misc',
@@ -64,7 +64,7 @@ export const categories: Category[] = [
     description: 'Other useful tools and utilities',
     icon: 'Wrench',
     slug: 'misc',
-    toolCount: 10,
+    toolCount: 13,
   },
   {
     id: 'office',
@@ -88,9 +88,9 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   Code,
   FileText,
   Image,
-  Youtube,
   Palette,
   ArrowLeftRight,
   Wrench,
   FileSpreadsheet,
+  Video,
 };

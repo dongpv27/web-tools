@@ -84,6 +84,46 @@ export const CronExpressionParserClient = dynamic(
   () => import('@/components/tool-clients/CronExpressionParserClient'),
   { ssr: false }
 );
+export const JsonMinifyClient = dynamic(
+  () => import('@/components/tool-clients/JsonMinifyClient'),
+  { ssr: false }
+);
+export const JsonDiffClient = dynamic(
+  () => import('@/components/tool-clients/JsonDiffClient'),
+  { ssr: false }
+);
+export const HtmlEncodeDecodeClient = dynamic(
+  () => import('@/components/tool-clients/HtmlEncodeDecodeClient'),
+  { ssr: false }
+);
+export const QueryStringParserClient = dynamic(
+  () => import('@/components/tool-clients/QueryStringParserClient'),
+  { ssr: false }
+);
+export const UrlParserClient = dynamic(
+  () => import('@/components/tool-clients/UrlParserClient'),
+  { ssr: false }
+);
+export const HttpStatusCodesClient = dynamic(
+  () => import('@/components/tool-clients/HttpStatusCodesClient'),
+  { ssr: false }
+);
+export const UserAgentParserClient = dynamic(
+  () => import('@/components/tool-clients/UserAgentParserClient'),
+  { ssr: false }
+);
+export const BinaryConverterClient = dynamic(
+  () => import('@/components/tool-clients/BinaryConverterClient'),
+  { ssr: false }
+);
+export const HexConverterClient = dynamic(
+  () => import('@/components/tool-clients/HexConverterClient'),
+  { ssr: false }
+);
+export const BcryptHashGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/BcryptHashGeneratorClient'),
+  { ssr: false }
+);
 
 // Text Tools
 export const WordCounterClient = dynamic(
@@ -242,48 +282,6 @@ export const ImageToIcoClient = dynamic(
 );
 export const FaviconGeneratorClient = dynamic(
   () => import('@/components/tool-clients/FaviconGeneratorClient'),
-  { ssr: false }
-);
-
-// YouTube Tools
-export const YoutubeThumbnailClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeThumbnailClient'),
-  { ssr: false }
-);
-export const YoutubeVideoIdExtractorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeVideoIdExtractorClient'),
-  { ssr: false }
-);
-export const YoutubeEmbedGeneratorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeEmbedGeneratorClient'),
-  { ssr: false }
-);
-export const YoutubeTimestampClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeTimestampClient'),
-  { ssr: false }
-);
-export const YoutubeTagExtractorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeTagExtractorClient'),
-  { ssr: false }
-);
-export const YoutubeTitleGeneratorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeTitleGeneratorClient'),
-  { ssr: false }
-);
-export const YoutubeDescriptionGeneratorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeDescriptionGeneratorClient'),
-  { ssr: false }
-);
-export const YoutubeHashtagGeneratorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeHashtagGeneratorClient'),
-  { ssr: false }
-);
-export const YoutubeChannelIdFinderClient = dynamic(
-  () => import('@/components/tool-clients/YoutubeChannelIdFinderClient'),
-  { ssr: false }
-);
-export const YoutubePlaylistIdExtractorClient = dynamic(
-  () => import('@/components/tool-clients/YoutubePlaylistIdExtractorClient'),
   { ssr: false }
 );
 
@@ -527,6 +525,222 @@ export const SplitPptClient = dynamic(
   { ssr: false }
 );
 
+// Video Tools
+export const VideoToGifClient = dynamic(
+  () => import('@/components/tool-clients/VideoToGifClient'),
+  { ssr: false }
+);
+export const CompressVideoClient = dynamic(
+  () => import('@/components/tool-clients/CompressVideoClient'),
+  { ssr: false }
+);
+export const Mp4ToMp3Client = dynamic(
+  () => import('@/components/tool-clients/Mp4ToMp3Client'),
+  { ssr: false }
+);
+export const TrimVideoClient = dynamic(
+  () => import('@/components/tool-clients/TrimVideoClient'),
+  { ssr: false }
+);
+export const CropVideoClient = dynamic(
+  () => import('@/components/tool-clients/CropVideoClient'),
+  { ssr: false }
+);
+export const ResizeVideoClient = dynamic(
+  () => import('@/components/tool-clients/ResizeVideoClient'),
+  { ssr: false }
+);
+export const MergeVideosClient = dynamic(
+  () => import('@/components/tool-clients/MergeVideosClient'),
+  { ssr: false }
+);
+export const RotateVideoClient = dynamic(
+  () => import('@/components/tool-clients/RotateVideoClient'),
+  { ssr: false }
+);
+export const ChangeVideoSpeedClient = dynamic(
+  () => import('@/components/tool-clients/ChangeVideoSpeedClient'),
+  { ssr: false }
+);
+export const ExtractAudioClient = dynamic(
+  () => import('@/components/tool-clients/ExtractAudioClient'),
+  { ssr: false }
+);
+export const MuteVideoClient = dynamic(
+  () => import('@/components/tool-clients/MuteVideoClient'),
+  { ssr: false }
+);
+export const VideoToImagesClient = dynamic(
+  () => import('@/components/tool-clients/VideoToImagesClient'),
+  { ssr: false }
+);
+export const ReverseVideoClient = dynamic(
+  () => import('@/components/tool-clients/ReverseVideoClient'),
+  { ssr: false }
+);
+export const LoopVideoClient = dynamic(
+  () => import('@/components/tool-clients/LoopVideoClient'),
+  { ssr: false }
+);
+export const VideoThumbnailClient = dynamic(
+  () => import('@/components/tool-clients/VideoThumbnailClient'),
+  { ssr: false }
+);
+export const SplitVideoClient = dynamic(
+  () => import('@/components/tool-clients/SplitVideoClient'),
+  { ssr: false }
+);
+export const AddTextToVideoClient = dynamic(
+  () => import('@/components/tool-clients/AddTextToVideoClient'),
+  { ssr: false }
+);
+export const AddWatermarkToVideoClient = dynamic(
+  () => import('@/components/tool-clients/AddWatermarkToVideoClient'),
+  { ssr: false }
+);
+export const ConvertVideoClient = dynamic(
+  () => import('@/components/tool-clients/ConvertVideoClient'),
+  { ssr: false }
+);
+export const VideoFrameExtractorClient = dynamic(
+  () => import('@/components/tool-clients/VideoFrameExtractorClient'),
+  { ssr: false }
+);
+
+// New Developer Tools
+export const RandomStringGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/RandomStringGeneratorClient'),
+  { ssr: false }
+);
+export const GuidGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/GuidGeneratorClient'),
+  { ssr: false }
+);
+export const UuidBulkGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/UuidBulkGeneratorClient'),
+  { ssr: false }
+);
+export const JwtEncoderClient = dynamic(
+  () => import('@/components/tool-clients/JwtEncoderClient'),
+  { ssr: false }
+);
+export const CurlToFetchClient = dynamic(
+  () => import('@/components/tool-clients/CurlToFetchClient'),
+  { ssr: false }
+);
+
+// New Text Tools
+export const Rot13EncoderClient = dynamic(
+  () => import('@/components/tool-clients/Rot13EncoderClient'),
+  { ssr: false }
+);
+export const Rot13DecoderClient = dynamic(
+  () => import('@/components/tool-clients/Rot13DecoderClient'),
+  { ssr: false }
+);
+export const MorseCodeTranslatorClient = dynamic(
+  () => import('@/components/tool-clients/MorseCodeTranslatorClient'),
+  { ssr: false }
+);
+export const AsciiConverterClient = dynamic(
+  () => import('@/components/tool-clients/AsciiConverterClient'),
+  { ssr: false }
+);
+
+// New Image Tools
+export const ImageCompressorClient = dynamic(
+  () => import('@/components/tool-clients/ImageCompressorClient'),
+  { ssr: false }
+);
+export const CropImageClient = dynamic(
+  () => import('@/components/tool-clients/CropImageClient'),
+  { ssr: false }
+);
+export const GifMakerClient = dynamic(
+  () => import('@/components/tool-clients/GifMakerClient'),
+  { ssr: false }
+);
+export const PngCompressorClient = dynamic(
+  () => import('@/components/tool-clients/PngCompressorClient'),
+  { ssr: false }
+);
+export const JpegCompressorClient = dynamic(
+  () => import('@/components/tool-clients/JpegCompressorClient'),
+  { ssr: false }
+);
+export const GifCompressorClient = dynamic(
+  () => import('@/components/tool-clients/GifCompressorClient'),
+  { ssr: false }
+);
+export const SvgToPngClient = dynamic(
+  () => import('@/components/tool-clients/SvgToPngClient'),
+  { ssr: false }
+);
+
+// New Video Tools
+export const VideoScreenshotClient = dynamic(
+  () => import('@/components/tool-clients/VideoScreenshotClient'),
+  { ssr: false }
+);
+
+// New Color Tools
+export const RgbColorPickerClient = dynamic(
+  () => import('@/components/tool-clients/RgbColorPickerClient'),
+  { ssr: false }
+);
+export const HexColorPickerClient = dynamic(
+  () => import('@/components/tool-clients/HexColorPickerClient'),
+  { ssr: false }
+);
+export const RgbaToHexClient = dynamic(
+  () => import('@/components/tool-clients/RgbaToHexClient'),
+  { ssr: false }
+);
+
+// New Converter Tools
+export const TimeConverterClient = dynamic(
+  () => import('@/components/tool-clients/TimeConverterClient'),
+  { ssr: false }
+);
+export const TemperatureConverterClient = dynamic(
+  () => import('@/components/tool-clients/TemperatureConverterClient'),
+  { ssr: false }
+);
+export const WeightConverterClient = dynamic(
+  () => import('@/components/tool-clients/WeightConverterClient'),
+  { ssr: false }
+);
+export const LengthConverterClient = dynamic(
+  () => import('@/components/tool-clients/LengthConverterClient'),
+  { ssr: false }
+);
+export const MarkdownToPdfClient = dynamic(
+  () => import('@/components/tool-clients/MarkdownToPdfClient'),
+  { ssr: false }
+);
+export const JsonToXmlClient = dynamic(
+  () => import('@/components/tool-clients/JsonToXmlClient'),
+  { ssr: false }
+);
+export const XmlToJsonClient = dynamic(
+  () => import('@/components/tool-clients/XmlToJsonClient'),
+  { ssr: false }
+);
+
+// New Misc Tools
+export const SecureTokenGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/SecureTokenGeneratorClient'),
+  { ssr: false }
+);
+export const NanoIdGeneratorClient = dynamic(
+  () => import('@/components/tool-clients/NanoIdGeneratorClient'),
+  { ssr: false }
+);
+export const SlugGeneratorAdvancedClient = dynamic(
+  () => import('@/components/tool-clients/SlugGeneratorAdvancedClient'),
+  { ssr: false }
+);
+
 // Tool Component Map
 export const toolComponentMap: Record<string, ComponentType> = {
   // Developer Tools
@@ -550,6 +764,21 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'sql-formatter': SqlFormatterClient,
   'ip-address-validator': IpAddressValidatorClient,
   'cron-expression-parser': CronExpressionParserClient,
+  'json-minify': JsonMinifyClient,
+  'json-diff': JsonDiffClient,
+  'html-encode-decode': HtmlEncodeDecodeClient,
+  'query-string-parser': QueryStringParserClient,
+  'url-parser': UrlParserClient,
+  'http-status-codes': HttpStatusCodesClient,
+  'user-agent-parser': UserAgentParserClient,
+  'binary-converter': BinaryConverterClient,
+  'hex-converter': HexConverterClient,
+  'bcrypt-hash-generator': BcryptHashGeneratorClient,
+  'random-string-generator': RandomStringGeneratorClient,
+  'guid-generator': GuidGeneratorClient,
+  'uuid-bulk-generator': UuidBulkGeneratorClient,
+  'jwt-encoder': JwtEncoderClient,
+  'curl-to-fetch': CurlToFetchClient,
   // Text Tools
   'word-counter': WordCounterClient,
   'character-counter': CharacterCounterClient,
@@ -571,6 +800,10 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'capitalize-sentences': CapitalizeSentencesClient,
   'text-cleaner': TextCleanerClient,
   'text-formatter': TextFormatterClient,
+  'rot13-encoder': Rot13EncoderClient,
+  'rot13-decoder': Rot13DecoderClient,
+  'morse-code-translator': MorseCodeTranslatorClient,
+  'ascii-converter': AsciiConverterClient,
   // Image Tools
   'image-resize': ImageResizeClient,
   'image-to-base64': ImageToBase64Client,
@@ -593,17 +826,13 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'extract-colors': ExtractColorsClient,
   'image-to-ico': ImageToIcoClient,
   'favicon-generator': FaviconGeneratorClient,
-  // YouTube Tools
-  'youtube-thumbnail': YoutubeThumbnailClient,
-  'youtube-video-id-extractor': YoutubeVideoIdExtractorClient,
-  'youtube-embed-generator': YoutubeEmbedGeneratorClient,
-  'youtube-timestamp-generator': YoutubeTimestampClient,
-  'youtube-tag-extractor': YoutubeTagExtractorClient,
-  'youtube-title-generator': YoutubeTitleGeneratorClient,
-  'youtube-description-generator': YoutubeDescriptionGeneratorClient,
-  'youtube-hashtag-generator': YoutubeHashtagGeneratorClient,
-  'youtube-channel-id-finder': YoutubeChannelIdFinderClient,
-  'youtube-playlist-id-extractor': YoutubePlaylistIdExtractorClient,
+  'image-compressor': ImageCompressorClient,
+  'crop-image': CropImageClient,
+  'gif-maker': GifMakerClient,
+  'png-compressor': PngCompressorClient,
+  'jpeg-compressor': JpegCompressorClient,
+  'gif-compressor': GifCompressorClient,
+  'svg-to-png': SvgToPngClient,
   // Color Tools
   'color-picker': ColorPickerClient,
   'hex-to-rgb': HexToRgbClient,
@@ -615,6 +844,9 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'css-gradient-generator': CssGradientGeneratorClient,
   'tailwind-color-converter': TailwindColorConverterClient,
   'color-converter': ColorConverterClient,
+  'rgb-color-picker': RgbColorPickerClient,
+  'hex-color-picker': HexColorPickerClient,
+  'rgba-to-hex': RgbaToHexClient,
   // Converter Tools
   'csv-to-json': CsvToJsonClient,
   'qr-code-generator': QrCodeGeneratorClient,
@@ -625,11 +857,21 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'base64-to-text': Base64ToTextClient,
   'unix-time-to-date': UnixTimeToDateClient,
   'date-to-unix-time': DateToUnixTimeClient,
+  'time-converter': TimeConverterClient,
+  'temperature-converter': TemperatureConverterClient,
+  'weight-converter': WeightConverterClient,
+  'length-converter': LengthConverterClient,
+  'markdown-to-pdf': MarkdownToPdfClient,
+  'json-to-xml': JsonToXmlClient,
+  'xml-to-json': XmlToJsonClient,
   // Misc Tools
   'random-number-generator': RandomNumberGeneratorClient,
   'dice-roll-simulator': DiceRollSimulatorClient,
   'coin-flip': CoinFlipClient,
   'password-strength-checker': PasswordStrengthCheckerClient,
+  'secure-token-generator': SecureTokenGeneratorClient,
+  'nano-id-generator': NanoIdGeneratorClient,
+  'slug-generator-advanced': SlugGeneratorAdvancedClient,
   'age-calculator': AgeCalculatorClient,
   'bmi-calculator': BmiCalculatorClient,
   'countdown-timer': CountdownTimerClient,
@@ -669,4 +911,26 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'ppt-to-pdf': PptToPdfClient,
   'merge-ppt': MergePptClient,
   'split-ppt': SplitPptClient,
+  // Video Tools
+  'video-to-gif': VideoToGifClient,
+  'compress-video': CompressVideoClient,
+  'mp4-to-mp3': Mp4ToMp3Client,
+  'trim-video': TrimVideoClient,
+  'crop-video': CropVideoClient,
+  'resize-video': ResizeVideoClient,
+  'merge-videos': MergeVideosClient,
+  'rotate-video': RotateVideoClient,
+  'change-video-speed': ChangeVideoSpeedClient,
+  'extract-audio': ExtractAudioClient,
+  'mute-video': MuteVideoClient,
+  'video-to-images': VideoToImagesClient,
+  'reverse-video': ReverseVideoClient,
+  'loop-video': LoopVideoClient,
+  'video-thumbnail': VideoThumbnailClient,
+  'split-video': SplitVideoClient,
+  'add-text-to-video': AddTextToVideoClient,
+  'add-watermark-to-video': AddWatermarkToVideoClient,
+  'convert-video': ConvertVideoClient,
+  'video-frame-extractor': VideoFrameExtractorClient,
+  'video-screenshot': VideoScreenshotClient,
 };

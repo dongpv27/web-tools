@@ -16,7 +16,7 @@ export const ADSENSE_SLOTS = {
 const ADS_ENABLED = false;
 
 // Toggle this to show placeholder ads when ADS_ENABLED is false
-const SHOW_PLACEHOLDERS = true;
+const SHOW_PLACEHOLDERS = false;
 
 // Your AdSense Publisher ID
 const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
