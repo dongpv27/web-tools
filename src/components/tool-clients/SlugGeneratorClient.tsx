@@ -123,7 +123,7 @@ export default function SlugGeneratorClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Generated Slug" />
+        <ToolResult value={output} label="Generated Slug" showDownload downloadFilename="slug.txt" />
       )}
 
       {/* Preview URL */}

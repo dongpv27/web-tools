@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function YoutubeTitleGeneratorClient() {
   const [topic, setTopic] = useState('');
@@ -67,7 +68,10 @@ export default function YoutubeTitleGeneratorClient() {
 
       {titles.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm text-gray-500">Click on a title to copy it</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">Click on a title to copy it</p>
+            <DownloadButton content={titles.join('\n')} filename="youtube-titles.txt" />
+          </div>
           {titles.map((title, index) => (
             <div
               key={index}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ToolResult from '@/components/tools/ToolResult';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function UuidGeneratorClient() {
   const [uuids, setUuids] = useState<string[]>([]);
@@ -87,6 +88,7 @@ export default function UuidGeneratorClient() {
               >
                 Copy All
               </button>
+              <DownloadButton content={uuids.join('\n')} filename="uuids.txt" />
             </div>
           </div>
           <div className="bg-gray-900 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">

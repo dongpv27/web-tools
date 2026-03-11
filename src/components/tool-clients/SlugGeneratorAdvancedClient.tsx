@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function SlugGeneratorAdvancedClient() {
   const [input, setInput] = useState('');
@@ -179,7 +180,10 @@ export default function SlugGeneratorAdvancedClient() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-700">Generated Slug</label>
-            <CopyButton text={output} />
+            <div className="flex gap-2">
+              <CopyButton text={output} />
+              <DownloadButton content={output} filename="slug.txt" />
+            </div>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <code className="text-sm font-mono text-gray-800 break-all">{output}</code>

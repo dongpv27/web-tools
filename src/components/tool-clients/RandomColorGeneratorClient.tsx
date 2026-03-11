@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function RandomColorGeneratorClient() {
   const [colors, setColors] = useState<string[]>([]);
@@ -102,6 +103,7 @@ export default function RandomColorGeneratorClient() {
           {/* Actions */}
           <div className="flex gap-2">
             <button onClick={copyAll} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">Copy All</button>
+            <DownloadButton content={colors.join('\n')} filename="colors.txt" />
             <button onClick={clear} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Clear</button>
           </div>
         </div>

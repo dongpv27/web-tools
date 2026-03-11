@@ -14,6 +14,7 @@ import FaqSection from '@/components/seo/FaqSection';
 import { SeoContent } from '@/components/seo/SeoContent';
 import RelatedTools from '@/components/tools/RelatedTools';
 import ToolRenderer from '@/components/tools/ToolRenderer';
+import ExampleOutput from '@/components/tools/ExampleOutput';
 import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
 import { getCategoryById } from '@/lib/categories';
@@ -36,12 +37,14 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
     return { title: 'Tool Not Found' };
   }
 
+  const pageTitle = tool.seoTitle || `${tool.name} - Free Online Tool`;
+
   return {
-    title: `${tool.name} - Free Online Tool`,
+    title: pageTitle,
     description: tool.description,
     keywords: tool.keywords.join(', '),
     openGraph: {
-      title: `${tool.name} - Free Online Tool`,
+      title: pageTitle,
       description: tool.shortDescription,
       type: 'website',
     },
@@ -115,7 +118,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
       />
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">{tool.name}</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">{tool.seoTitle || tool.name}</h1>
       <p className="text-gray-600 mb-8">{tool.description}</p>
 
       {/* Tool Card */}
@@ -123,6 +126,15 @@ export default async function ToolPage({ params }: ToolPageProps) {
         <Suspense fallback={<div className="animate-pulse bg-gray-100 h-64 rounded-lg"></div>}>
           <ToolRenderer slug={tool.slug} />
         </Suspense>
+
+        {/* Example Output */}
+        {tool.exampleOutput && (
+          <ExampleOutput
+            input={tool.exampleOutput.input}
+            output={tool.exampleOutput.output}
+            description={tool.exampleOutput.description}
+          />
+        )}
       </div>
 
       {/* SEO Content */}

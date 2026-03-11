@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function UuidBulkGeneratorClient() {
   const [uuids, setUuids] = useState<string[]>([]);
@@ -116,6 +117,7 @@ export default function UuidBulkGeneratorClient() {
               >
                 Copy as JSON
               </button>
+              <DownloadButton content={uuids.join('\n')} filename="uuids.txt" />
             </div>
           </div>
           <div className="bg-gray-900 rounded-lg p-4 space-y-1 max-h-80 overflow-y-auto font-mono text-xs">

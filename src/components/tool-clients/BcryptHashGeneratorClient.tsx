@@ -159,6 +159,8 @@ export default function BcryptHashGeneratorClient() {
         <ToolResult
           value={hash}
           label="bcrypt Hash"
+          showDownload
+          downloadFilename="bcrypt-hash.txt"
         />
       )}
 

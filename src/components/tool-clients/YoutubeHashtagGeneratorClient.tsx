@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function YoutubeHashtagGeneratorClient() {
   const [topic, setTopic] = useState('');
@@ -84,6 +85,7 @@ export default function YoutubeHashtagGeneratorClient() {
               <div className="flex gap-2">
                 <button onClick={copyAll} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Copy All</button>
                 <button onClick={copyAllComma} className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Copy (Comma)</button>
+                <DownloadButton content={hashtags.join(' ')} filename="youtube-hashtags.txt" />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function YoutubeDescriptionGeneratorClient() {
   const [title, setTitle] = useState('');
@@ -115,7 +116,10 @@ Thanks for watching! 🙏`;
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-700">Generated Description</label>
-            <CopyButton text={description} />
+            <div className="flex gap-2">
+              <CopyButton text={description} />
+              <DownloadButton content={description} filename="youtube-description.txt" />
+            </div>
           </div>
           <textarea
             value={description}

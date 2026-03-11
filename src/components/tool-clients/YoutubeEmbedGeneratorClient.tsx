@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function YoutubeEmbedGeneratorClient() {
   const [url, setUrl] = useState('');
@@ -151,7 +152,10 @@ export default function YoutubeEmbedGeneratorClient() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700">Embed Code</label>
-              <CopyButton text={embedCode} />
+              <div className="flex gap-2">
+                <CopyButton text={embedCode} />
+                <DownloadButton content={embedCode} filename="youtube-embed.txt" />
+              </div>
             </div>
             <pre className="p-4 bg-gray-900 rounded-lg text-sm font-mono text-green-400 overflow-x-auto whitespace-pre-wrap">
               {embedCode}

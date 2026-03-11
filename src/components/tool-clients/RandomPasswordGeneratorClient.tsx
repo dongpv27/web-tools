@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function RandomPasswordGeneratorClient() {
   const [password, setPassword] = useState('');
@@ -73,7 +74,10 @@ export default function RandomPasswordGeneratorClient() {
           <div className="p-4 bg-gray-900 rounded-lg">
             <code className="text-lg font-mono text-green-400 break-all">{password}</code>
           </div>
-          <CopyButton text={password} className="absolute top-2 right-2" />
+          <div className="absolute top-2 right-2 flex gap-2">
+            <CopyButton text={password} />
+            <DownloadButton content={password} filename="password.txt" />
+          </div>
 
           {/* Strength Indicator */}
           {strength && (

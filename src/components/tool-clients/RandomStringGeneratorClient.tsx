@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function RandomStringGeneratorClient() {
   const [result, setResult] = useState('');
@@ -136,12 +137,15 @@ export default function RandomStringGeneratorClient() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-700">Generated Strings</label>
-            <button
-              onClick={copyAll}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Copy All
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={copyAll}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Copy All
+              </button>
+              <DownloadButton content={result} filename="strings.txt" />
+            </div>
           </div>
           <div className="bg-gray-900 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
             {result.split('\n').map((str, index) => (

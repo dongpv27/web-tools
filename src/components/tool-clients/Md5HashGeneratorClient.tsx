@@ -225,7 +225,7 @@ export default function Md5HashGeneratorClient() {
 
       {/* Output */}
       {output && !error && (
-        <ToolResult value={output} label="MD5 Hash" />
+        <ToolResult value={output} label="MD5 Hash" showDownload downloadFilename="md5-hash.txt" />
       )}
 
       {/* Warning */}

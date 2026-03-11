@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function ColorPaletteGeneratorClient() {
   const [baseColor, setBaseColor] = useState('#3B82F6');
@@ -154,8 +155,9 @@ export default function ColorPaletteGeneratorClient() {
             ))}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <button onClick={copyAll} className="text-sm text-blue-600 hover:text-blue-700">Copy All</button>
+            <DownloadButton content={palette.join('\n')} filename="color-palette.txt" />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">

@@ -79,7 +79,7 @@ export default function Sha256HashGeneratorClient() {
 
       {/* Output */}
       {output && !error && (
-        <ToolResult value={output} label="SHA-256 Hash" />
+        <ToolResult value={output} label="SHA-256 Hash" showDownload downloadFilename="sha256-hash.txt" />
       )}
 
       {/* Info */}

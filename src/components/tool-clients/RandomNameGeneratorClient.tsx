@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const firstNamesMale = [
   'James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph',
@@ -131,12 +132,15 @@ export default function RandomNameGeneratorClient() {
             <label className="text-sm font-medium text-gray-700">
               Generated Names ({names.length})
             </label>
-            <button
-              onClick={copyAll}
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              Copy All
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={copyAll}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Copy All
+              </button>
+              <DownloadButton content={names.join('\n')} filename="names.txt" />
+            </div>
           </div>
           <div className="bg-gray-50 rounded-lg divide-y divide-gray-200">
             {names.map((name, i) => (

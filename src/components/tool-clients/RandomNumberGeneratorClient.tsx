@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import ToolResult from '@/components/tools/ToolResult';
+import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function RandomNumberGeneratorClient() {
   const [min, setMin] = useState(1);
@@ -98,6 +99,13 @@ export default function RandomNumberGeneratorClient() {
       {/* Results */}
       {results.length > 0 && (
         <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Generated Numbers</span>
+            <div className="flex gap-2">
+              <CopyButton text={results.join('\n')} />
+              <DownloadButton content={results.join('\n')} filename="numbers.txt" />
+            </div>
+          </div>
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
             <span className="text-3xl font-bold text-blue-600">
               {results.join(', ')}
