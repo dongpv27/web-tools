@@ -9,14 +9,15 @@ export default function NanoIdGeneratorClient() {
   const [length, setLength] = useState(21);
   const [count, setCount] = useState(10);
   const [alphabet, setAlphabet] = useState('url-safe');
+  const [copied, setCopied] = useState(false);
 
   const alphabets: Record<string, string> = {
-    'url-safe': 'Uint8ArdomValuesObj012345679BCDEFGHIJKLMNPQRSTWXYZ_cfghkpqvwxy-=',
-    'alphanumeric': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-    'lowercase': '0123456789abcdefghijklmnopqrstuvwxyz',
-    'numbers': '0123456789',
-    'no-lookalikes': '346789ABCDEFGHJKLMNPQRTUVWXYabcdefghijkmnpqrtwxy',
-  };
+      'url-safe': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-',
+      'alphanumeric': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+      'lowercase': '0123456789abcdefghijklmnopqrstuvwxyz',
+      'numbers': '0123456789',
+      'no-lookalikes': '346789ABCDEFGHJKLMNPQRTUVWXYabcdefghijkmnpqrtwxy',
+    };
 
   const generateNanoId = (size: number, chars: string): string => {
     const bytes = new Uint8Array(size);
@@ -53,6 +54,8 @@ export default function NanoIdGeneratorClient() {
 
   const copyAll = async () => {
     await navigator.clipboard.writeText(ids.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const clearAll = () => {
@@ -132,9 +135,13 @@ export default function NanoIdGeneratorClient() {
             <div className="flex gap-2">
               <button
                 onClick={copyAll}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  copied
+                    ? 'border-green-300 bg-green-100 text-green-700 hover:bg-green-100'
+                    : 'text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                Copy All
+                {copied ? 'Copied!' : 'Copy All'}
               </button>
               <DownloadButton content={ids.join('\n')} filename="nanoids.txt" />
             </div>

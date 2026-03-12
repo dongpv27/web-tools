@@ -145,17 +145,19 @@ export default function GradientGeneratorClient() {
 
       {/* Output */}
       {cssOutput && (
-        <div className="p-4 bg-gray-900 rounded-lg">
+        <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">CSS</span>
+            <span className="text-sm font-medium text-gray-700">CSS</span>
             <div className="flex gap-2">
               <CopyButton text={`background: ${cssOutput};`} />
               <DownloadButton content={`background: ${cssOutput};`} filename="gradient.css" />
             </div>
           </div>
-          <code className="text-sm font-mono text-green-400 break-all">
-            background: {cssOutput};
-          </code>
+          <div className="p-4 bg-gray-900 rounded-lg">
+            <code className="text-sm font-mono text-green-400 break-all">
+              background: {cssOutput};
+            </code>
+          </div>
         </div>
       )}
     </div>

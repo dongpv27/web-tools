@@ -18,17 +18,8 @@ export default function UrlEncodeClient() {
     }
 
     try {
-      if (encodeAll) {
-        // Encode all characters
-        const encoded = input
-          .split('')
-          .map((char) => '%' + char.charCodeAt(0).toString(16).padStart(2, '0'))
-          .join('');
-        setOutput(encoded);
-      } else {
-        // Standard URL encoding
-        setOutput(encodeURIComponent(input));
-      }
+      // Standard URL encoding (RFC 3986)
+      setOutput(encodeURIComponent(input));
     } catch (e) {
       setError(`Error encoding: ${(e as Error).message}`);
     }
@@ -66,18 +57,6 @@ export default function UrlEncodeClient() {
         />
       </div>
 
-      {/* Options */}
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={encodeAll}
-            onChange={(e) => setEncodeAll(e.target.checked)}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-600">Encode all characters</span>
-        </label>
-      </div>
 
       {/* Action Buttons */}
       <div className="flex gap-2">

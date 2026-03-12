@@ -30,6 +30,7 @@ export default function RandomNameGeneratorClient() {
   const [count, setCount] = useState(5);
   const [gender, setGender] = useState<'both' | 'male' | 'female'>('both');
   const [includeLastName, setIncludeLastName] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   const generate = () => {
     const result: string[] = [];
@@ -61,6 +62,8 @@ export default function RandomNameGeneratorClient() {
 
   const copyAll = async () => {
     await navigator.clipboard.writeText(names.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const clearAll = () => {
@@ -135,9 +138,11 @@ export default function RandomNameGeneratorClient() {
             <div className="flex gap-2">
               <button
                 onClick={copyAll}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className={`text-sm rounded px-2 py-1 transition-colors ${
+                  copied ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'text-blue-600 hover:text-blue-700'
+                }`}
               >
-                Copy All
+                {copied ? 'Copied!' : 'Copy All'}
               </button>
               <DownloadButton content={names.join('\n')} filename="names.txt" />
             </div>

@@ -9,6 +9,9 @@ export default function UuidBulkGeneratorClient() {
   const [count, setCount] = useState(50);
   const [uppercase, setUppercase] = useState(false);
   const [version, setVersion] = useState<'v4' | 'v1'>('v4');
+  const [copied, setCopied] = useState(false);
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedArray, setCopiedArray] = useState(false);
 
   const generateUUIDs = () => {
     const newUuids: string[] = [];
@@ -23,16 +26,22 @@ export default function UuidBulkGeneratorClient() {
   const copyAll = async () => {
     const text = uuids.join('\n');
     await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const copyAsJson = async () => {
     const json = JSON.stringify(uuids, null, 2);
     await navigator.clipboard.writeText(json);
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2000);
   };
 
   const copyAsArray = async () => {
     const arr = uuids.map(u => `'${u}'`).join(', ');
     await navigator.clipboard.writeText(`[${arr}]`);
+    setCopiedArray(true);
+    setTimeout(() => setCopiedArray(false), 2000);
   };
 
   const clearAll = () => {
@@ -107,15 +116,23 @@ export default function UuidBulkGeneratorClient() {
             <div className="flex gap-2">
               <button
                 onClick={copyAll}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  copied
+                    ? 'border-green-300 bg-green-100 text-green-700 hover:bg-green-100'
+                    : 'text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                Copy All
+                {copied ? 'Copied!' : 'Copy All'}
               </button>
               <button
                 onClick={copyAsJson}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  copiedJson
+                    ? 'border-green-300 bg-green-100 text-green-700 hover:bg-green-100'
+                    : 'text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                Copy as JSON
+                {copiedJson ? 'Copied!' : 'Copy as JSON'}
               </button>
               <DownloadButton content={uuids.join('\n')} filename="uuids.txt" />
             </div>

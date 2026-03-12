@@ -8,6 +8,7 @@ export default function RandomColorGeneratorClient() {
   const [colors, setColors] = useState<string[]>([]);
   const [count, setCount] = useState(5);
   const [format, setFormat] = useState<'hex' | 'rgb'>('hex');
+  const [copied, setCopied] = useState(false);
 
   const generateRandomColor = () => {
     const r = Math.floor(Math.random() * 256);
@@ -30,6 +31,8 @@ export default function RandomColorGeneratorClient() {
 
   const copyAll = () => {
     navigator.clipboard.writeText(colors.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const clear = () => {
@@ -102,7 +105,9 @@ export default function RandomColorGeneratorClient() {
 
           {/* Actions */}
           <div className="flex gap-2">
-            <button onClick={copyAll} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">Copy All</button>
+            <button onClick={copyAll} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              copied ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-green-600 text-white hover:bg-green-700'
+            }`}>{copied ? 'Copied!' : 'Copy All'}</button>
             <DownloadButton content={colors.join('\n')} filename="colors.txt" />
             <button onClick={clear} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Clear</button>
           </div>

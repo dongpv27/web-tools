@@ -70,18 +70,21 @@ export default function RandomPasswordGeneratorClient() {
     <div className="space-y-6">
       {/* Password Display */}
       {password && (
-        <div className="relative">
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">Generated Password</label>
+            <div className="flex gap-2">
+              <CopyButton text={password} />
+              <DownloadButton content={password} filename="password.txt" />
+            </div>
+          </div>
           <div className="p-4 bg-gray-900 rounded-lg">
             <code className="text-lg font-mono text-green-400 break-all">{password}</code>
-          </div>
-          <div className="absolute top-2 right-2 flex gap-2">
-            <CopyButton text={password} />
-            <DownloadButton content={password} filename="password.txt" />
           </div>
 
           {/* Strength Indicator */}
           {strength && (
-            <div className="mt-3">
+            <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm text-gray-600">Strength: {strength.label}</span>
                 <span className="text-sm text-gray-500">{password.length} chars</span>
@@ -91,7 +94,7 @@ export default function RandomPasswordGeneratorClient() {
               </div>
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* Length Slider */}

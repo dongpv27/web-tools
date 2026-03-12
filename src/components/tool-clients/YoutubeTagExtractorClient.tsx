@@ -8,6 +8,7 @@ export default function YoutubeTagExtractorClient() {
   const [tags, setTags] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const extractVideoId = (input: string): string | null => {
     const patterns = [
@@ -59,6 +60,8 @@ export default function YoutubeTagExtractorClient() {
 
   const copyAll = () => {
     navigator.clipboard.writeText(tags.join(', '));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -88,7 +91,9 @@ export default function YoutubeTagExtractorClient() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-gray-700">Tags ({tags.length})</p>
-              <button onClick={copyAll} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Copy All</button>
+              <button onClick={copyAll} className={`px-3 py-1 text-sm rounded transition-colors ${
+                copied ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}>{copied ? 'Copied!' : 'Copy All'}</button>
             </div>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag, index) => (

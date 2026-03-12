@@ -8,6 +8,7 @@ export default function ColorPaletteGeneratorClient() {
   const [baseColor, setBaseColor] = useState('#3B82F6');
   const [paletteType, setPaletteType] = useState<'complementary' | 'analogous' | 'triadic' | 'tetradic' | 'split-complementary'>('complementary');
   const [palette, setPalette] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
 
   const hexToHsl = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -91,6 +92,8 @@ export default function ColorPaletteGeneratorClient() {
 
   const copyAll = () => {
     navigator.clipboard.writeText(palette.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -156,7 +159,9 @@ export default function ColorPaletteGeneratorClient() {
           </div>
 
           <div className="flex justify-end gap-2">
-            <button onClick={copyAll} className="text-sm text-blue-600 hover:text-blue-700">Copy All</button>
+            <button onClick={copyAll} className={`text-sm rounded px-2 py-1 transition-colors ${
+              copied ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'text-blue-600 hover:text-blue-700'
+            }`}>{copied ? 'Copied!' : 'Copy All'}</button>
             <DownloadButton content={palette.join('\n')} filename="color-palette.txt" />
           </div>
 

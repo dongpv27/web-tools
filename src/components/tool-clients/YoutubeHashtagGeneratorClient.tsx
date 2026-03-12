@@ -8,6 +8,8 @@ export default function YoutubeHashtagGeneratorClient() {
   const [topic, setTopic] = useState('');
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [copiedComma, setCopiedComma] = useState(false);
 
   const generate = () => {
     setError('');
@@ -51,10 +53,14 @@ export default function YoutubeHashtagGeneratorClient() {
 
   const copyAll = () => {
     navigator.clipboard.writeText(hashtags.join(' '));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const copyAllComma = () => {
     navigator.clipboard.writeText(hashtags.join(', '));
+    setCopiedComma(true);
+    setTimeout(() => setCopiedComma(false), 2000);
   };
 
   return (
@@ -83,8 +89,12 @@ export default function YoutubeHashtagGeneratorClient() {
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-gray-700">Hashtags ({hashtags.length})</p>
               <div className="flex gap-2">
-                <button onClick={copyAll} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Copy All</button>
-                <button onClick={copyAllComma} className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Copy (Comma)</button>
+                <button onClick={copyAll} className={`px-3 py-1 text-sm rounded transition-colors ${
+                  copied ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}>{copied ? 'Copied!' : 'Copy All'}</button>
+                <button onClick={copyAllComma} className={`px-3 py-1 text-sm rounded transition-colors ${
+                  copiedComma ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}>{copiedComma ? 'Copied!' : 'Copy (Comma)'}</button>
                 <DownloadButton content={hashtags.join(' ')} filename="youtube-hashtags.txt" />
               </div>
             </div>

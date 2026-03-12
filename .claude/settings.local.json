@@ -1,9 +1,4 @@
 {
-  "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
-  },
   "permissions": {
     "allow": [
       "Bash(npx create-next-app@latest:*)",
@@ -27,7 +22,9 @@
       "Bash(done)",
       "Bash(npx tsc:*)",
       "Bash(sed:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(timeout 30 cmd:*)",
+      "Bash(netstat:*)"
     ]
   }
 }

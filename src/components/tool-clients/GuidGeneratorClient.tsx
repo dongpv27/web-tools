@@ -8,6 +8,7 @@ export default function GuidGeneratorClient() {
   const [guids, setGuids] = useState<string[]>([]);
   const [count, setCount] = useState(5);
   const [format, setFormat] = useState<'standard' | 'braces' | 'noparen'>('standard');
+  const [copied, setCopied] = useState(false);
 
   const generateGUID = () => {
     const uuid = crypto.randomUUID();
@@ -32,6 +33,8 @@ export default function GuidGeneratorClient() {
   const copyAll = async () => {
     const text = guids.join('\n');
     await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const clearAll = () => {
@@ -97,9 +100,13 @@ export default function GuidGeneratorClient() {
             <div className="flex gap-2">
               <button
                 onClick={copyAll}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  copied
+                    ? 'border-green-300 bg-green-100 text-green-700 hover:bg-green-100'
+                    : 'text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                Copy All
+                {copied ? 'Copied!' : 'Copy All'}
               </button>
               <DownloadButton content={guids.join('\n')} filename="guids.txt" />
             </div>

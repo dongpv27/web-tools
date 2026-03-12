@@ -54,8 +54,12 @@ export default function TimestampConverterClient() {
       return;
     }
 
-    // Handle both seconds and milliseconds
-    const ms = ts < 1e12 ? ts * 1000 : ts;
+    // Determine if timestamp is likely seconds or milliseconds
+    // Unix timestamps > 1e12 (year 2001) are typically seconds
+    // Also check if timestamp matches current time more closely as seconds vs milliseconds
+    const now = Date.now();
+    const isLikelySeconds = ts < 1e12 && Math.abs(now - ts * 1000) > Math.abs(now - ts);
+    const ms = isLikelySeconds ? ts * 1000 : ts;
     const date = new Date(ms);
 
     if (isNaN(date.getTime())) {
@@ -67,7 +71,7 @@ export default function TimestampConverterClient() {
       iso: date.toISOString(),
       utc: date.toUTCString(),
       local: date.toLocaleString(),
-      relative: formatRelativeTime(ms - Date.now()),
+      relative: formatRelativeTime(ms - now),
     });
   };
 

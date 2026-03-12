@@ -22,6 +22,28 @@ body {
   color: var(--foreground);
 }
 
+/* Pointer cursor for all interactive elements */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"] {
+  cursor: pointer;
+}
+
+/* Pointer cursor for label elements that wrap clickable inputs (like file uploads, checkboxes, radio) */
+label:has(input[type="file"]),
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]) {
+  cursor: pointer;
+}
+
+/* Pointer cursor for interactive divs with cursor-pointer class */
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

@@ -9,6 +9,7 @@ export default function SecureTokenGeneratorClient() {
   const [length, setLength] = useState(32);
   const [count, setCount] = useState(5);
   const [tokenType, setTokenType] = useState<'hex' | 'base64' | 'alphanumeric'>('hex');
+  const [copied, setCopied] = useState(false);
 
   const generateHexToken = (len: number): string => {
     const bytes = new Uint8Array(len / 2);
@@ -55,6 +56,8 @@ export default function SecureTokenGeneratorClient() {
 
   const copyAll = async () => {
     await navigator.clipboard.writeText(tokens.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const clearAll = () => {
@@ -132,9 +135,13 @@ export default function SecureTokenGeneratorClient() {
             <div className="flex gap-2">
               <button
                 onClick={copyAll}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  copied
+                    ? 'border-green-300 bg-green-100 text-green-700 hover:bg-green-100'
+                    : 'text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                Copy All
+                {copied ? 'Copied!' : 'Copy All'}
               </button>
               <DownloadButton content={tokens.join('\n')} filename="tokens.txt" />
             </div>

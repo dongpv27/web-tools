@@ -15,12 +15,20 @@ export default function RandomNumberGeneratorClient() {
     const numbers: number[] = [];
     const usedNumbers = new Set<number>();
 
-    const maxIterations = (max - min + 1) * 10;
+    // Use crypto.getRandomValues() for cryptographically secure random numbers
+    const generateSecureRandom = (minVal: number, maxVal: number): number => {
+      const range = maxVal - minVal + 1;
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      return minVal + (array[0] % range);
+    };
+
+    const maxIterations = Math.min(count * 10, range * 100);
     let iterations = 0;
 
     while (numbers.length < count && iterations < maxIterations) {
       iterations++;
-      const num = Math.floor(Math.random() * (max - min + 1)) + min;
+      const num = generateSecureRandom(min, max);
 
       if (allowDuplicates || !usedNumbers.has(num)) {
         numbers.push(num);

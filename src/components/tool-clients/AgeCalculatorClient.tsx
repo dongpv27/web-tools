@@ -21,7 +21,7 @@ export default function AgeCalculatorClient() {
     const today = new Date();
 
     if (birth > today) {
-      alert('Birth date cannot be in the future');
+      setError('Birth date cannot be in the future');
       return;
     }
 
