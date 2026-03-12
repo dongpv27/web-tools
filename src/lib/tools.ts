@@ -42,6 +42,18 @@ export const tools: Tool[] = [
         question: 'Is my JSON data secure?',
         answer: 'Yes, all processing happens in your browser. Your JSON data is never sent to any server, ensuring complete privacy and security.',
       },
+      {
+        question: 'What indentation options are available?',
+        answer: 'Our JSON Formatter supports multiple indentation options: 2 spaces, 4 spaces, or tabs. Choose the style that matches your project conventions.',
+      },
+      {
+        question: 'Can I format large JSON files?',
+        answer: 'Yes! Our tool handles JSON files of various sizes. For very large files (multiple MB), processing may take a few seconds but will complete successfully.',
+      },
+      {
+        question: 'Does the formatter validate JSON?',
+        answer: 'Yes, while formatting, the tool also validates your JSON. If there are syntax errors, you will see an error message indicating what is wrong.',
+      },
     ],
     relatedTools: ['json-validator', 'json-minify', 'json-to-yaml', 'json-diff'],
     howToUse: [
@@ -61,6 +73,28 @@ export const tools: Tool[] = [
     slug: 'json-validator',
     icon: 'CheckCircle',
     keywords: ['json', 'validator', 'validate json', 'json checker', 'json lint'],
+    faq: [
+      {
+        question: 'What is JSON validation?',
+        answer: 'JSON validation checks if your JSON data follows the correct syntax rules. It verifies proper bracket matching, correct use of quotes, valid data types, and proper structure.',
+      },
+      {
+        question: 'What common errors does the validator detect?',
+        answer: 'Our validator detects missing or extra commas, unquoted keys, single quotes instead of double quotes, missing brackets, trailing commas, and malformed values.',
+      },
+      {
+        question: 'Is my JSON data sent to a server?',
+        answer: 'No, all validation happens locally in your browser. Your data never leaves your device, ensuring complete privacy and security.',
+      },
+      {
+        question: 'Can I validate JSON with comments?',
+        answer: 'Standard JSON does not support comments. If your JSON has comments, it will be flagged as invalid. Consider using JSONC (JSON with Comments) format for configuration files.',
+      },
+      {
+        question: 'What is the maximum JSON size I can validate?',
+        answer: 'There is no strict limit. The tool can handle JSON files of several megabytes. Very large files may take longer to process but will validate successfully.',
+      },
+    ],
     relatedTools: ['json-formatter', 'json-minify', 'json-to-yaml'],
     howToUse: [
       'Paste your JSON data into the input field',
@@ -78,6 +112,28 @@ export const tools: Tool[] = [
     slug: 'json-to-yaml',
     icon: 'FileCode',
     keywords: ['json', 'yaml', 'converter', 'json to yaml', 'convert json'],
+    faq: [
+      {
+        question: 'Why convert JSON to YAML?',
+        answer: 'YAML is more human-readable than JSON and supports comments. It is commonly used for configuration files (Kubernetes, Ansible, CI/CD) where readability matters.',
+      },
+      {
+        question: 'Is data preserved during conversion?',
+        answer: 'Yes, all data types including strings, numbers, booleans, arrays, and nested objects are preserved during the conversion process.',
+      },
+      {
+        question: 'What YAML indentation does this use?',
+        answer: 'Our converter uses 2-space indentation, which is the most common convention for YAML files and recommended by most style guides.',
+      },
+      {
+        question: 'Can I convert nested JSON objects?',
+        answer: 'Yes! Our converter handles deeply nested JSON structures and converts them to properly indented YAML with correct hierarchy.',
+      },
+      {
+        question: 'What happens to JSON null values?',
+        answer: 'JSON null values are converted to YAML null or simply omitted depending on context, maintaining the semantic meaning of your data.',
+      },
+    ],
     relatedTools: ['yaml-to-json', 'json-formatter', 'json-validator'],
   },
   {
@@ -90,6 +146,28 @@ export const tools: Tool[] = [
     slug: 'yaml-to-json',
     icon: 'FileCode',
     keywords: ['yaml', 'json', 'converter', 'yaml to json', 'convert yaml'],
+    faq: [
+      {
+        question: 'Why convert YAML to JSON?',
+        answer: 'JSON is widely supported by APIs, databases, and programming languages. Converting YAML config files to JSON makes them easier to consume in applications that expect JSON.',
+      },
+      {
+        question: 'Does it support YAML anchors and aliases?',
+        answer: 'Yes, our converter handles YAML anchors (&) and aliases (*) by expanding them into full JSON structures.',
+      },
+      {
+        question: 'What happens to YAML comments?',
+        answer: 'Since JSON does not support comments, all YAML comments are removed during conversion. The data structure is fully preserved.',
+      },
+      {
+        question: 'Can I convert multi-document YAML?',
+        answer: 'Yes, YAML files with multiple documents (separated by ---) are converted to a JSON array containing each document.',
+      },
+      {
+        question: 'Is the conversion order preserved?',
+        answer: 'Yes, the order of keys and items is preserved during conversion. YAML sequences become JSON arrays, and mappings become JSON objects.',
+      },
+    ],
     relatedTools: ['json-to-yaml', 'json-formatter', 'json-validator'],
   },
   {
@@ -107,6 +185,22 @@ export const tools: Tool[] = [
         question: 'What is Base64 encoding?',
         answer: 'Base64 is a binary-to-text encoding scheme that converts binary data into an ASCII string format. It is commonly used to encode data for safe transmission over media designed to handle text.',
       },
+      {
+        question: 'Why use Base64 encoding?',
+        answer: 'Base64 ensures binary data can be safely transmitted over text-based protocols like email or HTTP. It prevents corruption of special characters and preserves data integrity.',
+      },
+      {
+        question: 'Does Base64 increase data size?',
+        answer: 'Yes, Base64 encoding increases data size by approximately 33%. Every 3 bytes of input become 4 bytes of Base64 output.',
+      },
+      {
+        question: 'Is Base64 encryption?',
+        answer: 'No, Base64 is encoding, not encryption. Anyone can decode Base64 data. It provides no security—only a different representation of the same data.',
+      },
+      {
+        question: 'Can I encode images to Base64?',
+        answer: 'Yes! Images can be converted to Base64 strings and embedded directly in HTML, CSS, or JSON. This is useful for small images to reduce HTTP requests.',
+      },
     ],
     relatedTools: ['base64-decode', 'url-encode', 'text-to-base64'],
   },
@@ -120,6 +214,28 @@ export const tools: Tool[] = [
     slug: 'base64-decode',
     icon: 'Unlock',
     keywords: ['base64', 'decode', 'decoder', 'base64 decode', 'text decoder'],
+    faq: [
+      {
+        question: 'What is Base64 decoding?',
+        answer: 'Base64 decoding converts Base64-encoded strings back to their original binary or text format. It reverses the encoding process to retrieve the original data.',
+      },
+      {
+        question: 'Can I decode Base64 images?',
+        answer: 'Yes! If your Base64 string represents an image, our tool can decode it and display or download the image in its original format.',
+      },
+      {
+        question: 'What if my Base64 has errors?',
+        answer: 'Our decoder validates the input and shows an error message if the Base64 string is malformed or contains invalid characters.',
+      },
+      {
+        question: 'Does it support URL-safe Base64?',
+        answer: 'Yes, our decoder handles both standard Base64 and URL-safe variants (using - and _ instead of + and /).',
+      },
+      {
+        question: 'Is decoding Base64 secure?',
+        answer: 'All decoding happens locally in your browser. Your data is never sent to external servers, ensuring complete privacy.',
+      },
+    ],
     relatedTools: ['base64-encode', 'url-decode', 'base64-to-text'],
   },
   {
@@ -132,6 +248,28 @@ export const tools: Tool[] = [
     slug: 'url-encode',
     icon: 'Link',
     keywords: ['url', 'encode', 'encoder', 'url encode', 'percent encoding'],
+    faq: [
+      {
+        question: 'What is URL encoding?',
+        answer: 'URL encoding (percent encoding) converts characters into a format that can be transmitted over the Internet. Special characters are replaced with % followed by two hexadecimal digits.',
+      },
+      {
+        question: 'Which characters need to be encoded?',
+        answer: 'Reserved characters like ?, &, =, /, #, and spaces need encoding when used as data. Non-ASCII characters and unsafe characters should also be encoded.',
+      },
+      {
+        question: 'What is the difference between encodeURI and encodeURIComponent?',
+        answer: 'encodeURI encodes for a full URL, keeping scheme and domain characters. encodeURIComponent encodes for query parameters, encoding all special characters including / and ?.',
+      },
+      {
+        question: 'How are spaces encoded?',
+        answer: 'Spaces can be encoded as %20 or + (plus sign). In URL paths, %20 is preferred. In query strings, + is commonly used.',
+      },
+      {
+        question: 'When should I use URL encoding?',
+        answer: 'Use URL encoding when including user input, special characters, or non-ASCII text in URLs or query parameters to ensure proper transmission.',
+      },
+    ],
     relatedTools: ['url-decode', 'base64-encode', 'query-string-parser'],
   },
   {
@@ -144,6 +282,28 @@ export const tools: Tool[] = [
     slug: 'url-decode',
     icon: 'Unlink',
     keywords: ['url', 'decode', 'decoder', 'url decode', 'percent decoding'],
+    faq: [
+      {
+        question: 'What is URL decoding?',
+        answer: 'URL decoding converts percent-encoded characters back to their original form. It reverses the encoding applied to make text URL-safe.',
+      },
+      {
+        question: 'Can I decode full URLs?',
+        answer: 'Yes! Paste any URL with encoded characters and our tool will decode all percent-encoded sequences to show the original text.',
+      },
+      {
+        question: 'What if decoding shows strange characters?',
+        answer: 'This usually means the original encoding used a different character set. The tool defaults to UTF-8, which handles most modern web content.',
+      },
+      {
+        question: 'Can I decode multiple times?',
+        answer: 'Yes, if text was encoded multiple times, you can decode repeatedly until you get readable text. Our tool shows results instantly.',
+      },
+      {
+        question: 'Is my decoded data private?',
+        answer: 'Absolutely! All decoding happens locally in your browser. Your data is never sent to any external server.',
+      },
+    ],
     relatedTools: ['url-encode', 'base64-decode', 'url-parser'],
   },
   {
@@ -165,6 +325,22 @@ export const tools: Tool[] = [
         question: 'How do I use generated UUIDs?',
         answer: 'Generated UUIDs can be used as database primary keys, session identifiers, transaction IDs, or any scenario requiring unique identification without central coordination.',
       },
+      {
+        question: 'Are UUIDs guaranteed to be unique?',
+        answer: 'While UUIDs are not mathematically guaranteed to be unique, the probability of generating a duplicate UUID v4 is astronomically low—about 1 in 2^122. In practice, you can consider them unique for all reasonable purposes.',
+      },
+      {
+        question: 'Can I generate UUIDs in JavaScript?',
+        answer: 'Yes! Modern browsers support the Web Crypto API. You can use `crypto.randomUUID()` to generate UUIDs, or use libraries like uuid.js. Our tool uses this same API for generation.',
+      },
+      {
+        question: 'What is UUID v4?',
+        answer: 'UUID v4 is a randomly generated UUID variant. It uses random numbers for most of its bits, making it the most common choice when you need unique identifiers without a central authority.',
+      },
+      {
+        question: 'Are generated UUIDs secure?',
+        answer: 'UUIDs generated using cryptographic random sources (like our tool uses) are suitable for most purposes. However, they are not designed to be secret or tamper-proof—use proper encryption for sensitive data.',
+      },
     ],
     exampleOutput: {
       output: '550e8400-e29b-41d4-a716-446655440000\n6fa459ea-ee8a-3ca4-894e-db77e160355e\n3c4e5a6b-7c8d-4e9f-0a1b-2c3d4e5f6a7b',
@@ -182,6 +358,28 @@ export const tools: Tool[] = [
     slug: 'timestamp-converter',
     icon: 'Clock',
     keywords: ['timestamp', 'unix', 'converter', 'epoch', 'date converter'],
+    faq: [
+      {
+        question: 'What is a Unix timestamp?',
+        answer: 'A Unix timestamp (also called epoch time) is the number of seconds that have elapsed since January 1, 1970 (UTC). It is a standard way to represent time in computing.',
+      },
+      {
+        question: 'Why use Unix timestamps?',
+        answer: 'Unix timestamps are timezone-independent, easy to calculate differences, and universally understood by programming languages and databases.',
+      },
+      {
+        question: 'What is the Unix timestamp for now?',
+        answer: 'The current Unix timestamp is displayed in real-time on our converter. It updates every second and shows both seconds and milliseconds formats.',
+      },
+      {
+        question: 'How do I convert a date to timestamp?',
+        answer: 'Simply enter your date in the input field (supports various formats like YYYY-MM-DD or MM/DD/YYYY) and the tool will instantly convert it to a Unix timestamp.',
+      },
+      {
+        question: 'Does it support milliseconds?',
+        answer: 'Yes! Our converter handles both second-based and millisecond-based timestamps, which are common in JavaScript and other programming environments.',
+      },
+    ],
     relatedTools: ['unix-time-to-date', 'date-to-unix-time', 'time-converter'],
   },
   {
@@ -203,6 +401,18 @@ export const tools: Tool[] = [
         question: 'Are generated passwords truly random?',
         answer: 'Yes, this tool uses the Web Crypto API (crypto.getRandomValues) which provides cryptographically secure random number generation, making passwords suitable for security purposes.',
       },
+      {
+        question: 'Can I customize password length?',
+        answer: 'Yes! You can set any password length from 4 to 128 characters. For maximum security, we recommend at least 16 characters.',
+      },
+      {
+        question: 'Should I exclude certain characters?',
+        answer: 'Some websites do not accept special characters. You can uncheck the symbols option to generate alphanumeric-only passwords if needed.',
+      },
+      {
+        question: 'Is my generated password stored?',
+        answer: 'No, passwords are generated locally in your browser and are never sent to any server. Your passwords remain completely private.',
+      },
     ],
     exampleOutput: {
       output: 'Kx9#mP2$vL7@nQ4!',
@@ -220,6 +430,28 @@ export const tools: Tool[] = [
     slug: 'regex-tester',
     icon: 'Regex',
     keywords: ['regex', 'regexp', 'regular expression', 'tester', 'pattern matcher'],
+    faq: [
+      {
+        question: 'What is a regular expression?',
+        answer: 'A regular expression (regex) is a sequence of characters that defines a search pattern. It is used for pattern matching, validation, and text manipulation in programming.',
+      },
+      {
+        question: 'Which regex flags are supported?',
+        answer: 'Our tester supports common JavaScript flags: g (global), i (case-insensitive), m (multiline), s (dotAll), and u (unicode).',
+      },
+      {
+        question: 'How do I test my regex?',
+        answer: 'Enter your regex pattern in the pattern field, optionally add flags, then enter test text. Matches are highlighted in real-time as you type.',
+      },
+      {
+        question: 'Can I see capture groups?',
+        answer: 'Yes! When your regex contains capture groups (parentheses), the tool displays all captured groups with their indices and matched content.',
+      },
+      {
+        question: 'What regex syntax does this use?',
+        answer: 'This tool uses JavaScript regex syntax. While similar to PCRE, there may be slight differences. Check your target environment for compatibility.',
+      },
+    ],
     relatedTools: ['text-case-converter', 'find-and-replace', 'json-validator'],
   },
   {
@@ -232,6 +464,28 @@ export const tools: Tool[] = [
     slug: 'jwt-decoder',
     icon: 'Shield',
     keywords: ['jwt', 'json web token', 'decoder', 'token', 'authentication'],
+    faq: [
+      {
+        question: 'What is a JWT?',
+        answer: 'JWT (JSON Web Token) is a compact, URL-safe token format for securely transmitting information between parties. It consists of header, payload, and signature separated by dots.',
+      },
+      {
+        question: 'Can I decode any JWT?',
+        answer: 'Yes, you can decode the header and payload of any JWT without the secret key. However, verifying the signature requires the secret key used to sign it.',
+      },
+      {
+        question: 'Is decoding a JWT secure?',
+        answer: 'Decoding only reveals the base64-encoded payload. It does not verify authenticity. Never put sensitive secrets in JWT payloads as they can be decoded by anyone.',
+      },
+      {
+        question: 'What algorithms are supported?',
+        answer: 'Our decoder supports common JWT algorithms including HS256, HS384, HS512, RS256, RS384, RS512, and ES256. The header shows which algorithm was used.',
+      },
+      {
+        question: 'Why decode JWTs?',
+        answer: 'Developers decode JWTs to debug authentication issues, inspect token expiration, check user claims, and verify correct token structure during development.',
+      },
+    ],
     relatedTools: ['jwt-encoder', 'base64-decode', 'json-formatter'],
   },
   {
@@ -252,6 +506,18 @@ export const tools: Tool[] = [
       {
         question: 'Is MD5 secure for passwords?',
         answer: 'No, MD5 is not secure for password hashing. It is vulnerable to collision attacks and can be cracked quickly. Use bcrypt or SHA-256 for password hashing instead.',
+      },
+      {
+        question: 'How long is an MD5 hash?',
+        answer: 'MD5 always produces a 128-bit (16-byte) hash value, typically represented as a 32-character hexadecimal string.',
+      },
+      {
+        question: 'Can MD5 be reversed?',
+        answer: 'No, MD5 is a one-way hash function and cannot be mathematically reversed. However, rainbow tables can be used to look up common inputs for known MD5 hashes.',
+      },
+      {
+        question: 'What is an MD5 collision?',
+        answer: 'A collision occurs when two different inputs produce the same MD5 hash. MD5 is vulnerable to collision attacks, which is why it should not be used for security purposes.',
       },
     ],
     exampleOutput: {
@@ -280,6 +546,18 @@ export const tools: Tool[] = [
         question: 'What is SHA-256 used for?',
         answer: 'SHA-256 is used for password hashing (with salt), digital signatures, file integrity verification, cryptocurrency transactions, and SSL/TLS certificates.',
       },
+      {
+        question: 'How long is a SHA-256 hash?',
+        answer: 'SHA-256 always produces a 256-bit (32-byte) hash value, represented as a 64-character hexadecimal string.',
+      },
+      {
+        question: 'Can SHA-256 be decrypted?',
+        answer: 'No, SHA-256 is a one-way hash function. It cannot be reversed or decrypted. The only way to find the original input is through brute-force or rainbow table attacks.',
+      },
+      {
+        question: 'Is SHA-256 secure?',
+        answer: 'Yes, SHA-256 is currently considered secure for most cryptographic purposes. It is used in Bitcoin, SSL/TLS certificates, and many security protocols.',
+      },
     ],
     exampleOutput: {
       input: 'Hello World',
@@ -298,6 +576,28 @@ export const tools: Tool[] = [
     slug: 'html-formatter',
     icon: 'Code',
     keywords: ['html', 'formatter', 'beautify', 'format html', 'html prettifier'],
+    faq: [
+      {
+        question: 'What is HTML formatting?',
+        answer: 'HTML formatting adds proper indentation, line breaks, and structure to HTML code, making it easier to read and maintain.',
+      },
+      {
+        question: 'Does formatting change how the page looks?',
+        answer: 'No, formatting only changes the code structure. The rendered webpage looks exactly the same—only the source code becomes more readable.',
+      },
+      {
+        question: 'What indentation style is used?',
+        answer: 'Our formatter uses 2-space indentation by default, which is the most common convention for HTML. Nested elements are properly indented.',
+      },
+      {
+        question: 'Can it handle inline JavaScript and CSS?',
+        answer: 'Yes, the formatter preserves inline JavaScript and CSS while properly indenting the surrounding HTML structure.',
+      },
+      {
+        question: 'Is my HTML code secure?',
+        answer: 'Absolutely! All formatting happens locally in your browser. Your code is never sent to any external server.',
+      },
+    ],
     relatedTools: ['css-formatter', 'json-formatter', 'html-encode-decode'],
   },
   {
@@ -310,6 +610,28 @@ export const tools: Tool[] = [
     slug: 'css-formatter',
     icon: 'Palette',
     keywords: ['css', 'formatter', 'beautify', 'format css', 'css prettifier'],
+    faq: [
+      {
+        question: 'Why format CSS code?',
+        answer: 'Formatted CSS is easier to read, debug, and maintain. It helps identify errors, understand the cascade, and collaborate with other developers.',
+      },
+      {
+        question: 'What formatting style is applied?',
+        answer: 'Each selector and property is placed on its own line with proper indentation. Opening braces stay on the selector line, and closing braces align with the selector.',
+      },
+      {
+        question: 'Can it format CSS preprocessors?',
+        answer: 'This tool formats standard CSS. While it can process SCSS/SASS syntax, some preprocessor-specific features may not format perfectly.',
+      },
+      {
+        question: 'Does formatting affect performance?',
+        answer: 'For production, use minified CSS. But during development, formatted CSS helps debugging. Our tool can format minified CSS back to readable form.',
+      },
+      {
+        question: 'Is my CSS data private?',
+        answer: 'Yes! All formatting happens locally in your browser. Your stylesheets are never sent to external servers.',
+      },
+    ],
     relatedTools: ['html-formatter', 'json-formatter', 'css-gradient-generator'],
   },
   {
@@ -322,6 +644,28 @@ export const tools: Tool[] = [
     slug: 'sql-formatter',
     icon: 'Database',
     keywords: ['sql', 'formatter', 'beautify', 'format sql', 'sql prettifier'],
+    faq: [
+      {
+        question: 'Why format SQL queries?',
+        answer: 'Formatted SQL is easier to read, debug, and maintain. Complex JOINs and subqueries become much more understandable with proper formatting.',
+      },
+      {
+        question: 'Which SQL dialects are supported?',
+        answer: 'Our formatter supports standard SQL syntax used in MySQL, PostgreSQL, SQL Server, Oracle, and SQLite. Most queries will format correctly.',
+      },
+      {
+        question: 'How are keywords formatted?',
+        answer: 'SQL keywords (SELECT, FROM, WHERE, etc.) are capitalized and placed on new lines for better readability. Each clause is clearly separated.',
+      },
+      {
+        question: 'Can it handle complex queries?',
+        answer: 'Yes! The formatter handles subqueries, CTEs (WITH clauses), JOINs, UNIONs, and nested expressions with proper indentation.',
+      },
+      {
+        question: 'Is my SQL data sent anywhere?',
+        answer: 'No, all formatting happens locally in your browser. Your SQL queries remain completely private and never leave your device.',
+      },
+    ],
     relatedTools: ['json-formatter', 'excel-to-sql', 'csv-to-json'],
   },
   {
@@ -334,6 +678,28 @@ export const tools: Tool[] = [
     slug: 'ip-address-validator',
     icon: 'Globe',
     keywords: ['ip', 'ip address', 'validator', 'ipv4', 'ipv6'],
+    faq: [
+      {
+        question: 'What is an IP address?',
+        answer: 'An IP address is a unique numerical identifier assigned to devices on a network. IPv4 uses 32 bits (e.g., 192.168.1.1), while IPv6 uses 128 bits.',
+      },
+      {
+        question: 'How do I know if an IP is valid?',
+        answer: 'Enter any IP address and our tool instantly validates it, showing whether it is a valid IPv4 or IPv6 address and providing details about its type.',
+      },
+      {
+        question: 'What is the difference between IPv4 and IPv6?',
+        answer: 'IPv4 uses dot-decimal notation (192.168.1.1) with 4.3 billion possible addresses. IPv6 uses hexadecimal notation with virtually unlimited addresses.',
+      },
+      {
+        question: 'What are private IP addresses?',
+        answer: 'Private IPs (like 192.168.x.x or 10.x.x.x) are used within local networks and are not routable on the internet. They are reserved for internal use.',
+      },
+      {
+        question: 'Is my IP address private?',
+        answer: 'The tool identifies whether an IP is public (internet-routable) or private (local network only), helping you understand network configurations.',
+      },
+    ],
     relatedTools: ['url-parser', 'http-status-codes', 'user-agent-parser'],
   },
   {
@@ -346,6 +712,28 @@ export const tools: Tool[] = [
     slug: 'cron-expression-parser',
     icon: 'Timer',
     keywords: ['cron', 'expression', 'parser', 'schedule', 'cron job'],
+    faq: [
+      {
+        question: 'What is a cron expression?',
+        answer: 'A cron expression is a string of 5 or 6 fields separated by spaces that represents a schedule. It defines when a cron job should run.',
+      },
+      {
+        question: 'What do the cron fields mean?',
+        answer: 'The 5 fields are: minute (0-59), hour (0-23), day of month (1-31), month (1-12), and day of week (0-7). Some systems add a 6th field for seconds.',
+      },
+      {
+        question: 'How do I read a cron expression?',
+        answer: 'Enter your cron expression and our tool instantly shows a human-readable description and the next scheduled run times.',
+      },
+      {
+        question: 'What are common cron examples?',
+        answer: '`0 * * * *` runs hourly, `0 0 * * *` runs daily at midnight, `0 0 * * 0` runs weekly on Sunday, and `0 0 1 * *` runs monthly on the first.',
+      },
+      {
+        question: 'Does it support special characters?',
+        answer: 'Yes, our parser supports *, /, -, and L (last) special characters used in cron expressions for flexible scheduling.',
+      },
+    ],
     relatedTools: ['countdown-timer', 'time-converter', 'timestamp-converter'],
   },
   {
@@ -362,6 +750,22 @@ export const tools: Tool[] = [
       {
         question: 'What is JSON minification?',
         answer: 'JSON minification removes unnecessary whitespace, line breaks, and indentation from JSON data, reducing file size for faster transmission over networks.',
+      },
+      {
+        question: 'Why minify JSON?',
+        answer: 'Minified JSON files are smaller, which means faster downloads, reduced bandwidth costs, and improved API response times in production.',
+      },
+      {
+        question: 'How much does minification reduce size?',
+        answer: 'Typical size reduction is 20-50% depending on the original formatting. Heavily indented JSON with lots of whitespace sees the most benefit.',
+      },
+      {
+        question: 'Does minification affect functionality?',
+        answer: 'No, minified JSON is functionally identical to formatted JSON. All data is preserved—only unnecessary whitespace is removed.',
+      },
+      {
+        question: 'Can I un-minify JSON later?',
+        answer: 'Yes! Use our JSON Formatter tool to beautify minified JSON back to a readable format with proper indentation.',
       },
     ],
     relatedTools: ['json-formatter', 'json-validator', 'json-diff'],
@@ -381,6 +785,22 @@ export const tools: Tool[] = [
         question: 'How does JSON diff work?',
         answer: 'The tool parses both JSON inputs and recursively compares their structure, highlighting any differences in values, added or removed keys, and type changes.',
       },
+      {
+        question: 'What types of differences are detected?',
+        answer: 'The tool detects added keys, removed keys, changed values, type changes (e.g., string to number), and nested object/array differences.',
+      },
+      {
+        question: 'Does order matter in JSON diff?',
+        answer: 'For objects, key order does not affect comparison—{a:1, b:2} equals {b:2, a:1}. For arrays, element order matters.',
+      },
+      {
+        question: 'Can I compare arrays?',
+        answer: 'Yes! The diff tool handles both JSON objects and arrays, comparing element by element and highlighting position-specific changes.',
+      },
+      {
+        question: 'Is my JSON data private?',
+        answer: 'Absolutely! All comparison happens locally in your browser. Your JSON data is never sent to external servers.',
+      },
     ],
     relatedTools: ['json-formatter', 'json-validator', 'json-minify'],
   },
@@ -399,6 +819,22 @@ export const tools: Tool[] = [
         question: 'What are HTML entities?',
         answer: 'HTML entities are special codes that represent characters that have special meaning in HTML, such as <, >, &, and ". Encoding them ensures they display correctly in browsers.',
       },
+      {
+        question: 'Why encode HTML entities?',
+        answer: 'Encoding prevents browsers from interpreting special characters as HTML markup. This is essential when displaying code snippets or user-generated content.',
+      },
+      {
+        question: 'What characters are encoded?',
+        answer: "Common encoded characters include < (lt), > (gt), & (amp), \" (quot), and ' (apos). Non-ASCII characters may also be encoded as numeric entities.",
+      },
+      {
+        question: 'When should I decode HTML entities?',
+        answer: 'Decode when you need the original characters back, such as when processing form data, parsing RSS feeds, or cleaning imported content.',
+      },
+      {
+        question: 'Is my data secure during encoding?',
+        answer: 'Yes! All encoding and decoding happens locally in your browser. Your text is never sent to any external server.',
+      },
     ],
     relatedTools: ['url-encode', 'base64-encode', 'rot13-encoder'],
   },
@@ -415,7 +851,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What is a query string?',
-        answer: 'A query string is the part of a URL after the ? character, containing key-value pairs separated by &. It\'s commonly used to pass data between web pages.',
+        answer: 'A query string is the part of a URL after the ? character, containing key-value pairs separated by &. It is commonly used to pass data between web pages.',
+      },
+      {
+        question: 'How are parameters separated?',
+        answer: 'Query parameters are separated by & symbols. Each parameter consists of a key and value connected by = (e.g., key1=value1&key2=value2).',
+      },
+      {
+        question: 'Does it handle URL-encoded values?',
+        answer: 'Yes! The parser automatically decodes URL-encoded values, showing the original text for parameters with special characters.',
+      },
+      {
+        question: 'Can I parse multiple values for the same key?',
+        answer: 'Yes, the parser handles array-style query parameters like colors=red&colors=blue and displays all values for each key.',
+      },
+      {
+        question: 'What if my URL is malformed?',
+        answer: 'The parser is forgiving and will still extract any valid parameters it can find, even if the URL has minor formatting issues.',
       },
     ],
     relatedTools: ['url-parser', 'url-encode', 'url-decode'],
@@ -435,6 +887,22 @@ export const tools: Tool[] = [
         question: 'What URL components can be extracted?',
         answer: 'The parser extracts protocol (http/https), hostname, port number, path, query parameters, and fragment (hash) from any valid URL.',
       },
+      {
+        question: 'What is a URL fragment?',
+        answer: 'A fragment (or hash) is the part after # in a URL. It typically points to a specific section within a page and is not sent to the server.',
+      },
+      {
+        question: 'How does the parser handle special characters?',
+        answer: 'The parser properly handles URL-encoded characters, punycode domains, and internationalized domain names (IDNs).',
+      },
+      {
+        question: 'Can it parse relative URLs?',
+        answer: 'Yes, the parser can handle relative URLs (paths without a domain). It shows all available components for any URL format.',
+      },
+      {
+        question: 'Is my URL data private?',
+        answer: 'Absolutely! All parsing happens locally in your browser. Your URLs are never sent to external servers.',
+      },
     ],
     relatedTools: ['query-string-parser', 'url-encode', 'url-decode'],
   },
@@ -452,6 +920,22 @@ export const tools: Tool[] = [
       {
         question: 'What are HTTP status codes?',
         answer: 'HTTP status codes are standardized codes returned by web servers to indicate the result of a request. They are grouped into classes: 1xx (informational), 2xx (success), 3xx (redirection), 4xx (client error), 5xx (server error).',
+      },
+      {
+        question: 'What does 404 mean?',
+        answer: '404 Not Found means the requested resource does not exist on the server. It is one of the most common HTTP error codes.',
+      },
+      {
+        question: 'What is the difference between 401 and 403?',
+        answer: '401 Unauthorized means authentication is required. 403 Forbidden means the request is understood but the server refuses to authorize it.',
+      },
+      {
+        question: 'What are 5xx errors?',
+        answer: '5xx codes indicate server errors. Common ones include 500 (Internal Server Error), 502 (Bad Gateway), 503 (Service Unavailable), and 504 (Gateway Timeout).',
+      },
+      {
+        question: 'Why do I need to know HTTP codes?',
+        answer: 'Understanding HTTP status codes helps debug API issues, implement proper error handling, and build more robust web applications.',
       },
     ],
     relatedTools: ['ip-address-validator', 'user-agent-parser', 'url-parser'],
@@ -471,6 +955,22 @@ export const tools: Tool[] = [
         question: 'What is a User Agent string?',
         answer: 'A User Agent string is sent by browsers and applications to identify themselves to web servers. It contains information about the browser name, version, operating system, and sometimes device type.',
       },
+      {
+        question: 'Why parse User Agent strings?',
+        answer: 'Parsing User Agents helps with analytics, browser-specific fixes, device detection for responsive design, and debugging compatibility issues.',
+      },
+      {
+        question: 'Can User Agents be spoofed?',
+        answer: 'Yes, User Agent strings can be easily faked. They should not be relied upon for security decisions, only for analytics and best-effort feature detection.',
+      },
+      {
+        question: 'What information can be extracted?',
+        answer: 'The parser extracts browser name and version, operating system, OS version, device type (mobile/tablet/desktop), and sometimes CPU architecture.',
+      },
+      {
+        question: 'What is my current User Agent?',
+        answer: 'Your browser sends a User Agent with every request. Our tool can detect and parse your current User Agent automatically.',
+      },
     ],
     relatedTools: ['http-status-codes', 'ip-address-validator', 'url-parser'],
   },
@@ -489,6 +989,22 @@ export const tools: Tool[] = [
         question: 'What is binary representation?',
         answer: 'Binary representation uses only 0s and 1s to encode data. Each character is converted to its 8-bit binary equivalent based on its ASCII/Unicode code.',
       },
+      {
+        question: 'How do I read binary?',
+        answer: 'Each 8-bit group represents one character. For example, 01000001 represents A. Reading from right to left, each position doubles: 1, 2, 4, 8, 16, 32, 64, 128.',
+      },
+      {
+        question: 'Why use binary conversion?',
+        answer: 'Binary conversion helps understand how computers store text, is useful for learning computer science concepts, and can be used for simple encoding purposes.',
+      },
+      {
+        question: 'Can I convert numbers to binary?',
+        answer: 'Yes! Enter a number and it will be converted to its binary representation. For example, 255 becomes 11111111.',
+      },
+      {
+        question: 'What character encoding is used?',
+        answer: 'The converter uses UTF-8 encoding by default, supporting ASCII characters (0-127) and extended Unicode characters.',
+      },
     ],
     relatedTools: ['hex-converter', 'ascii-converter', 'base64-encode'],
   },
@@ -505,7 +1021,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What is hexadecimal representation?',
-        answer: 'Hexadecimal (hex) is a base-16 number system using digits 0-9 and letters A-F. It\'s commonly used to represent binary data in a more compact, human-readable format.',
+        answer: 'Hexadecimal (hex) is a base-16 number system using digits 0-9 and letters A-F. It is commonly used to represent binary data in a more compact, human-readable format.',
+      },
+      {
+        question: 'Why use hexadecimal?',
+        answer: 'Hex is widely used in programming for memory addresses, color codes, and representing binary data. It is more compact than binary while being easy to convert.',
+      },
+      {
+        question: 'How do I convert hex to decimal?',
+        answer: 'Each hex digit represents 4 bits. Multiply each digit by 16^position and sum. For example, 1A = 1×16 + 10 = 26 in decimal.',
+      },
+      {
+        question: 'What is the format for hex output?',
+        answer: 'Each character is converted to two hex digits (00-FF). Spaces separate each byte for readability: 48 65 6C 6C 6F for "Hello".',
+      },
+      {
+        question: 'Can I convert Unicode characters?',
+        answer: 'Yes! Unicode characters are converted to their UTF-8 hex representation. For example, the emoji 🎉 becomes F0 9F 8E 89.',
       },
     ],
     relatedTools: ['binary-converter', 'ascii-converter', 'base64-encode'],
@@ -529,6 +1061,18 @@ export const tools: Tool[] = [
         question: 'What are salt rounds?',
         answer: 'Salt rounds (or cost factor) determine how many iterations are used to generate the hash. Higher rounds = more secure but slower. Common values are 10-12.',
       },
+      {
+        question: 'Why is bcrypt better than SHA-256 for passwords?',
+        answer: 'bcrypt is intentionally slow, making brute-force attacks impractical. SHA-256 is fast, which is good for data but bad for passwords. bcrypt also has built-in salting.',
+      },
+      {
+        question: 'Why does the hash change each time?',
+        answer: 'bcrypt generates a random salt each time, so the same password produces different hashes. This is by design and does not affect verification.',
+      },
+      {
+        question: 'How do I verify a bcrypt hash?',
+        answer: 'Use the bcrypt.compare() function (in most libraries) with the plaintext password and the stored hash. It will return true if they match.',
+      },
     ],
     exampleOutput: {
       input: 'mypassword123',
@@ -551,6 +1095,22 @@ export const tools: Tool[] = [
       {
         question: 'What is a random string generator?',
         answer: 'A random string generator creates sequences of random characters. You can customize the length and which character types to include (letters, numbers, symbols).',
+      },
+      {
+        question: 'What character sets are available?',
+        answer: 'You can include uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), and special symbols (!@#$%^&*). Mix and match based on your needs.',
+      },
+      {
+        question: 'How long can the strings be?',
+        answer: 'You can generate strings of any length, typically from 1 to 1000 characters. Longer strings are useful for API keys and tokens.',
+      },
+      {
+        question: 'Are the strings cryptographically secure?',
+        answer: 'Yes! This tool uses the Web Crypto API (crypto.getRandomValues) which provides cryptographically secure random generation.',
+      },
+      {
+        question: 'What can I use random strings for?',
+        answer: 'Random strings are useful for generating API keys, session tokens, test data, unique identifiers, coupon codes, and one-time passwords.',
       },
     ],
     exampleOutput: {
@@ -578,10 +1138,21 @@ export const tools: Tool[] = [
         question: 'What is the difference between GUID and UUID?',
         answer: 'GUID and UUID refer to the same concept (128-bit unique identifier). GUID is the Microsoft/Windows term, while UUID is the standard term. They are functionally identical.',
       },
+      {
+        question: 'Why would I use GUID instead of UUID?',
+        answer: 'GUID is primarily used in Microsoft ecosystems (.NET, Windows, SQL Server). If you are working with these technologies, using the GUID terminology is more consistent with documentation and conventions.',
+      },
+      {
+        question: 'What GUID formats are available?',
+        answer: 'Common GUID formats include: standard format with hyphens, registry format with braces {...}, and plain hex without hyphens. Our tool generates the standard hyphenated format.',
+      },
+      {
+        question: 'Can I use GUIDs across different systems?',
+        answer: 'Yes! GUIDs are compatible with UUID systems. A GUID generated on Windows can be used in Linux, macOS, or any system that supports UUIDs—they follow the same 128-bit standard.',
+      },
     ],
     exampleOutput: {
-      output: '{550e8400-e29b-41d4-a716-446655440000}\n{6fa459ea-ee8a-3ca4-894e-db77e160355e}\n{3c4e5a6b-7c8d-4e9f-0a1b-2c3d4e5f6a7b}',
-      description: 'Example of 3 GUIDs with braces format',
+      output: '{550e8400-e29b-41d4-a716-446655440000}\n{6fa459ea-ee8a-3ca4-894e-db77e160355e}\n{3c4e5a6b-7c8d-4e9f-0a1b-2c3d4e5f6a7b}',      description: 'Example of 3 GUIDs with braces format',
     },
     relatedTools: ['uuid-generator', 'uuid-bulk-generator', 'nano-id-generator'],
   },
@@ -603,6 +1174,18 @@ export const tools: Tool[] = [
       {
         question: 'How many UUIDs can I generate at once?',
         answer: 'You can generate up to 1000 UUIDs at once. Each UUID is generated independently using the Web Crypto API for randomness.',
+      },
+      {
+        question: 'Can I export the generated UUIDs?',
+        answer: 'Yes! After generating UUIDs, you can copy them to clipboard or download as a text file. Each UUID is on a separate line for easy import into other applications.',
+      },
+      {
+        question: 'What format are bulk UUIDs in?',
+        answer: 'Bulk generated UUIDs use the standard format: 8-4-4-4-12 hexadecimal characters (e.g., `550e8400-e29b-41d4-a716-446655440000`). This is the canonical UUID format.',
+      },
+      {
+        question: 'Is there a limit to bulk generation?',
+        answer: 'For performance reasons, we limit bulk generation to 1000 UUIDs at once. This ensures smooth browser performance while still meeting most use case needs.',
       },
     ],
     exampleOutput: {
@@ -626,6 +1209,22 @@ export const tools: Tool[] = [
         question: 'What is JWT encoding?',
         answer: 'JWT encoding creates a token consisting of three Base64-encoded parts: header, payload, and signature. It is commonly used for authentication in web applications.',
       },
+      {
+        question: 'What algorithm is used?',
+        answer: 'Our encoder supports HS256 (HMAC with SHA-256), which is the most commonly used JWT algorithm for symmetric key signing.',
+      },
+      {
+        question: 'What should I put in the payload?',
+        answer: 'The payload contains claims—standard fields like iss (issuer), exp (expiration), sub (subject) plus any custom data you need to transmit.',
+      },
+      {
+        question: 'How secure are generated JWTs?',
+        answer: 'JWTs generated with a strong secret key are secure. Use a long, random secret. Remember: the payload is encoded, not encrypted, so do not put sensitive data in it.',
+      },
+      {
+        question: 'What is the secret key for?',
+        answer: 'The secret key is used to create the signature. The same secret is needed to verify the token later. Keep it secure and never share it.',
+      },
     ],
     relatedTools: ['jwt-decoder', 'base64-encode', 'json-formatter'],
   },
@@ -644,6 +1243,22 @@ export const tools: Tool[] = [
         question: 'Why convert CURL to fetch?',
         answer: 'Converting CURL to fetch allows you to use the same HTTP request in browser-based JavaScript applications. Fetch is the modern standard for making HTTP requests in JavaScript.',
       },
+      {
+        question: 'What CURL options are supported?',
+        answer: 'Our converter handles headers (-H), request body (-d/--data), HTTP methods (-X), authentication (-u), and most common CURL options.',
+      },
+      {
+        question: 'Does it handle authentication?',
+        answer: 'Yes! The converter handles Basic Auth (-u) and Bearer tokens, converting them to appropriate fetch headers.',
+      },
+      {
+        question: 'Can it convert POST requests?',
+        answer: 'Absolutely! POST requests with JSON or form data are converted to fetch with proper headers and body formatting.',
+      },
+      {
+        question: 'What about async/await?',
+        answer: 'The generated fetch code uses async/await syntax, which is the modern and recommended way to work with promises in JavaScript.',
+      },
     ],
     relatedTools: ['json-formatter', 'base64-encode', 'jwt-decoder'],
   },
@@ -659,6 +1274,28 @@ export const tools: Tool[] = [
     slug: 'word-counter',
     icon: 'Hash',
     keywords: ['word counter', 'character count', 'word count', 'text counter'],
+    faq: [
+      {
+        question: 'What does the word counter measure?',
+        answer: 'Our word counter measures words, characters (with and without spaces), sentences, paragraphs, and average word length to give you comprehensive text statistics.',
+      },
+      {
+        question: 'How does it count words?',
+        answer: 'Words are counted by splitting text on whitespace. Punctuation attached to words is included in character count but not as separate words.',
+      },
+      {
+        question: 'Is there a character limit?',
+        answer: 'There is no limit! Count words in documents of any size. Very large documents may take a few seconds to process.',
+      },
+      {
+        question: 'Does it work with all languages?',
+        answer: 'Yes, the word counter works with most languages including English, European languages, and languages using non-Latin scripts.',
+      },
+      {
+        question: 'Is my text private?',
+        answer: 'Absolutely! All counting happens locally in your browser. Your text is never sent to any server.',
+      },
+    ],
     relatedTools: ['character-counter', 'text-case-converter', 'remove-duplicate-lines'],
   },
   {
@@ -671,6 +1308,28 @@ export const tools: Tool[] = [
     slug: 'character-counter',
     icon: 'Type',
     keywords: ['character counter', 'char count', 'letter count', 'text statistics'],
+    faq: [
+      {
+        question: 'What is the difference between character count with and without spaces?',
+        answer: 'Character count with spaces includes all whitespace characters. Without spaces counts only visible characters, useful for platforms with strict limits.',
+      },
+      {
+        question: 'What platforms have character limits?',
+        answer: 'Twitter: 280 characters, SMS: 160 characters, Instagram captions: 2,200 characters, LinkedIn posts: 3,000 characters, Facebook posts: 63,206 characters.',
+      },
+      {
+        question: 'Does it count special characters?',
+        answer: 'Yes! All characters including emojis, symbols, punctuation, and Unicode characters are counted. Emojis may count as multiple characters depending on encoding.',
+      },
+      {
+        question: 'How accurate is the line count?',
+        answer: 'Lines are counted based on line breaks (newline characters). Wrapped text still counts as one line until a hard break is inserted.',
+      },
+      {
+        question: 'Can I use this for academic writing?',
+        answer: 'Yes! Many students use this tool to meet essay requirements. It accurately counts words and characters for academic submissions.',
+      },
+    ],
     relatedTools: ['word-counter', 'word-word-counter', 'text-case-converter'],
   },
   {
@@ -683,6 +1342,28 @@ export const tools: Tool[] = [
     slug: 'text-case-converter',
     icon: 'CaseSensitive',
     keywords: ['case converter', 'uppercase', 'lowercase', 'title case', 'text transform'],
+    faq: [
+      {
+        question: 'What case types are available?',
+        answer: 'Our converter supports: UPPERCASE, lowercase, Title Case, Sentence case, aLtErNaTiNg, and Start Case for various formatting needs.',
+      },
+      {
+        question: 'What is Title Case?',
+        answer: 'Title Case capitalizes the first letter of each major word. Small words like "a", "an", "the", "in", "on" typically remain lowercase unless they start the title.',
+      },
+      {
+        question: 'What is Sentence case?',
+        answer: 'Sentence case capitalizes only the first letter of sentences, with the rest lowercase. This is normal text formatting used in most paragraphs.',
+      },
+      {
+        question: 'Can I convert large amounts of text?',
+        answer: 'Yes! Paste any amount of text and it will be converted instantly. The tool handles documents of any size.',
+      },
+      {
+        question: 'Does it handle non-English characters?',
+        answer: 'Yes, the converter properly handles accented characters and non-Latin scripts that have case distinctions.',
+      },
+    ],
     relatedTools: ['capitalize-sentences', 'text-cleaner', 'word-counter'],
   },
   {
@@ -704,6 +1385,18 @@ export const tools: Tool[] = [
         question: 'Why are slugs important for SEO?',
         answer: 'Slugs help search engines understand page content and improve click-through rates. Good slugs are short, descriptive, and contain relevant keywords.',
       },
+      {
+        question: 'What characters are allowed in slugs?',
+        answer: 'Slugs typically contain lowercase letters, numbers, and hyphens. Spaces and special characters are converted to hyphens or removed.',
+      },
+      {
+        question: 'Should slugs be long or short?',
+        answer: 'Shorter is better! Keep slugs concise while still being descriptive. Ideally 3-5 words that clearly describe the content.',
+      },
+      {
+        question: 'Can I customize the slug format?',
+        answer: 'Yes, you can choose different separators (hyphens, underscores) and options for handling special characters in our advanced slug generator.',
+      },
     ],
     exampleOutput: {
       input: 'My First Blog Post! (2024)',
@@ -722,6 +1415,28 @@ export const tools: Tool[] = [
     slug: 'remove-duplicate-lines',
     icon: 'ListX',
     keywords: ['remove duplicates', 'unique lines', 'dedupe', 'duplicate remover'],
+    faq: [
+      {
+        question: 'How does duplicate line removal work?',
+        answer: 'The tool scans each line and keeps only the first occurrence of each unique line, removing subsequent duplicates.',
+      },
+      {
+        question: 'Is the removal case-sensitive?',
+        answer: 'By default, yes. "Apple" and "apple" are treated as different lines. Some tools offer case-insensitive options.',
+      },
+      {
+        question: 'Does it preserve the original order?',
+        answer: 'Yes! The first occurrence of each line is kept in its original position. Only duplicates are removed.',
+      },
+      {
+        question: 'Can I remove blank lines too?',
+        answer: 'Yes, there is usually an option to remove empty lines along with duplicates for cleaner output.',
+      },
+      {
+        question: 'What file types can I process?',
+        answer: 'Paste any text content—CSV lines, log files, email lists, or any text data. The tool works with plain text of any format.',
+      },
+    ],
     relatedTools: ['sort-lines-alphabetically', 'text-to-list', 'list-to-text'],
   },
   {
@@ -734,6 +1449,28 @@ export const tools: Tool[] = [
     slug: 'sort-lines-alphabetically',
     icon: 'ListOrdered',
     keywords: ['sort lines', 'alphabetical sort', 'sort text', 'order lines'],
+    faq: [
+      {
+        question: 'How does alphabetical sorting work?',
+        answer: 'Lines are sorted by comparing characters from left to right using their Unicode values. A comes before B, numbers come before letters.',
+      },
+      {
+        question: 'Can I sort in descending order?',
+        answer: 'Yes! You can choose between A-Z (ascending) or Z-A (descending) sorting order.',
+      },
+      {
+        question: 'Is sorting case-sensitive?',
+        answer: 'By default, uppercase letters sort before lowercase. You can often enable case-insensitive sorting for more intuitive results.',
+      },
+      {
+        question: 'How are numbers sorted?',
+        answer: 'Numbers are sorted character by character, so "10" comes before "2". For numerical sorting, ensure numbers have leading zeros.',
+      },
+      {
+        question: 'Can I sort by specific columns?',
+        answer: 'For simple alphabetical sorting, lines are compared entirely. For column-based sorting, you may need specialized CSV tools.',
+      },
+    ],
     relatedTools: ['remove-duplicate-lines', 'reverse-text', 'text-to-list'],
   },
   {
@@ -746,6 +1483,28 @@ export const tools: Tool[] = [
     slug: 'reverse-text',
     icon: 'Reverse',
     keywords: ['reverse text', 'flip text', 'backwards text', 'text reverser'],
+    faq: [
+      {
+        question: 'What does reversing text do?',
+        answer: 'Reversing text flips the order of characters. "Hello" becomes "olleH". It works character by character from end to start.',
+      },
+      {
+        question: 'Can I reverse word order instead?',
+        answer: 'Yes, some tools offer options to reverse the order of words while keeping each word intact, or reverse characters within each word.',
+      },
+      {
+        question: 'Does it work with Unicode?',
+        answer: 'Yes! The tool properly handles Unicode characters including emojis and accented letters. Complex grapheme clusters are preserved.',
+      },
+      {
+        question: 'Why would I need to reverse text?',
+        answer: 'Text reversal is used for puzzles, creative writing, testing, simple encoding, and educational purposes about string manipulation.',
+      },
+      {
+        question: 'Is there a character limit?',
+        answer: 'There is no strict limit. You can reverse text of any length, though very long texts may take a moment to process.',
+      },
+    ],
     relatedTools: ['sort-lines-alphabetically', 'remove-line-breaks', 'text-case-converter'],
   },
   {
@@ -758,6 +1517,28 @@ export const tools: Tool[] = [
     slug: 'remove-line-breaks',
     icon: 'Minus',
     keywords: ['remove line breaks', 'join lines', 'single line', 'remove newlines'],
+    faq: [
+      {
+        question: 'What are line breaks?',
+        answer: 'Line breaks (newline characters) are special characters that separate lines of text. They include LF (\\n), CR (\\r), and CRLF (\\r\\n).',
+      },
+      {
+        question: 'What replaces the line breaks?',
+        answer: 'By default, line breaks are replaced with a single space. You can also join lines with no separator or a custom character.',
+      },
+      {
+        question: 'Will this affect paragraph breaks?',
+        answer: 'Yes, all line breaks are removed. To preserve paragraphs, you may need to process paragraphs separately or use a more advanced tool.',
+      },
+      {
+        question: 'Why remove line breaks?',
+        answer: 'Removing line breaks is useful when copying text from PDFs, emails, or formatted documents where you need continuous text.',
+      },
+      {
+        question: 'Can I undo this operation?',
+        answer: 'The original line break positions are lost after removal. Keep a backup of your original text if you need to restore formatting.',
+      },
+    ],
     relatedTools: ['remove-extra-spaces', 'reverse-text', 'text-cleaner'],
   },
   {
@@ -770,6 +1551,28 @@ export const tools: Tool[] = [
     slug: 'lorem-ipsum',
     icon: 'AlignLeft',
     keywords: ['lorem ipsum', 'placeholder text', 'dummy text', 'lipsum'],
+    faq: [
+      {
+        question: 'What is Lorem Ipsum?',
+        answer: 'Lorem Ipsum is placeholder text used in printing and typesetting since the 1500s. It helps designers focus on layout without being distracted by readable content.',
+      },
+      {
+        question: 'Why use Lorem Ipsum instead of real text?',
+        answer: 'Lorem Ipsum has normal letter distribution, making it better for visual balance than repetitive text. It lets viewers focus on design, not content.',
+      },
+      {
+        question: 'How much text can I generate?',
+        answer: 'Generate as many paragraphs, words, or sentences as you need. Select the unit and quantity that fits your project.',
+      },
+      {
+        question: 'Is Lorem Ipsum Latin?',
+        answer: 'Lorem Ipsum is derived from Latin text by Cicero, but it is scrambled and modified so it does not make coherent sense.',
+      },
+      {
+        question: 'Can I use this commercially?',
+        answer: 'Yes! Lorem Ipsum is public domain text. Use the generated placeholder text freely in any project.',
+      },
+    ],
     relatedTools: ['random-text-generator', 'random-name-generator', 'word-counter'],
   },
   {
@@ -791,6 +1594,18 @@ export const tools: Tool[] = [
         question: 'How is this different from Lorem Ipsum?',
         answer: 'While Lorem Ipsum uses standardized Latin text, this generator creates varied, realistic-looking sentences using a template system. This can be more engaging for testing.',
       },
+      {
+        question: 'Can I control the length?',
+        answer: 'Yes! You can specify the number of paragraphs, sentences per paragraph, or total word count to generate exactly what you need.',
+      },
+      {
+        question: 'Is the text unique each time?',
+        answer: 'Yes, each generation produces different random text. The combinations are vast, so you get fresh content every time.',
+      },
+      {
+        question: 'Can I use this for mockups?',
+        answer: 'Absolutely! This is perfect for filling design mockups with realistic-looking placeholder text before real content is available.',
+      },
     ],
     exampleOutput: {
       output: 'The amazing platform delivers an incredible experience. Our outstanding system provides the most elegant solution. This remarkable application optimizes a truly dynamic workflow.',
@@ -808,6 +1623,28 @@ export const tools: Tool[] = [
     slug: 'text-difference-checker',
     icon: 'Diff',
     keywords: ['text diff', 'compare text', 'difference checker', 'text compare'],
+    faq: [
+      {
+        question: 'How does text comparison work?',
+        answer: 'The tool compares two texts character by character or word by word, highlighting additions, deletions, and modifications between them.',
+      },
+      {
+        question: 'What types of differences are shown?',
+        answer: 'Added text is typically highlighted in green, removed text in red, and modified text may be shown with strikethrough or different colors.',
+      },
+      {
+        question: 'Is the comparison case-sensitive?',
+        answer: 'By default, yes. "Hello" and "hello" would be marked as different. Some tools offer case-insensitive comparison options.',
+      },
+      {
+        question: 'Can I compare large documents?',
+        answer: 'Yes! The tool handles documents of various sizes. Very large documents may take longer to process but will compare successfully.',
+      },
+      {
+        question: 'What is this useful for?',
+        answer: 'Text comparison helps with proofreading, checking document revisions, comparing code changes, reviewing translations, and tracking edits.',
+      },
+    ],
     relatedTools: ['find-and-replace', 'json-diff', 'word-counter'],
   },
   {
@@ -820,6 +1657,28 @@ export const tools: Tool[] = [
     slug: 'remove-html-tags',
     icon: 'CodeX',
     keywords: ['remove html', 'strip tags', 'html remover', 'plain text'],
+    faq: [
+      {
+        question: 'What are HTML tags?',
+        answer: 'HTML tags are markup elements like <p>, <div>, <span> that define document structure. They are enclosed in angle brackets and usually come in pairs.',
+      },
+      {
+        question: 'Will this remove all formatting?',
+        answer: 'Yes, all HTML formatting including bold, italic, links, and structure is removed. Only the plain text content remains.',
+      },
+      {
+        question: 'What about script and style tags?',
+        answer: 'The tool removes all tags including <script> and <style>, so JavaScript and CSS content within those tags is also removed.',
+      },
+      {
+        question: 'Are HTML entities decoded?',
+        answer: 'Yes, common HTML entities like &amp; &lt; &gt; are converted to their character equivalents (& < >).',
+      },
+      {
+        question: 'Can I process partial HTML?',
+        answer: 'Yes! The tool works with any HTML fragments, not just complete documents. Paste any HTML snippet to extract its text.',
+      },
+    ],
     relatedTools: ['html-formatter', 'html-encode-decode', 'markdown-to-html'],
   },
   {
@@ -832,6 +1691,28 @@ export const tools: Tool[] = [
     slug: 'find-and-replace',
     icon: 'Replace',
     keywords: ['find replace', 'search replace', 'text replace', 'replace all'],
+    faq: [
+      {
+        question: 'How does find and replace work?',
+        answer: 'Enter the text to find and the replacement text. The tool searches for all occurrences and replaces them with your new text.',
+      },
+      {
+        question: 'Can I replace all occurrences at once?',
+        answer: 'Yes! By default, all matches are replaced. You can also replace one at a time if you want to review each change.',
+      },
+      {
+        question: 'Is the search case-sensitive?',
+        answer: 'You can toggle case sensitivity. With it on, "Word" and "word" are different. Off, they are treated the same.',
+      },
+      {
+        question: 'Can I use regular expressions?',
+        answer: 'Some find and replace tools support regex for complex pattern matching. This allows powerful searches like finding all email addresses.',
+      },
+      {
+        question: 'What if I make a mistake?',
+        answer: 'Keep a backup of your original text! The replacement is immediate. You can also use undo (Ctrl+Z) if working in the browser.',
+      },
+    ],
     relatedTools: ['text-difference-checker', 'remove-duplicate-lines', 'sort-lines-alphabetically'],
   },
   {
@@ -844,6 +1725,28 @@ export const tools: Tool[] = [
     slug: 'text-to-list',
     icon: 'List',
     keywords: ['text to list', 'convert to list', 'list maker', 'bullet points'],
+    faq: [
+      {
+        question: 'How does text to list conversion work?',
+        answer: 'The tool splits your text by sentences, lines, or custom delimiters and formats each item as a list entry with bullets or numbers.',
+      },
+      {
+        question: 'What list styles are available?',
+        answer: 'You can choose from bullet points (•), numbered lists (1, 2, 3), lettered lists (a, b, c), and other common list formats.',
+      },
+      {
+        question: 'How is text split into items?',
+        answer: 'Text can be split by line breaks, sentences (periods), commas, or custom characters. Choose the method that matches your content.',
+      },
+      {
+        question: 'Can I convert back from list to text?',
+        answer: 'Yes! Use our List to Text tool to remove list formatting and convert back to paragraphs or continuous text.',
+      },
+      {
+        question: 'What is this useful for?',
+        answer: 'Convert paragraphs to bullet points for presentations, create task lists from text, organize notes, or format content for documents.',
+      },
+    ],
     relatedTools: ['list-to-text', 'remove-duplicate-lines', 'sort-lines-alphabetically'],
   },
   {
@@ -856,6 +1759,28 @@ export const tools: Tool[] = [
     slug: 'list-to-text',
     icon: 'FileText',
     keywords: ['list to text', 'convert list', 'join list', 'list to paragraph'],
+    faq: [
+      {
+        question: 'What types of lists can I convert?',
+        answer: 'You can convert any text-based list including bulleted lists, numbered lists, or plain line-separated items. Simply paste your list and choose how you want the items joined.',
+      },
+      {
+        question: 'How are the list items joined together?',
+        answer: 'By default, items are joined with spaces to form a paragraph. You can customize the separator to use commas, semicolons, or any other delimiter based on your needs.',
+      },
+      {
+        question: 'Will formatting like bullets or numbers be removed?',
+        answer: 'Yes, when converting to text, bullet points and numbering are typically removed. You can clean the list first if needed or the tool will extract just the content.',
+      },
+      {
+        question: 'Is there a limit to how many items I can convert?',
+        answer: 'There is no strict limit on the number of items. The tool processes text locally in your browser, so it can handle large lists efficiently.',
+      },
+      {
+        question: 'Can I convert text back to a list format?',
+        answer: 'Yes, use the Text to List tool to convert paragraphs back into list format. It can split text by sentences, commas, or custom delimiters.',
+      },
+    ],
     relatedTools: ['text-to-list', 'remove-line-breaks', 'text-cleaner'],
   },
   {
@@ -877,6 +1802,18 @@ export const tools: Tool[] = [
         question: 'Are these real names?',
         answer: 'The generated names combine real first and last names from common databases. While the combinations are random, the individual names are genuine names used in English-speaking countries.',
       },
+      {
+        question: 'Can I choose specific gender for the names?',
+        answer: 'Yes, you can select male, female, or mixed names depending on your needs. This helps when you need names that match specific demographic requirements.',
+      },
+      {
+        question: 'How many names can I generate at once?',
+        answer: 'You can generate as many names as you need, from a single name to hundreds. Simply adjust the quantity setting and regenerate if you need more.',
+      },
+      {
+        question: 'Are the generated names unique?',
+        answer: 'Each generation produces random combinations, so duplicates are rare but possible with large quantities. Regenerate or add more names if you need guaranteed unique combinations.',
+      },
     ],
     exampleOutput: {
       output: 'James Smith\nJennifer Johnson\nMichael Williams\nSarah Brown\nDavid Jones',
@@ -894,6 +1831,28 @@ export const tools: Tool[] = [
     slug: 'remove-extra-spaces',
     icon: 'Space',
     keywords: ['remove spaces', 'extra spaces', 'whitespace remover', 'clean spaces'],
+    faq: [
+      {
+        question: 'What types of whitespace does this tool remove?',
+        answer: 'This tool removes multiple consecutive spaces, tabs, and can normalize line breaks. It converts any sequence of whitespace characters into a single space.',
+      },
+      {
+        question: 'Will it remove all spaces from my text?',
+        answer: 'No, it preserves single spaces between words. It only removes extra or redundant whitespace while maintaining proper word separation.',
+      },
+      {
+        question: 'Does it handle tabs and special whitespace characters?',
+        answer: 'Yes, the tool converts tabs and other whitespace characters to regular spaces, then removes any extra spaces to leave clean, single-spaced text.',
+      },
+      {
+        question: 'Can I remove leading and trailing spaces too?',
+        answer: 'Yes, the tool trims leading and trailing whitespace from the entire text as well as cleaning up extra spaces within the content.',
+      },
+      {
+        question: 'Why would I need to remove extra spaces?',
+        answer: 'Extra spaces can cause formatting issues in documents, websites, and databases. Clean spacing ensures consistent formatting and professional appearance.',
+      },
+    ],
     relatedTools: ['remove-line-breaks', 'text-cleaner', 'remove-html-tags'],
   },
   {
@@ -906,6 +1865,28 @@ export const tools: Tool[] = [
     slug: 'capitalize-sentences',
     icon: 'CaseUpper',
     keywords: ['capitalize sentences', 'sentence case', 'fix capitalization', 'capitalize first letter'],
+    faq: [
+      {
+        question: 'How does sentence capitalization work?',
+        answer: 'The tool identifies sentence boundaries (periods, exclamation marks, question marks) and capitalizes the first letter after each sentence ending punctuation.',
+      },
+      {
+        question: 'Will it affect proper nouns or other capitalized words?',
+        answer: 'The tool only changes the first letter of each sentence. Words that are already capitalized within sentences, like proper nouns, remain unchanged.',
+      },
+      {
+        question: 'Does it handle abbreviations correctly?',
+        answer: 'The tool recognizes common abbreviation patterns to avoid incorrectly capitalizing after periods in abbreviations like "Dr." or "etc.".',
+      },
+      {
+        question: 'Can I use this for titles and headings?',
+        answer: 'For titles, consider using Title Case instead. Sentence capitalization is best for paragraphs and regular body text.',
+      },
+      {
+        question: 'What if my text has inconsistent spacing after periods?',
+        answer: 'The tool works best with properly spaced text. Consider using the Remove Extra Spaces tool first to clean up spacing before capitalizing sentences.',
+      },
+    ],
     relatedTools: ['text-case-converter', 'text-cleaner', 'text-formatter'],
   },
   {
@@ -918,6 +1899,28 @@ export const tools: Tool[] = [
     slug: 'text-cleaner',
     icon: 'Eraser',
     keywords: ['text cleaner', 'clean text', 'format text', 'text sanitizer'],
+    faq: [
+      {
+        question: 'What does the Text Cleaner tool do?',
+        answer: 'It removes unwanted elements from text including extra spaces, line breaks, tabs, and special characters. It helps prepare text for publishing, databases, or further processing.',
+      },
+      {
+        question: 'Can I choose which elements to remove?',
+        answer: 'Yes, you can select specific cleaning options such as removing extra spaces, line breaks, HTML tags, or special characters based on your needs.',
+      },
+      {
+        question: 'Is my text sent to any server?',
+        answer: 'No, all text cleaning happens locally in your browser. Your text never leaves your device, ensuring complete privacy and security.',
+      },
+      {
+        question: 'What special characters can be removed?',
+        answer: 'You can remove various special characters including punctuation, symbols, non-printable characters, and custom character sets that you specify.',
+      },
+      {
+        question: 'Can I undo the cleaning if needed?',
+        answer: 'The tool does not store your original text, so make sure to save a backup before cleaning. You can always paste the original text again if needed.',
+      },
+    ],
     relatedTools: ['remove-extra-spaces', 'text-case-converter', 'remove-html-tags'],
   },
   {
@@ -930,6 +1933,28 @@ export const tools: Tool[] = [
     slug: 'text-formatter',
     icon: 'TextCursor',
     keywords: ['text formatter', 'format text', 'text styling', 'text layout'],
+    faq: [
+      {
+        question: 'What formatting options are available?',
+        answer: 'You can change text case (uppercase, lowercase, title case), remove line breaks, add or remove indentation, and apply various text transformations in one place.',
+      },
+      {
+        question: 'Can I apply multiple formatting changes at once?',
+        answer: 'Yes, you can combine multiple formatting options such as changing case and removing extra spaces simultaneously to achieve your desired output.',
+      },
+      {
+        question: 'Is this tool suitable for code formatting?',
+        answer: 'This tool is designed for general text formatting. For code formatting, consider using a dedicated code formatter specific to your programming language.',
+      },
+      {
+        question: 'How is this different from the Text Cleaner tool?',
+        answer: 'Text Formatter focuses on transforming text appearance (case, alignment, structure), while Text Cleaner focuses on removing unwanted elements like extra spaces and special characters.',
+      },
+      {
+        question: 'Can I preview changes before applying them?',
+        answer: 'Yes, the tool shows the formatted output in real-time as you apply options, allowing you to see and adjust changes before copying the result.',
+      },
+    ],
     relatedTools: ['text-cleaner', 'text-case-converter', 'remove-line-breaks'],
   },
   {
@@ -946,6 +1971,22 @@ export const tools: Tool[] = [
       {
         question: 'What is ROT13?',
         answer: 'ROT13 is a simple letter substitution cipher that replaces each letter with the 13th letter after it in the alphabet. It is its own inverse, meaning applying it twice returns the original text.',
+      },
+      {
+        question: 'Is ROT13 secure for sensitive information?',
+        answer: 'No, ROT13 is not secure and should never be used for protecting sensitive information. It is a simple obfuscation method that can be easily decoded by anyone.',
+      },
+      {
+        question: 'What is ROT13 commonly used for?',
+        answer: 'ROT13 is often used in online forums to hide spoilers, punchlines, or solutions to puzzles. It provides just enough obfuscation to prevent accidental reading.',
+      },
+      {
+        question: 'Does ROT13 affect numbers and special characters?',
+        answer: 'No, ROT13 only transforms letters A-Z (and a-z). Numbers, punctuation, and special characters remain unchanged in the output.',
+      },
+      {
+        question: 'Why is it called ROT13?',
+        answer: 'The name comes from "rotate by 13 places." Since the English alphabet has 26 letters, rotating by 13 positions creates a symmetric cipher where encoding and decoding use the same operation.',
       },
     ],
     relatedTools: ['rot13-decoder', 'morse-code-translator', 'base64-encode'],
@@ -965,6 +2006,22 @@ export const tools: Tool[] = [
         question: 'How does ROT13 decoding work?',
         answer: 'Since ROT13 is its own inverse, decoding is the same as encoding. Applying ROT13 to the encoded text returns the original message.',
       },
+      {
+        question: 'Can I decode any ROT13 text?',
+        answer: 'Yes, any text encoded with ROT13 can be decoded. Simply paste the encoded text and the tool will convert it back to readable text.',
+      },
+      {
+        question: 'How do I know if text is ROT13 encoded?',
+        answer: 'ROT13 text often looks like readable letters but forms nonsense words. Common indicators include words that look unusual but contain only letters.',
+      },
+      {
+        question: 'What if my text contains non-alphabetic characters?',
+        answer: 'Non-alphabetic characters like numbers, spaces, and punctuation are preserved as-is during decoding. Only letters A-Z are transformed.',
+      },
+      {
+        question: 'Can I decode ROT13 manually?',
+        answer: 'Yes, you can decode ROT13 by hand by shifting each letter 13 positions in the alphabet. However, using this tool is much faster and eliminates errors.',
+      },
     ],
     relatedTools: ['rot13-encoder', 'morse-code-translator', 'base64-decode'],
   },
@@ -983,6 +2040,22 @@ export const tools: Tool[] = [
         question: 'What is Morse code?',
         answer: 'Morse code is a method of encoding text using sequences of dots and dashes (or dits and dahs) to represent letters, numbers, and punctuation. It was developed for telegraph communication.',
       },
+      {
+        question: 'Can I translate both ways - text to Morse and Morse to text?',
+        answer: 'Yes, this tool supports bidirectional translation. Enter text to get Morse code, or enter Morse code (using dots, dashes, and spaces) to get readable text.',
+      },
+      {
+        question: 'How are letters separated in Morse code?',
+        answer: 'Letters are separated by a short pause (represented as a space in text). Words are separated by a longer pause (typically represented as a forward slash or multiple spaces).',
+      },
+      {
+        question: 'Does Morse code support all characters?',
+        answer: 'Standard Morse code supports letters A-Z, numbers 0-9, and some punctuation. Special characters and non-English letters may have extended Morse code representations.',
+      },
+      {
+        question: 'Is Morse code still used today?',
+        answer: 'Yes, Morse code is still used in aviation, amateur radio, emergency signaling, and assistive technology for people with disabilities. It remains a reliable backup communication method.',
+      },
     ],
     relatedTools: ['ascii-converter', 'binary-converter', 'rot13-encoder'],
   },
@@ -1000,6 +2073,22 @@ export const tools: Tool[] = [
       {
         question: 'What is ASCII?',
         answer: 'ASCII (American Standard Code for Information Interchange) is a character encoding standard that assigns numeric codes to letters, digits, punctuation, and control characters.',
+      },
+      {
+        question: 'What ASCII code range does this tool support?',
+        answer: 'This tool supports standard 7-bit ASCII (0-127) which includes letters, numbers, common punctuation, and control characters. Extended ASCII (128-255) may also be supported.',
+      },
+      {
+        question: 'How do I convert text to ASCII codes?',
+        answer: 'Simply enter your text and the tool will display the ASCII numeric code for each character. Each letter, number, and symbol has a unique ASCII value.',
+      },
+      {
+        question: 'Can I convert ASCII codes back to text?',
+        answer: 'Yes, enter ASCII codes (typically separated by spaces or commas) and the tool will convert them back to readable text characters.',
+      },
+      {
+        question: 'Why would I need ASCII codes?',
+        answer: 'ASCII codes are useful for programming, debugging character encoding issues, understanding how computers store text, and working with systems that require numeric character representation.',
       },
     ],
     relatedTools: ['binary-converter', 'hex-converter', 'morse-code-translator'],
@@ -1396,6 +2485,28 @@ export const tools: Tool[] = [
     slug: 'color-picker',
     icon: 'Pipette',
     keywords: ['color picker', 'hex color', 'rgb color', 'color code'],
+    faq: [
+      {
+        question: 'What is a color picker?',
+        answer: 'A color picker is a tool that lets you select colors visually and get their values in different formats like HEX, RGB, and HSL. It helps designers and developers choose exact colors for their projects.',
+      },
+      {
+        question: 'What is the difference between HEX, RGB, and HSL?',
+        answer: 'HEX is a hexadecimal code (e.g., #FF5733) used in web design. RGB represents colors as Red, Green, Blue values (0-255). HSL describes colors by Hue (0-360), Saturation, and Lightness percentages, making it more intuitive for adjusting colors.',
+      },
+      {
+        question: 'How do I pick a color from anywhere on my screen?',
+        answer: 'Most operating systems have built-in color pickers. On Windows, use the PowerToys Color Picker. On Mac, use the Digital Color Meter in Utilities. Many browser extensions also offer screen color picking functionality.',
+      },
+      {
+        question: 'What color format should I use for web design?',
+        answer: 'HEX codes are most common in CSS for web design. RGB/RGBA is useful when you need to manipulate colors with JavaScript or add transparency. HSL is great when you need to create color variations by adjusting lightness or saturation.',
+      },
+      {
+        question: 'Can I copy color codes directly from the picker?',
+        answer: 'Yes, our color picker allows you to copy color codes in multiple formats with a single click. Simply select your color and click on the format you want to copy to your clipboard.',
+      },
+    ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'color-palette-generator', 'image-color-picker'],
   },
   {
@@ -1408,6 +2519,28 @@ export const tools: Tool[] = [
     slug: 'hex-to-rgb',
     icon: 'Palette',
     keywords: ['hex to rgb', 'color converter', 'hex color', 'rgb color'],
+    faq: [
+      {
+        question: 'How do I convert HEX to RGB manually?',
+        answer: 'A HEX code has 6 characters (e.g., #FF5733). Split it into three pairs: FF, 57, 33. Convert each pair from hexadecimal to decimal: FF=255, 57=87, 33=51. So #FF5733 becomes rgb(255, 87, 51).',
+      },
+      {
+        question: 'Why would I need to convert HEX to RGB?',
+        answer: 'RGB format is needed when working with design software like Photoshop, programming languages like Python or JavaScript, or when you need to add transparency (RGBA) which HEX alone cannot represent.',
+      },
+      {
+        question: 'What is the range of RGB values?',
+        answer: 'Each RGB component (Red, Green, Blue) ranges from 0 to 255. A value of 0 means no color, while 255 means full intensity. For example, rgb(0, 0, 0) is black and rgb(255, 255, 255) is white.',
+      },
+      {
+        question: 'Can HEX codes include transparency?',
+        answer: 'Standard 6-character HEX codes do not include transparency. However, 8-character HEX codes (HEXA) add an alpha channel, or you can convert to RGBA format which explicitly includes transparency as the fourth value.',
+      },
+      {
+        question: 'Is there a difference in color quality between HEX and RGB?',
+        answer: 'No, HEX and RGB represent the exact same colors. They are simply different notations for the same color values. Converting between them does not change or lose any color information.',
+      },
+    ],
     relatedTools: ['rgb-to-hex', 'color-picker', 'rgba-to-hex'],
   },
   {
@@ -1420,6 +2553,28 @@ export const tools: Tool[] = [
     slug: 'rgb-to-hex',
     icon: 'Palette',
     keywords: ['rgb to hex', 'color converter', 'rgb color', 'hex color'],
+    faq: [
+      {
+        question: 'How do I convert RGB to HEX manually?',
+        answer: 'Take each RGB value (0-255) and convert it to hexadecimal. For example, rgb(255, 87, 51): 255=FF, 87=57, 51=33. Combine them with a # prefix to get #FF5733.',
+      },
+      {
+        question: 'Why is HEX format preferred for web design?',
+        answer: 'HEX codes are more compact and easier to copy-paste than RGB values. They are the standard format in CSS and HTML, making them universally recognized by web browsers and design tools.',
+      },
+      {
+        question: 'What are shorthand HEX codes?',
+        answer: 'When a HEX code has repeating characters in each pair (e.g., #FFAA00), it can be shortened to 3 characters (#FA0). Shorthand HEX codes are shorter but less precise since each digit is duplicated.',
+      },
+      {
+        question: 'Can all RGB colors be represented in HEX?',
+        answer: 'Yes, all RGB colors (16.7 million combinations) can be represented in HEX format. Both systems use the same 0-255 range per color channel, just expressed in different number systems.',
+      },
+      {
+        question: 'Why do some HEX codes have 8 characters?',
+        answer: '8-character HEX codes (HEXA) include an alpha channel for transparency. The last two characters represent opacity: 00 is fully transparent and FF is fully opaque. Standard CSS HEX is 6 characters without transparency.',
+      },
+    ],
     relatedTools: ['hex-to-rgb', 'color-picker', 'rgba-to-hex'],
   },
   {
@@ -1440,6 +2595,18 @@ export const tools: Tool[] = [
       {
         question: 'How do I choose the right color palette?',
         answer: 'Complementary palettes create high contrast and bold designs. Analogous palettes are harmonious and calming. Triadic palettes offer variety while maintaining balance. Choose based on the mood you want to convey.',
+      },
+      {
+        question: 'What is color harmony and why does it matter?',
+        answer: 'Color harmony refers to pleasing color combinations that work well together. Harmonious palettes create visual appeal and help guide the viewer eye. Using established harmony rules ensures your designs look professional and balanced.',
+      },
+      {
+        question: 'How many colors should I use in a design?',
+        answer: 'For most designs, use 3-5 colors: a dominant color (60%), a secondary color (30%), and an accent color (10%). This 60-30-10 rule creates visual hierarchy and prevents your design from looking cluttered.',
+      },
+      {
+        question: 'Can I save or export my generated palette?',
+        answer: 'Yes, you can copy individual color codes or export your palette in various formats. You can also copy CSS variables or array formats to use directly in your web development projects.',
       },
     ],
     exampleOutput: {
@@ -1463,6 +2630,22 @@ export const tools: Tool[] = [
         question: 'What is the difference between linear and radial gradients?',
         answer: 'Linear gradients transition colors along a straight line (can be angled). Radial gradients transition colors from a center point outward in a circular pattern. Both can use multiple color stops.',
       },
+      {
+        question: 'How do I create a diagonal gradient?',
+        answer: 'Use angles in your linear gradient. For example, `linear-gradient(45deg, #color1, #color2)` creates a diagonal gradient from bottom-left to top-right. 135deg goes from top-left to bottom-right.',
+      },
+      {
+        question: 'What are color stops and how do they work?',
+        answer: 'Color stops define where each color begins and ends in your gradient. You can specify positions like `linear-gradient(red 0%, blue 50%, green 100%)` to control exactly where color transitions happen.',
+      },
+      {
+        question: 'Can I use transparency in gradients?',
+        answer: 'Yes, use RGBA or HSLA colors to add transparency. For example, `linear-gradient(rgba(255,0,0,0.5), rgba(0,0,255,0.5))` creates a gradient with semi-transparent colors.',
+      },
+      {
+        question: 'How do I make a gradient repeat?',
+        answer: 'Use `repeating-linear-gradient()` or `repeating-radial-gradient()` functions. These repeat the gradient pattern infinitely. For example, `repeating-linear-gradient(45deg, red, red 10px, blue 10px, blue 20px)` creates stripes.',
+      },
     ],
     exampleOutput: {
       output: 'background: linear-gradient(90deg, #3B82F6, #8B5CF6);',
@@ -1480,6 +2663,28 @@ export const tools: Tool[] = [
     slug: 'color-contrast-checker',
     icon: 'Contrast',
     keywords: ['contrast checker', 'wcag', 'accessibility', 'color contrast'],
+    faq: [
+      {
+        question: 'What is WCAG color contrast?',
+        answer: 'WCAG (Web Content Accessibility Guidelines) sets standards for color contrast to ensure text is readable. WCAG 2.1 requires a minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text at Level AA.',
+      },
+      {
+        question: 'What is the difference between WCAG AA and AAA?',
+        answer: 'WCAG AA requires 4.5:1 contrast for normal text and 3:1 for large text. AAA is stricter, requiring 7:1 for normal text and 4.5:1 for large text. AA is the standard compliance level for most websites.',
+      },
+      {
+        question: 'Why is color contrast important for accessibility?',
+        answer: 'Proper color contrast ensures that people with visual impairments, color blindness, or low vision can read your content. It also improves readability for everyone in different lighting conditions.',
+      },
+      {
+        question: 'How is contrast ratio calculated?',
+        answer: 'Contrast ratio is calculated using the relative luminance of the lighter and darker colors. The formula is (L1 + 0.05) / (L2 + 0.05), where L1 is the lighter color luminance. Ratios range from 1:1 (no contrast) to 21:1 (maximum contrast).',
+      },
+      {
+        question: 'What colors pass WCAG requirements?',
+        answer: 'Dark text on light backgrounds or light text on dark backgrounds typically pass. Pure black on white (21:1) always passes. For colors, ensure sufficient lightness difference. Tools like this checker help verify compliance.',
+      },
+    ],
     relatedTools: ['color-picker', 'color-palette-generator', 'random-color-generator'],
   },
   {
@@ -1610,6 +2815,28 @@ export const tools: Tool[] = [
     slug: 'csv-to-json',
     icon: 'FileSpreadsheet',
     keywords: ['csv to json', 'csv converter', 'spreadsheet to json', 'csv parser'],
+    faq: [
+      {
+        question: 'What is CSV to JSON conversion?',
+        answer: 'CSV to JSON conversion transforms comma-separated values data into JavaScript Object Notation format, converting each row into an object with column headers as keys.',
+      },
+      {
+        question: 'How do I convert a CSV file to JSON?',
+        answer: 'Simply paste or upload your CSV data, and the tool automatically parses it and generates JSON output. Each CSV row becomes a JSON object with the header row as property names.',
+      },
+      {
+        question: 'Does the tool handle CSV files with special characters?',
+        answer: 'Yes, the tool properly handles CSV files with special characters, quotes, commas within fields, and multi-line values according to standard CSV formatting rules.',
+      },
+      {
+        question: 'What JSON structure does the converter produce?',
+        answer: 'The converter produces a JSON array where each element is an object representing a row, with keys derived from the CSV header row and values from each data cell.',
+      },
+      {
+        question: 'Is my CSV data secure during conversion?',
+        answer: 'Yes, all conversion happens locally in your browser. Your data never leaves your device and is not stored on any server.',
+      },
+    ],
     relatedTools: ['json-to-csv', 'excel-to-json', 'json-formatter'],
   },
   {
@@ -1622,6 +2849,28 @@ export const tools: Tool[] = [
     slug: 'json-to-csv',
     icon: 'FileSpreadsheet',
     keywords: ['json to csv', 'json converter', 'json to spreadsheet', 'export csv'],
+    faq: [
+      {
+        question: 'How do I convert JSON to CSV?',
+        answer: 'Paste your JSON array into the tool, and it will automatically extract the keys as column headers and convert each object into a CSV row.',
+      },
+      {
+        question: 'What JSON format is required for conversion?',
+        answer: 'The tool accepts JSON arrays of objects. Each object should have similar keys, which become the CSV column headers.',
+      },
+      {
+        question: 'Can I convert nested JSON objects to CSV?',
+        answer: 'The tool works best with flat JSON structures. Nested objects may be converted to JSON strings within the CSV cells.',
+      },
+      {
+        question: 'Will the CSV file open correctly in Excel or Google Sheets?',
+        answer: 'Yes, the generated CSV follows standard formatting and will open correctly in Excel, Google Sheets, and other spreadsheet applications.',
+      },
+      {
+        question: 'How are special characters handled in CSV output?',
+        answer: 'Fields containing commas, quotes, or newlines are properly escaped and quoted according to CSV standards to ensure correct parsing.',
+      },
+    ],
     relatedTools: ['csv-to-json', 'csv-to-excel', 'excel-to-json'],
   },
   {
@@ -1634,6 +2883,28 @@ export const tools: Tool[] = [
     slug: 'markdown-to-html',
     icon: 'FileCode',
     keywords: ['markdown to html', 'md to html', 'markdown converter', 'md converter'],
+    faq: [
+      {
+        question: 'What Markdown features are supported?',
+        answer: 'The converter supports standard Markdown including headings, bold, italic, links, images, lists (ordered and unordered), code blocks, blockquotes, tables, and horizontal rules.',
+      },
+      {
+        question: 'How do I convert Markdown to HTML?',
+        answer: 'Simply paste your Markdown text into the input area, and the tool instantly generates the corresponding HTML code that you can copy and use.',
+      },
+      {
+        question: 'Is GitHub Flavored Markdown (GFM) supported?',
+        answer: 'Yes, the tool supports GitHub Flavored Markdown extensions including tables, task lists, strikethrough, and autolinks.',
+      },
+      {
+        question: 'Can I customize the HTML output?',
+        answer: 'The converter generates clean, standard HTML. You can further style the output using CSS classes as needed for your project.',
+      },
+      {
+        question: 'Will code blocks be properly converted?',
+        answer: 'Yes, both inline code and fenced code blocks are converted to appropriate HTML elements with syntax highlighting support available.',
+      },
+    ],
     relatedTools: ['html-to-markdown', 'markdown-to-pdf', 'html-formatter'],
   },
   {
@@ -1646,6 +2917,28 @@ export const tools: Tool[] = [
     slug: 'html-to-markdown',
     icon: 'FileCode',
     keywords: ['html to markdown', 'html converter', 'html to md', 'markdown generator'],
+    faq: [
+      {
+        question: 'How does HTML to Markdown conversion work?',
+        answer: 'Paste your HTML code and the tool parses the markup, converting each HTML element to its Markdown equivalent while preserving the document structure.',
+      },
+      {
+        question: 'What HTML elements are supported?',
+        answer: 'The converter handles common HTML elements including headings, paragraphs, links, images, lists (ordered and unordered), tables, code blocks, and text formatting.',
+      },
+      {
+        question: 'Will the Markdown output be compatible with all platforms?',
+        answer: 'Yes, the tool generates standard Markdown syntax that works across all major platforms including GitHub, GitLab, Reddit, and static site generators.',
+      },
+      {
+        question: 'What happens to unsupported HTML elements?',
+        answer: 'Unsupported or complex HTML elements may be kept as raw HTML within the Markdown output, which is valid in most Markdown processors.',
+      },
+      {
+        question: 'Can I convert entire web pages to Markdown?',
+        answer: 'Yes, you can paste the HTML source of any web page. For best results, extract just the content portion rather than the entire page structure.',
+      },
+    ],
     relatedTools: ['markdown-to-html', 'remove-html-tags', 'markdown-to-pdf'],
   },
   {
@@ -1658,6 +2951,28 @@ export const tools: Tool[] = [
     slug: 'qr-code-generator',
     icon: 'QrCode',
     keywords: ['qr code', 'qr generator', 'qr maker', 'barcode generator'],
+    faq: [
+      {
+        question: 'What types of data can I encode in a QR code?',
+        answer: 'You can encode URLs, plain text, email addresses, phone numbers, WiFi credentials, contact information (vCard), calendar events, and more.',
+      },
+      {
+        question: 'How do I download the generated QR code?',
+        answer: 'After generating your QR code, you can download it as an image file (PNG or SVG) by clicking the download button.',
+      },
+      {
+        question: 'Can I customize the color of my QR code?',
+        answer: 'Yes, many QR code generators allow you to change the foreground and background colors while maintaining scannability.',
+      },
+      {
+        question: 'What is the maximum amount of data a QR code can hold?',
+        answer: 'A standard QR code can hold up to 4,296 alphanumeric characters, 7,089 numeric characters, or 2,953 binary bytes, depending on the version and error correction level.',
+      },
+      {
+        question: 'Do QR codes expire?',
+        answer: 'No, QR codes themselves do not expire. However, if the QR code points to a URL, that destination URL may become unavailable over time.',
+      },
+    ],
     relatedTools: ['url-to-qr-code', 'barcode-generator', 'url-encode'],
   },
   {
@@ -1670,6 +2985,28 @@ export const tools: Tool[] = [
     slug: 'text-to-base64',
     icon: 'Binary',
     keywords: ['text to base64', 'base64 encoder', 'encode text', 'base64 converter'],
+    faq: [
+      {
+        question: 'What is Base64 encoding?',
+        answer: 'Base64 is a binary-to-text encoding scheme that converts binary data into ASCII characters using 64 different characters (A-Z, a-z, 0-9, +, /).',
+      },
+      {
+        question: 'Why would I need to convert text to Base64?',
+        answer: 'Base64 encoding is used to safely transmit data over text-based protocols, embed images in HTML/CSS, store complex data in JSON, and handle binary data in email attachments.',
+      },
+      {
+        question: 'Does Base64 encoding encrypt my data?',
+        answer: 'No, Base64 is an encoding scheme, not encryption. Anyone can decode Base64 data. It does not provide security, only safe data representation.',
+      },
+      {
+        question: 'How much larger is Base64 encoded data?',
+        answer: 'Base64 encoding increases data size by approximately 33%. For every 3 bytes of input, you get 4 bytes of output.',
+      },
+      {
+        question: 'Can I encode special characters and Unicode text?',
+        answer: 'Yes, the tool handles special characters and Unicode text. The text is first converted to UTF-8 bytes before Base64 encoding.',
+      },
+    ],
     relatedTools: ['base64-to-text', 'base64-encode', 'base64-decode'],
   },
   {
@@ -1682,6 +3019,28 @@ export const tools: Tool[] = [
     slug: 'base64-to-text',
     icon: 'FileText',
     keywords: ['base64 to text', 'base64 decoder', 'decode base64', 'base64 converter'],
+    faq: [
+      {
+        question: 'How do I decode Base64 to text?',
+        answer: 'Simply paste your Base64 encoded string into the input field, and the tool will automatically decode it to readable text.',
+      },
+      {
+        question: 'What if my Base64 string is invalid?',
+        answer: 'The tool validates the input and will display an error message if the Base64 string is malformed or contains invalid characters.',
+      },
+      {
+        question: 'Can I decode Base64 that contains binary data?',
+        answer: 'This tool is designed for text output. Binary data like images will be decoded to raw bytes, which may not display as readable text.',
+      },
+      {
+        question: 'What characters are valid in Base64?',
+        answer: 'Valid Base64 characters are A-Z, a-z, 0-9, +, /, and = for padding. Some variants use - and _ instead of + and /.',
+      },
+      {
+        question: 'Is decoding Base64 secure?',
+        answer: 'Decoding Base64 is safe and simply reverses the encoding process. However, be cautious when decoding content from untrusted sources.',
+      },
+    ],
     relatedTools: ['text-to-base64', 'base64-decode', 'base64-encode'],
   },
   {
@@ -1694,6 +3053,28 @@ export const tools: Tool[] = [
     slug: 'url-to-qr-code',
     icon: 'Link',
     keywords: ['url to qr', 'url qr code', 'website qr', 'link qr code'],
+    faq: [
+      {
+        question: 'How do I create a QR code for a URL?',
+        answer: 'Enter your website URL in the input field and the tool instantly generates a scannable QR code that links directly to that URL.',
+      },
+      {
+        question: 'Do URL QR codes work with all devices?',
+        answer: 'Yes, QR codes are universal and can be scanned by any smartphone camera or QR code reader app on iOS, Android, and other devices.',
+      },
+      {
+        question: 'Can I use shortened URLs in QR codes?',
+        answer: 'Yes, shortened URLs from services like bit.ly work perfectly and result in simpler QR codes that may be easier to scan.',
+      },
+      {
+        question: 'What happens if my URL changes?',
+        answer: 'Static QR codes cannot be changed after creation. If your URL changes, you will need to generate a new QR code.',
+      },
+      {
+        question: 'What URL formats are supported?',
+        answer: 'The tool supports HTTP, HTTPS URLs, and can also encode FTP links, mailto links, and other URI schemes.',
+      },
+    ],
     relatedTools: ['qr-code-generator', 'barcode-generator', 'url-parser'],
   },
   {
@@ -1706,6 +3087,28 @@ export const tools: Tool[] = [
     slug: 'unix-time-to-date',
     icon: 'Clock',
     keywords: ['unix time', 'epoch converter', 'timestamp to date', 'unix timestamp'],
+    faq: [
+      {
+        question: 'What is Unix time (epoch time)?',
+        answer: 'Unix time is the number of seconds that have elapsed since January 1, 1970 (UTC), not counting leap seconds. It is also called epoch time or POSIX time.',
+      },
+      {
+        question: 'How do I convert a Unix timestamp to a readable date?',
+        answer: 'Enter your Unix timestamp (in seconds or milliseconds) and the tool instantly converts it to a human-readable date and time format.',
+      },
+      {
+        question: 'What is the difference between seconds and milliseconds timestamps?',
+        answer: 'Unix timestamps in seconds are typically 10 digits, while millisecond timestamps are 13 digits. The tool can auto-detect the format.',
+      },
+      {
+        question: 'What timezone is used for the conversion?',
+        answer: 'By default, the tool displays dates in your local timezone. Some converters also show UTC time for reference.',
+      },
+      {
+        question: 'Can I convert negative Unix timestamps?',
+        answer: 'Yes, negative Unix timestamps represent dates before January 1, 1970, and the tool can handle these correctly.',
+      },
+    ],
     relatedTools: ['date-to-unix-time', 'timestamp-converter', 'time-converter'],
   },
   {
@@ -1718,6 +3121,28 @@ export const tools: Tool[] = [
     slug: 'date-to-unix-time',
     icon: 'Clock',
     keywords: ['date to unix', 'date to timestamp', 'epoch time', 'unix converter'],
+    faq: [
+      {
+        question: 'How do I convert a date to Unix timestamp?',
+        answer: 'Select or enter your date and time, and the tool will instantly calculate the corresponding Unix timestamp in seconds.',
+      },
+      {
+        question: 'What date format should I use?',
+        answer: 'Most tools accept standard date pickers or common formats like YYYY-MM-DD HH:MM:SS. The tool handles parsing automatically.',
+      },
+      {
+        question: 'Does the timezone affect the Unix timestamp?',
+        answer: 'Unix timestamps are always in UTC. When you enter a local time, it is converted to UTC before calculating the timestamp.',
+      },
+      {
+        question: 'Can I get timestamps in milliseconds?',
+        answer: 'Yes, many tools offer the option to output timestamps in milliseconds (13 digits) instead of seconds (10 digits).',
+      },
+      {
+        question: 'What is the valid date range for Unix timestamps?',
+        answer: 'Standard Unix timestamps (32-bit) range from 1901 to 2038, but 64-bit systems can handle a much wider range of dates.',
+      },
+    ],
     relatedTools: ['unix-time-to-date', 'timestamp-converter', 'time-converter'],
   },
   {
@@ -1734,6 +3159,22 @@ export const tools: Tool[] = [
       {
         question: 'What time units can I convert?',
         answer: 'You can convert between seconds, minutes, hours, days, weeks, milliseconds, microseconds, and nanoseconds.',
+      },
+      {
+        question: 'How do I convert hours to minutes?',
+        answer: 'Enter the number of hours and select minutes as the target unit. The tool multiplies by 60 to give you the equivalent minutes.',
+      },
+      {
+        question: 'Can I convert large time values?',
+        answer: 'Yes, the tool handles large values and can convert thousands of hours to days or weeks instantly.',
+      },
+      {
+        question: 'How many seconds are in a day?',
+        answer: 'There are 86,400 seconds in a standard day (24 hours x 60 minutes x 60 seconds). The tool calculates this automatically.',
+      },
+      {
+        question: 'Does the converter account for leap years?',
+        answer: 'For day-based conversions, the tool uses standard calculations. Leap year adjustments are typically not needed for basic time unit conversions.',
       },
     ],
     relatedTools: ['timestamp-converter', 'countdown-timer', 'cron-expression-parser'],
@@ -1753,6 +3194,22 @@ export const tools: Tool[] = [
         question: 'How do I convert Celsius to Fahrenheit?',
         answer: 'To convert Celsius to Fahrenheit, multiply by 9/5 and add 32. For example, 0°C = (0 × 9/5) + 32 = 32°F.',
       },
+      {
+        question: 'How do I convert Fahrenheit to Celsius?',
+        answer: 'Subtract 32 from the Fahrenheit value, then multiply by 5/9. For example, 68°F = (68 - 32) × 5/9 = 20°C.',
+      },
+      {
+        question: 'What is Kelvin used for?',
+        answer: 'Kelvin is the SI unit for temperature and is used in scientific contexts. Absolute zero is 0K (-273.15°C), the lowest possible temperature.',
+      },
+      {
+        question: 'What is absolute zero in different scales?',
+        answer: 'Absolute zero is 0 Kelvin, -273.15°C, or -459.67°F. It is the theoretical temperature at which molecular motion stops.',
+      },
+      {
+        question: 'Which temperature scale should I use?',
+        answer: 'Celsius is used in most countries, Fahrenheit in the US, and Kelvin in scientific applications. Choose based on your location or field of work.',
+      },
     ],
     relatedTools: ['weight-converter', 'length-converter', 'unit-converter'],
   },
@@ -1771,6 +3228,22 @@ export const tools: Tool[] = [
         question: 'What weight units can I convert?',
         answer: 'You can convert between kilograms, grams, pounds, ounces, tons, milligrams, and other common weight units.',
       },
+      {
+        question: 'How do I convert kilograms to pounds?',
+        answer: 'Multiply kilograms by 2.20462 to get pounds. For example, 10 kg = 10 × 2.20462 = 22.0462 lbs.',
+      },
+      {
+        question: 'How do I convert pounds to kilograms?',
+        answer: 'Divide pounds by 2.20462 to get kilograms. For example, 100 lbs = 100 / 2.20462 = 45.36 kg.',
+      },
+      {
+        question: 'What is the difference between weight and mass?',
+        answer: 'Mass is the amount of matter in an object (measured in kg), while weight is the force of gravity on that mass. In everyday use, they are often treated the same.',
+      },
+      {
+        question: 'How many ounces are in a pound?',
+        answer: 'There are 16 ounces in one pound. To convert, divide ounces by 16 to get pounds, or multiply pounds by 16 to get ounces.',
+      },
     ],
     relatedTools: ['temperature-converter', 'length-converter', 'unit-converter'],
   },
@@ -1788,6 +3261,22 @@ export const tools: Tool[] = [
       {
         question: 'What length units are supported?',
         answer: 'You can convert between meters, kilometers, centimeters, millimeters, miles, yards, feet, inches, and more.',
+      },
+      {
+        question: 'How do I convert meters to feet?',
+        answer: 'Multiply meters by 3.28084 to get feet. For example, 10 meters = 10 × 3.28084 = 32.8084 feet.',
+      },
+      {
+        question: 'How do I convert inches to centimeters?',
+        answer: 'Multiply inches by 2.54 to get centimeters. For example, 12 inches = 12 × 2.54 = 30.48 cm.',
+      },
+      {
+        question: 'How many kilometers are in a mile?',
+        answer: 'One mile equals approximately 1.60934 kilometers. To convert, multiply miles by 1.60934.',
+      },
+      {
+        question: 'What is the difference between imperial and metric units?',
+        answer: 'Metric units (meters, kilometers) are based on powers of 10 and used globally. Imperial units (feet, miles) are primarily used in the United States and a few other countries.',
       },
     ],
     relatedTools: ['weight-converter', 'temperature-converter', 'unit-converter'],
@@ -2074,6 +3563,28 @@ export const tools: Tool[] = [
     slug: 'excel-to-csv',
     icon: 'FileSpreadsheet',
     keywords: ['excel to csv', 'xlsx to csv', 'convert excel', 'spreadsheet converter'],
+    faq: [
+      {
+        question: 'What is the difference between Excel and CSV format?',
+        answer: 'Excel files (.xlsx) support multiple sheets, formulas, formatting, and charts. CSV files are plain text files that only contain comma-separated values, making them universally compatible but limited to single-sheet data without formatting.',
+      },
+      {
+        question: 'Will formulas be preserved when converting to CSV?',
+        answer: 'No, CSV files do not support formulas. When converting Excel to CSV, only the calculated values are exported, not the formulas themselves. The resulting CSV will show the final values from your spreadsheet.',
+      },
+      {
+        question: 'Can I convert multiple sheets from one Excel file?',
+        answer: 'Yes, you can select which sheet to convert. Each sheet needs to be converted separately as CSV files can only contain one data table. Use the sheet selector to choose the specific sheet you want to export.',
+      },
+      {
+        question: 'What character encoding does the CSV use?',
+        answer: 'The CSV file uses UTF-8 encoding by default, which supports international characters and special symbols. This ensures compatibility with most applications and proper display of accented characters.',
+      },
+      {
+        question: 'Are my Excel files uploaded to a server?',
+        answer: 'No, all conversions happen directly in your browser using client-side processing. Your Excel files never leave your device, ensuring complete privacy and security of your data.',
+      },
+    ],
     relatedTools: ['csv-to-excel', 'excel-to-json', 'csv-to-json'],
     howToUse: [
       'Upload your Excel file (.xlsx or .xls)',
@@ -2612,6 +4123,18 @@ export const tools: Tool[] = [
         question: 'What video formats are supported?',
         answer: 'We support MP4, WebM, MOV, AVI, MKV, and most common video formats.',
       },
+      {
+        question: 'Why is my GIF file so large?',
+        answer: 'GIFs are inherently larger than video formats because they store each frame as an image. To reduce size, lower the frame rate, reduce dimensions, or trim the video to a shorter clip before converting.',
+      },
+      {
+        question: 'Can I control the GIF animation speed?',
+        answer: 'Yes, you can adjust the frame rate during conversion. Lower frame rates create slower, smoother animations while higher rates make faster GIFs.',
+      },
+      {
+        question: 'Is there a limit on video length for conversion?',
+        answer: 'For best results, we recommend converting videos under 30 seconds. Longer videos create very large GIF files that may be slow to load.',
+      },
     ],
     relatedTools: ['gif-maker', 'compress-video', 'video-to-images'],
     howToUse: [
@@ -2640,6 +4163,18 @@ export const tools: Tool[] = [
         question: 'How much can I reduce the file size?',
         answer: 'Compression results vary, but you can typically reduce file size by 50-80% while maintaining acceptable quality.',
       },
+      {
+        question: 'What video formats can be compressed?',
+        answer: 'We support compressing MP4, WebM, MOV, AVI, MKV, and most other common video formats.',
+      },
+      {
+        question: 'Does compression work on 4K videos?',
+        answer: 'Yes, 4K videos can be compressed. In fact, higher resolution videos often see the most significant size reduction while maintaining good quality.',
+      },
+      {
+        question: 'Is the compression processed on my device?',
+        answer: 'Yes, video compression happens entirely in your browser. Your files are never uploaded to any server, ensuring privacy and security.',
+      },
     ],
     relatedTools: ['video-to-gif', 'resize-video', 'trim-video'],
     howToUse: [
@@ -2663,6 +4198,22 @@ export const tools: Tool[] = [
       {
         question: 'Is the audio quality preserved?',
         answer: 'Yes, we use high-quality encoding to preserve audio quality during the conversion process.',
+      },
+      {
+        question: 'Can I convert other video formats to MP3?',
+        answer: 'Yes, besides MP4, you can also extract audio from WebM, MOV, AVI, MKV, and other video formats.',
+      },
+      {
+        question: 'What audio quality options are available?',
+        answer: 'You can choose from different bitrates ranging from 128kbps to 320kbps. Higher bitrates provide better quality but larger file sizes.',
+      },
+      {
+        question: 'How long does the conversion take?',
+        answer: 'Conversion time depends on video length and file size. Most conversions complete within seconds to a few minutes.',
+      },
+      {
+        question: 'Will the converted MP3 work on all devices?',
+        answer: 'Yes, MP3 is a universal audio format supported by virtually all devices, media players, and platforms.',
       },
     ],
     relatedTools: ['extract-audio', 'video-to-gif', 'compress-video'],
@@ -2688,6 +4239,22 @@ export const tools: Tool[] = [
         question: 'Does trimming affect video quality?',
         answer: 'No, trimming uses lossless cutting when possible, so the quality of the remaining clip is preserved.',
       },
+      {
+        question: 'Can I set precise start and end times?',
+        answer: 'Yes, you can enter exact timestamps (hours:minutes:seconds) or use the visual timeline to select your trim points.',
+      },
+      {
+        question: 'What video formats can I trim?',
+        answer: 'You can trim MP4, WebM, MOV, AVI, MKV, and most other common video formats.',
+      },
+      {
+        question: 'Can I trim multiple sections from one video?',
+        answer: 'For extracting multiple clips, use our Split Video tool which allows you to create several segments at once.',
+      },
+      {
+        question: 'Is there a limit on video length?',
+        answer: 'You can trim videos of any length. The tool processes files locally in your browser for optimal performance.',
+      },
     ],
     relatedTools: ['split-video', 'crop-video', 'compress-video'],
     howToUse: [
@@ -2711,6 +4278,22 @@ export const tools: Tool[] = [
       {
         question: 'Can I set custom crop dimensions?',
         answer: 'Yes, you can set custom width, height, and position values for precise cropping.',
+      },
+      {
+        question: 'What aspect ratios are available?',
+        answer: 'Common presets include 16:9, 4:3, 1:1 (square), and 9:16 (vertical). You can also set fully custom dimensions.',
+      },
+      {
+        question: 'Will cropping reduce video quality?',
+        answer: 'Cropping only removes portions of the frame. The remaining video quality is preserved at the original resolution.',
+      },
+      {
+        question: 'Can I preview the crop before applying?',
+        answer: 'Yes, you can see a real-time preview of the cropped area before finalizing the changes.',
+      },
+      {
+        question: 'Is cropping the same as resizing?',
+        answer: 'No. Cropping removes parts of the video frame, while resizing scales the entire video to different dimensions. They are different operations.',
       },
     ],
     relatedTools: ['trim-video', 'resize-video', 'rotate-video'],
@@ -2736,6 +4319,22 @@ export const tools: Tool[] = [
         question: 'Will resizing affect video quality?',
         answer: 'Downscaling generally preserves quality well. Upscaling may result in some quality loss depending on the original resolution.',
       },
+      {
+        question: 'What is aspect ratio lock?',
+        answer: 'When enabled, aspect ratio lock automatically adjusts the height when you change the width (or vice versa) to maintain the original proportions and prevent distortion.',
+      },
+      {
+        question: 'What resolutions are commonly used?',
+        answer: 'Common resolutions include 1920x1080 (Full HD), 1280x720 (HD), 3840x2160 (4K), and 640x480 (SD). Social platforms often have specific recommended sizes.',
+      },
+      {
+        question: 'Can I make the video larger?',
+        answer: 'Yes, you can upscale videos, but quality may decrease as the video is stretched beyond its original resolution.',
+      },
+      {
+        question: 'How is resizing different from cropping?',
+        answer: 'Resizing scales the entire video to new dimensions, while cropping cuts off portions of the frame. Both maintain the original content but achieve different results.',
+      },
     ],
     relatedTools: ['crop-video', 'compress-video', 'rotate-video'],
     howToUse: [
@@ -2760,6 +4359,22 @@ export const tools: Tool[] = [
         question: 'Can I merge videos of different formats?',
         answer: 'Yes, you can merge videos of different formats. They will be converted to a common format during the process.',
       },
+      {
+        question: 'Is there a limit on how many videos I can merge?',
+        answer: 'You can merge up to 10 video files in one session. The total combined file size should be within reasonable limits for browser processing.',
+      },
+      {
+        question: 'Will the merged video have consistent quality?',
+        answer: 'The output quality is determined by the lowest quality input video. For best results, use videos with similar resolutions and quality.',
+      },
+      {
+        question: 'Can I reorder videos before merging?',
+        answer: 'Yes, you can drag and drop to rearrange the order of videos before starting the merge process.',
+      },
+      {
+        question: 'What happens if my videos have different frame rates?',
+        answer: 'Videos with different frame rates will be harmonized during merging. The tool selects an appropriate output frame rate for smooth playback.',
+      },
     ],
     relatedTools: ['split-video', 'add-text-to-video', 'add-watermark-to-video'],
     howToUse: [
@@ -2783,6 +4398,22 @@ export const tools: Tool[] = [
       {
         question: 'Will rotation affect video quality?',
         answer: 'No, rotation is a lossless operation that preserves the original video quality.',
+      },
+      {
+        question: 'What rotation angles are available?',
+        answer: 'You can rotate videos by 90 degrees clockwise, 180 degrees (upside down), or 270 degrees clockwise (equivalent to 90 degrees counter-clockwise).',
+      },
+      {
+        question: 'Can I also flip the video?',
+        answer: 'This tool focuses on rotation. For flipping (mirroring), you would need to combine rotation with other editing operations.',
+      },
+      {
+        question: 'Will rotation change the file size?',
+        answer: 'Rotation itself does not significantly change file size. The video dimensions swap (width becomes height and vice versa) but quality remains the same.',
+      },
+      {
+        question: 'Why does my video need rotation?',
+        answer: 'Videos recorded on mobile devices are sometimes stored in landscape but tagged with rotation metadata. Our tool physically rotates the video for better compatibility.',
       },
     ],
     relatedTools: ['flip-image-horizontal', 'crop-video', 'resize-video'],

@@ -26,7 +26,8 @@
       "Read(//d/web-tools/src/app/tools/**)",
       "Bash(done)",
       "Bash(npx tsc:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(dir:*)"
     ]
   }
 }

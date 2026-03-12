@@ -82,25 +82,26 @@ export default async function ToolPage({ params }: ToolPageProps) {
     },
   };
 
-  // Sidebar content with related tools (simple list)
-  const sidebarContent = relatedTools.length > 0 ? (
+  // Sidebar content with popular tools (same as home page)
+  const popularTools = tools.slice(0, 8);
+  const sidebarContent = (
     <div className="space-y-6">
       <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 className="font-semibold text-gray-900 mb-4">Related Tools</h3>
+        <h3 className="font-semibold text-gray-900 mb-4">Popular Tools</h3>
         <div className="space-y-2">
-          {relatedTools.slice(0, 5).map((relatedTool) => (
+          {popularTools.map((popularTool) => (
             <a
-              key={relatedTool.id}
-              href={`/${relatedTool.slug}`}
+              key={popularTool.id}
+              href={`/${popularTool.slug}`}
               className="block text-sm text-gray-600 hover:text-blue-600 hover:underline py-1"
             >
-              {relatedTool.name}
+              {popularTool.name}
             </a>
           ))}
         </div>
       </div>
     </div>
-  ) : null;
+  );
 
   return (
     <MainLayout
@@ -162,13 +163,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
         ]}
       />
 
+      {/* FAQ Section */}
+      {tool.faq && <FaqSection items={tool.faq} />}
+
       {/* Related Tools */}
       {relatedTools.length > 0 && (
         <RelatedTools tools={relatedTools} />
       )}
-
-      {/* FAQ Section */}
-      {tool.faq && <FaqSection items={tool.faq} />}
     </MainLayout>
   );
 }
