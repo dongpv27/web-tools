@@ -6,6 +6,7 @@ import ToolResult from '@/components/tools/ToolResult';
 interface Match {
   match: string;
   index: number;
+  indices?: { start: number; end: number };
   groups: Record<string, string> | null;
 }
 
@@ -22,6 +23,10 @@ export default function RegexTesterClient() {
     { flag: 'i', label: 'Case Insensitive', desc: 'Ignore case' },
     { flag: 'm', label: 'Multiline', desc: '^ and $ match line boundaries' },
     { flag: 's', label: 'Dotall', desc: '. matches newlines' },
+    { flag: 'd', label: 'Indices', desc: 'Include start/end indices for matches' },
+    { flag: 'u', label: 'Unicode', desc: 'Enable full Unicode matching' },
+    { flag: 'y', label: 'Sticky', desc: 'Match only from lastIndex position' },
+    { flag: 'v', label: 'Sets & Properties', desc: 'Enable ES2024 set syntax' },
   ];
 
   const testRegex = () => {
@@ -46,9 +51,11 @@ export default function RegexTesterClient() {
       if (flags.includes('g')) {
         let match;
         while ((match = regex.exec(testString)) !== null) {
+          const hasIndices = flags.includes('d');
           allMatches.push({
             match: match[0],
             index: match.index,
+            indices: hasIndices ? match.indices?.[0] : undefined,
             groups: match.groups || null,
           });
           // Prevent infinite loop for zero-length matches
@@ -59,9 +66,11 @@ export default function RegexTesterClient() {
       } else {
         const match = regex.exec(testString);
         if (match) {
+          const hasIndices = flags.includes('d');
           allMatches.push({
             match: match[0],
             index: match.index,
+            indices: hasIndices ? match.indices?.[0] : undefined,
             groups: match.groups || null,
           });
         }
@@ -235,6 +244,11 @@ export default function RegexTesterClient() {
                     <code className="text-sm font-mono text-blue-600">"{m.match}"</code>
                     <span className="text-xs text-gray-500">index: {m.index}</span>
                   </div>
+                  {m.indices && (
+                    <div className="mt-1 text-xs text-gray-500">
+                      indices: [{m.indices.start}, {m.indices.end}]
+                    </div>
+                  )}
                   {m.groups && Object.keys(m.groups).length > 0 && (
                     <div className="mt-2 text-xs">
                       <span className="text-gray-500">Groups: </span>

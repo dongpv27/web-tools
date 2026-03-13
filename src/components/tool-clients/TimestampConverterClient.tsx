@@ -8,6 +8,7 @@ export default function TimestampConverterClient() {
   const [dateInput, setDateInput] = useState('');
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [result, setResult] = useState<{
+    ms: number;
     iso: string;
     utc: string;
     local: string;
@@ -24,21 +25,29 @@ export default function TimestampConverterClient() {
   }, []);
 
   const formatRelativeTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    const totalSeconds = Math.floor(ms / 1000);
+    const absSeconds = Math.abs(totalSeconds);
 
-    if (Math.abs(days) > 0) {
-      return days > 0 ? `${days} days from now` : `${Math.abs(days)} days ago`;
-    }
-    if (Math.abs(hours) > 0) {
-      return hours > 0 ? `${hours} hours from now` : `${Math.abs(hours)} hours ago`;
-    }
-    if (Math.abs(minutes) > 0) {
-      return minutes > 0 ? `${minutes} minutes from now` : `${Math.abs(minutes)} minutes ago`;
-    }
-    return seconds > 0 ? `${seconds} seconds from now` : `${Math.abs(seconds)} seconds ago`;
+    // Calculate units from largest to smallest
+    const days = Math.floor(absSeconds / 86400);
+    const hours = Math.floor((absSeconds % 86400) / 3600);
+    const minutes = Math.floor((absSeconds % 3600) / 60);
+    const seconds = absSeconds % 60;
+
+    // Helper to get singular/plural form
+    const formatUnit = (value: number, singular: string, plural: string) => {
+      return `${value} ${value === 1 ? singular : plural}`;
+    };
+
+    const isFuture = totalSeconds >= 0;
+    const suffix = isFuture ? 'from now' : 'ago';
+
+    if (days > 0) return `${formatUnit(days, 'day', 'days')} ${suffix}`;
+    if (hours > 0) return `${formatUnit(hours, 'hour', 'hours')} ${suffix}`;
+    if (minutes > 0) return `${formatUnit(minutes, 'minute', 'minutes')} ${suffix}`;
+    if (seconds > 0) return `${formatUnit(seconds, 'second', 'seconds')} ${suffix}`;
+
+    return 'now';
   };
 
   const convertTimestamp = () => {
@@ -55,10 +64,10 @@ export default function TimestampConverterClient() {
     }
 
     // Determine if timestamp is likely seconds or milliseconds
-    // Unix timestamps > 1e12 (year 2001) are typically seconds
-    // Also check if timestamp matches current time more closely as seconds vs milliseconds
+    // Unix timestamps < 1e12 (before year 2286) are seconds, >= 1e12 are milliseconds
+    // This simple threshold works for practical timestamps
     const now = Date.now();
-    const isLikelySeconds = ts < 1e12 && Math.abs(now - ts * 1000) > Math.abs(now - ts);
+    const isLikelySeconds = ts < 1e12;
     const ms = isLikelySeconds ? ts * 1000 : ts;
     const date = new Date(ms);
 
@@ -68,6 +77,7 @@ export default function TimestampConverterClient() {
     }
 
     setResult({
+      ms,
       iso: date.toISOString(),
       utc: date.toUTCString(),
       local: date.toLocaleString(),
@@ -90,6 +100,7 @@ export default function TimestampConverterClient() {
 
     setTimestamp(Math.floor(date.getTime() / 1000).toString());
     setResult({
+      ms: date.getTime(),
       iso: date.toISOString(),
       utc: date.toUTCString(),
       local: date.toLocaleString(),
@@ -102,6 +113,7 @@ export default function TimestampConverterClient() {
     setTimestamp(Math.floor(now / 1000).toString());
     setDateInput(new Date(now).toISOString().slice(0, 16));
     setResult({
+      ms: now,
       iso: new Date(now).toISOString(),
       utc: new Date(now).toUTCString(),
       local: new Date(now).toLocaleString(),
@@ -198,6 +210,12 @@ export default function TimestampConverterClient() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-gray-700">Result</h3>
           <div className="grid gap-3">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Timestamp (ms)</span>
+              <div className="flex items-center gap-2">
+                <code className="text-sm font-mono">{result.ms}</code>
+              </div>
+            </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm text-gray-600">ISO 8601</span>
               <div className="flex items-center gap-2">

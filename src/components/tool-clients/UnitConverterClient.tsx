@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 type UnitCategory = 'length' | 'weight' | 'temperature' | 'volume' | 'area' | 'speed' | 'time' | 'data';
 
@@ -240,7 +241,10 @@ export default function UnitConverterClient() {
             <span className="text-sm text-green-800">
               {value} {currentUnits.find(u => u.value === fromUnit)?.label} = <strong>{result}</strong> {currentUnits.find(u => u.value === toUnit)?.label}
             </span>
-            <CopyButton text={result} />
+            <div className="flex gap-2">
+              <CopyButton text={result} />
+              <DownloadButton content={`${value} ${currentUnits.find(u => u.value === fromUnit)?.label} = ${result} ${currentUnits.find(u => u.value === toUnit)?.label}`} filename="unit-conversion.txt" />
+            </div>
           </div>
         </div>
       )}

@@ -108,6 +108,7 @@ export default function JsonFormatterClient() {
             className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value={2}>2 spaces</option>
+            <option value={3}>3 spaces</option>
             <option value={4}>4 spaces</option>
             <option value={1}>1 tab</option>
           </select>

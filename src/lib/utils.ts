@@ -6,7 +6,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatJSON(json: string, indent: number = 2): string {
   const parsed = JSON.parse(json);
-  return JSON.stringify(parsed, null, indent);
+  const indentStr = indent === 1 ? '\t' : indent;
+  return JSON.stringify(parsed, null, indentStr);
 }
 
 export function minifyJSON(json: string): string {

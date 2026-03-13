@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const lengthUnits: Record<string, { name: string; toMeters: number }> = {
   millimeters: { name: 'Millimeters', toMeters: 0.001 },
@@ -106,6 +107,16 @@ export default function LengthConverterClient() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Download All Results */}
+      {Object.keys(results).length > 0 && (
+        <div className="mt-2">
+          <DownloadButton
+            content={`${inputValue} ${lengthUnits[inputUnit].name} equals:\n${Object.entries(results).map(([key, value]) => `- ${value} ${lengthUnits[key].name}`).join('\n')}`}
+            filename="length-conversion.txt"
+          />
         </div>
       )}
 

@@ -13,6 +13,8 @@ export default function JsonValidatorClient() {
       keys: number;
       depth: number;
       size: string;
+      objects: number;
+      arrays: number;
     };
   } | null>(null);
 
@@ -29,30 +31,41 @@ export default function JsonValidatorClient() {
       const parsed = JSON.parse(input);
 
       // Calculate stats
-      const countKeys = (obj: unknown, depth = 0): { keys: number; depth: number } => {
+      const countKeys = (
+        obj: unknown,
+        depth = 0
+      ): { keys: number; depth: number; objects: number; arrays: number } => {
         if (typeof obj !== 'object' || obj === null) {
-          return { keys: 0, depth };
+          return { keys: 0, depth, objects: 0, arrays: 0 };
         }
 
         let keys = 0;
         let maxDepth = depth;
+        let objectCount = 0;
+        let arrayCount = 0;
 
         if (Array.isArray(obj)) {
+          arrayCount = 1;
           for (const item of obj) {
             const result = countKeys(item, depth + 1);
             keys += result.keys;
             maxDepth = Math.max(maxDepth, result.depth);
+            objectCount += result.objects;
+            arrayCount += result.arrays;
           }
         } else {
+          objectCount = 1;
           keys = Object.keys(obj).length;
           for (const value of Object.values(obj)) {
             const result = countKeys(value, depth + 1);
             keys += result.keys;
             maxDepth = Math.max(maxDepth, result.depth);
+            objectCount += result.objects;
+            arrayCount += result.arrays;
           }
         }
 
-        return { keys, depth: maxDepth };
+        return { keys, depth: maxDepth, objects: objectCount, arrays: arrayCount };
       };
 
       const stats = countKeys(parsed);
@@ -65,8 +78,10 @@ export default function JsonValidatorClient() {
         parsed,
         stats: {
           keys: stats.keys,
-          depth: stats.depth + 1,
+          depth: stats.depth,
           size: sizeStr,
+          objects: stats.objects,
+          arrays: stats.arrays,
         },
       });
     } catch (e) {
@@ -182,7 +197,7 @@ export default function JsonValidatorClient() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             )}
-            <span className={`font-medium ${result.valid ? 'text-green-800' : 'text-red-800'}`}>
+            <span className={`text-sm ${result.valid ? 'text-green-800' : 'text-red-800'}`}>
               {result.message}
             </span>
           </div>
@@ -191,7 +206,9 @@ export default function JsonValidatorClient() {
           {result.valid && result.stats && (
             <div className="mt-3 flex gap-4 text-sm text-green-700">
               <span>📦 {result.stats.keys} keys</span>
-              <span>📏 {result.stats.depth} levels deep</span>
+              <span>📏 depth {result.stats.depth}</span>
+              <span>🏗️ {result.stats.objects} objects</span>
+              <span>📚 {result.stats.arrays} arrays</span>
               <span>💾 {result.stats.size}</span>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
 
@@ -116,6 +117,16 @@ export default function TemperatureConverterClient() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Download All Results */}
+      {(results.celsius || results.fahrenheit || results.kelvin) && (
+        <div className="mt-2">
+          <DownloadButton
+            content={`Temperature Conversion\n---------------------\n\n${inputValue}${units[inputUnit].symbol} equals:\n${results.celsius ? `- ${results.celsius}°C (Celsius)\n` : ''}${results.fahrenheit ? `- ${results.fahrenheit}°F (Fahrenheit)\n` : ''}${results.kelvin ? `- ${results.kelvin}K (Kelvin)` : ''}`}
+            filename="temperature-conversion.txt"
+          />
         </div>
       )}
 

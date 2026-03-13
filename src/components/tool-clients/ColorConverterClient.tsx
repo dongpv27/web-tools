@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 interface ColorValues {
   hex: string;
@@ -255,6 +256,12 @@ export default function ColorConverterClient() {
             </div>
             <CopyButton text={`cmyk(${colorValues.cmyk.c}%, ${colorValues.cmyk.m}%, ${colorValues.cmyk.y}%, ${colorValues.cmyk.k}%)`} />
           </div>
+
+          {/* Download All */}
+          <DownloadButton
+            content={`Color Values\n------------\n\nHEX: ${colorValues.hex}\nRGB: rgb(${colorValues.rgb.r}, ${colorValues.rgb.g}, ${colorValues.rgb.b})\nHSL: hsl(${colorValues.hsl.h}, ${colorValues.hsl.s}%, ${colorValues.hsl.l}%)\nCMYK: cmyk(${colorValues.cmyk.c}%, ${colorValues.cmyk.m}%, ${colorValues.cmyk.y}%, ${colorValues.cmyk.k}%)`}
+            filename="color-values.txt"
+          />
         </div>
       )}
     </div>

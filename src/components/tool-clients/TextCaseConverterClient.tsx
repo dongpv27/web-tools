@@ -130,7 +130,7 @@ export default function TextCaseConverterClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Converted Text" />
+        <ToolResult value={output} label="Converted Text" showDownload={true} downloadFilename="converted-text.txt" />
       )}
 
       {/* Clear Button */}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const weightUnits: Record<string, { name: string; toKg: number }> = {
   milligrams: { name: 'Milligrams', toKg: 0.000001 },
@@ -105,6 +106,16 @@ export default function WeightConverterClient() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Download All Results */}
+      {Object.keys(results).length > 0 && (
+        <div className="mt-2">
+          <DownloadButton
+            content={`${inputValue} ${weightUnits[inputUnit].name} equals:\n${Object.entries(results).map(([key, value]) => `- ${value} ${weightUnits[key].name}`).join('\n')}`}
+            filename="weight-conversion.txt"
+          />
         </div>
       )}
 

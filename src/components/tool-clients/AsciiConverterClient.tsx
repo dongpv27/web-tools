@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 export default function AsciiConverterClient() {
   const [input, setInput] = useState('');
@@ -108,7 +109,10 @@ export default function AsciiConverterClient() {
             <label className="text-sm font-medium text-gray-700">
               {mode === 'textToAscii' ? 'ASCII Codes' : 'Converted Text'}
             </label>
-            <CopyButton text={output} />
+            <div className="flex gap-2">
+              <CopyButton text={output} />
+              <DownloadButton content={output} filename={mode === 'textToAscii' ? 'ascii-codes.txt' : 'converted-text.txt'} />
+            </div>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <pre className="text-sm font-mono text-gray-800 whitespace-pre-wrap break-all">{output}</pre>

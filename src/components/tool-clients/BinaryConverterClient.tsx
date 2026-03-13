@@ -128,6 +128,8 @@ export default function BinaryConverterClient() {
         <ToolResult
           value={output}
           label={mode === 'text-to-binary' ? 'Binary Output' : 'Text Output'}
+          showDownload={true}
+          downloadFilename={mode === 'text-to-binary' ? 'binary.txt' : 'text.txt'}
         />
       )}
 

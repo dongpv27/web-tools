@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const tailwindColors: Record<string, Record<string, string>> = {
   slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
@@ -153,6 +154,12 @@ export default function TailwindColorConverterClient() {
               <p className="text-gray-600">&lt;div class="border-{closestMatch.className}"&gt;</p>
             </div>
           </div>
+
+          {/* Download Button */}
+          <DownloadButton
+            content={`Tailwind Color Match\n-------------------\n\nClosest Match: ${closestMatch.className}\nHEX: ${closestMatch.hex.toUpperCase()}\n\nTop 10 Matches:\n${allMatches.map(m => `- ${m.className} (${m.hex.toUpperCase()})`).join('\n')}`}
+            filename="tailwind-colors.txt"
+          />
         </div>
       )}
     </div>

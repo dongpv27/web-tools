@@ -128,6 +128,8 @@ export default function HexConverterClient() {
         <ToolResult
           value={output}
           label={mode === 'text-to-hex' ? 'Hex Output' : 'Text Output'}
+          showDownload={true}
+          downloadFilename={mode === 'text-to-hex' ? 'hex.txt' : 'text.txt'}
         />
       )}
 

@@ -24,7 +24,8 @@
       "Bash(sed:*)",
       "Bash(dir:*)",
       "Bash(timeout 30 cmd:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
