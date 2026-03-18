@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { toolComponentMap } from './ToolLoader';
 
 interface ToolRendererProps {
@@ -20,7 +21,7 @@ export default function ToolRenderer({ slug }: ToolRendererProps) {
 
   return (
     <div className="tool-container">
-      <ToolComponent />
+      {React.createElement(ToolComponent as React.ComponentType<{ slug?: string }>, { slug })}
     </div>
   );
 }

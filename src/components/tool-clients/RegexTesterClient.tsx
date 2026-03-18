@@ -55,7 +55,7 @@ export default function RegexTesterClient() {
           allMatches.push({
             match: match[0],
             index: match.index,
-            indices: hasIndices ? match.indices?.[0] : undefined,
+            indices: hasIndices && match.indices?.[0] ? { start: match.indices[0][0], end: match.indices[0][1] } : undefined,
             groups: match.groups || null,
           });
           // Prevent infinite loop for zero-length matches
@@ -70,7 +70,7 @@ export default function RegexTesterClient() {
           allMatches.push({
             match: match[0],
             index: match.index,
-            indices: hasIndices ? match.indices?.[0] : undefined,
+            indices: hasIndices && match.indices?.[0] ? { start: match.indices[0][0], end: match.indices[0][1] } : undefined,
             groups: match.groups || null,
           });
         }

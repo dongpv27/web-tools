@@ -25,7 +25,13 @@
       "Bash(dir:*)",
       "Bash(timeout 30 cmd:*)",
       "Bash(netstat:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebSearch",
+      "Bash(do rm:*)",
+      "Bash(pkill:*)",
+      "Bash(npx tsx:*)",
+      "Bash(powershell:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

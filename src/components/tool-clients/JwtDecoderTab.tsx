@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import type { Algorithm } from './JwtToolClient';
+import { JwtVerify, type VerificationResult } from '@/lib/jwt-verify';
 
 type VerificationStatus = 'valid' | 'invalid' | 'error' | 'pending' | null;
 
@@ -12,166 +14,21 @@ interface DecodedResult {
   algorithm: string;
 }
 
-// ============================================================================
-// Base64URL Helpers
-// ============================================================================
+interface JwtDecoderTabProps {
+  sharedState: {
+    token: string;
+    secretKey: string;
+    algorithm: Algorithm;
+    base64UrlEncoded: boolean;
+    publicKey?: string;
+  };
+  onDecode: (token: string) => void;
+  onKeyUpdate: (secretKey: string, publicKey?: string, base64UrlEncoded?: boolean) => void;
+}
 
-const base64UrlEncode = (str: string): string => {
-  return btoa(str)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-};
-
-const base64UrlDecode = (str: string): string => {
-  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (base64.length % 4) {
-    base64 += '=';
-  }
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new TextDecoder().decode(bytes);
-};
-
-// ============================================================================
-// JWT Verification Functions
-// ============================================================================
-
-/**
- * Verify HMAC signature
- */
-const verifyHmac = async (
-  message: string,
-  sig: string,
-  secret: string,
-  algorithm: 'SHA-256' | 'SHA-384' | 'SHA-512'
-): Promise<boolean> => {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const messageData = encoder.encode(message);
-
-  const key = await crypto.subtle.importKey(
-    'raw',
-    keyData,
-    { name: 'HMAC', hash: algorithm },
-    false,
-    ['verify']
-  );
-
-  // Convert signature from Base64URL to buffer
-  let sigBase64 = sig.replace(/-/g, '+').replace(/_/g, '/');
-  while (sigBase64.length % 4) sigBase64 += '=';
-  const signatureData = Uint8Array.from(atob(sigBase64), (c) => c.charCodeAt(0));
-
-  return await crypto.subtle.verify('HMAC', key, messageData, signatureData);
-};
-
-/**
- * Verify RSA signature
- */
-const verifyRsa = async (
-  message: string,
-  sig: string,
-  publicKeyPem: string
-): Promise<boolean> => {
-  try {
-    // Convert PEM to ArrayBuffer
-    const pemContent = publicKeyPem
-      .replace(/-----BEGIN PUBLIC KEY-----/g, '')
-      .replace(/-----END PUBLIC KEY-----/g, '')
-      .replace(/\s/g, '');
-
-    const binaryString = atob(pemContent);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    const encoder = new TextEncoder();
-    const messageData = encoder.encode(message);
-
-    const key = await crypto.subtle.importKey(
-      'spki',
-      bytes.buffer,
-      { name: 'RSA-PKCS1-v1_5', hash: 'SHA-256' },
-      false,
-      ['verify']
-    );
-
-    // Convert signature
-    let sigBase64 = sig.replace(/-/g, '+').replace(/_/g, '/');
-    while (sigBase64.length % 4) sigBase64 += '=';
-    const signatureData = Uint8Array.from(atob(sigBase64), (c) => c.charCodeAt(0));
-
-    return await crypto.subtle.verify(
-      'RSASSA-PKCS1-v1_5',
-      key,
-      messageData,
-      signatureData
-    );
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Verify ECDSA signature
- */
-const verifyEcdsa = async (
-  message: string,
-  sig: string,
-  publicKeyPem: string
-): Promise<boolean> => {
-  try {
-    // Convert PEM to ArrayBuffer
-    const pemContent = publicKeyPem
-      .replace(/-----BEGIN PUBLIC KEY-----/g, '')
-      .replace(/-----END PUBLIC KEY-----/g, '')
-      .replace(/\s/g, '');
-
-    const binaryString = atob(pemContent);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    const encoder = new TextEncoder();
-    const messageData = encoder.encode(message);
-
-    const key = await crypto.subtle.importKey(
-      'spki',
-      bytes.buffer,
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      false,
-      ['verify']
-    );
-
-    // Convert signature
-    let sigBase64 = sig.replace(/-/g, '+').replace(/_/g, '/');
-    while (sigBase64.length % 4) sigBase64 += '=';
-    const signatureData = Uint8Array.from(atob(sigBase64), (c) => c.charCodeAt(0));
-
-    return await crypto.subtle.verify(
-      { name: 'ECDSA', hash: 'SHA-256' },
-      key,
-      messageData,
-      signatureData
-    );
-  } catch {
-    return false;
-  }
-};
-
-// ============================================================================
-// Main Component
-// ============================================================================
-
-export default function JwtDecoderClient() {
-  // Decode state
-  const [input, setInput] = useState('');
+export default function JwtDecoderTab({ sharedState, onDecode, onKeyUpdate }: JwtDecoderTabProps) {
+  // Local state for manual editing
+  const [input, setInput] = useState(sharedState.token);
   const [header, setHeader] = useState('');
   const [payload, setPayload] = useState('');
   const [signature, setSignature] = useState('');
@@ -179,164 +36,161 @@ export default function JwtDecoderClient() {
   const [decodeError, setDecodeError] = useState('');
 
   // Verification state
-  const [verifyKey, setVerifyKey] = useState('');
-  const [base64UrlEncoded, setBase64UrlEncoded] = useState(false);
+  const [verifyKey, setVerifyKey] = useState(sharedState.secretKey || '');
+  const [publicKey, setPublicKey] = useState<string>(sharedState.publicKey || '');
+  const [base64UrlEncoded, setBase64UrlEncoded] = useState(sharedState.base64UrlEncoded);
+  const [keyFromSync, setKeyFromSync] = useState(sharedState.secretKey ? true : false); // Set true if key exists in sharedState (from sync)
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(null);
   const [verificationError, setVerificationError] = useState('');
   const [isExpired, setIsExpired] = useState(false);
 
-  // Sync state
-  const [isAutoLoaded, setIsAutoLoaded] = useState(false);
-  const [shouldAutoDecode, setShouldAutoDecode] = useState(false);
-
-  // Auto-decode when token is auto-loaded
+  // Sync input from shared state when it changes (and not manually editing)
   useEffect(() => {
-    if (shouldAutoDecode && input.trim()) {
-      decodeRef.current();
-      setShouldAutoDecode(false);
+    if (sharedState.token && sharedState.token !== input) {
+      setInput(sharedState.token);
     }
-  }, [shouldAutoDecode, input]);
+  }, [sharedState.token]);
 
-  // Auto-load token from localStorage on mount
+  // Sync verify key from shared state when it changes
   useEffect(() => {
-    const savedToken = localStorage.getItem("jwt_token");
-    if (savedToken) {
-      setInput(savedToken);
-      setIsAutoLoaded(true);
-
-      // Also load secret key and settings for auto-verify
-      const savedSecret = localStorage.getItem("jwt_secret");
-      const savedBase64Encoded = localStorage.getItem("jwt_base64_encoded");
-      if (savedSecret) {
-        setVerifyKey(savedSecret);
-      }
-      if (savedBase64Encoded) {
-        setBase64UrlEncoded(savedBase64Encoded === 'true');
-      }
-
-      // Trigger auto-decode after state updates
-      setShouldAutoDecode(true);
+    console.log('[JWT Decoder - Sync Key Effect]', {
+      sharedStateSecretKey: sharedState.secretKey,
+      sharedStatePublicKey: sharedState.publicKey,
+      currentVerifyKey: verifyKey,
+      shouldSync: sharedState.secretKey && sharedState.secretKey !== verifyKey
+    });
+    if (sharedState.secretKey && sharedState.secretKey !== verifyKey) {
+      setVerifyKey(sharedState.secretKey);
+      setKeyFromSync(true); // Key came from sync (already decoded from Encoder)
     }
-  }, []);
+  }, [sharedState.secretKey]);
 
-  // Listen for JWT update events from Encoder
+  // Sync public key from shared state when it changes (for RSA/ECDSA)
   useEffect(() => {
-    const handler = () => {
-      const savedToken = localStorage.getItem("jwt_token");
-      if (savedToken) {
-        setInput(savedToken);
-        setIsAutoLoaded(true);
+    console.log('[JWT Decoder - Sync Public Key Effect]', {
+      sharedStatePublicKey: sharedState.publicKey,
+      currentPublicKey: publicKey,
+      shouldSync: sharedState.publicKey && sharedState.publicKey !== publicKey
+    });
+    if (sharedState.publicKey && sharedState.publicKey !== publicKey) {
+      setPublicKey(sharedState.publicKey);
+    }
+  }, [sharedState.publicKey]);
 
-        // Also load secret key and settings for auto-verify
-        const savedSecret = localStorage.getItem("jwt_secret");
-        const savedBase64Encoded = localStorage.getItem("jwt_base64_encoded");
-        if (savedSecret) {
-          setVerifyKey(savedSecret);
-        }
-        if (savedBase64Encoded) {
-          setBase64UrlEncoded(savedBase64Encoded === 'true');
-        }
+  // Sync base64UrlEncoded from shared state
+  useEffect(() => {
+    if (sharedState.base64UrlEncoded !== base64UrlEncoded) {
+      setBase64UrlEncoded(sharedState.base64UrlEncoded);
+    }
+  }, [sharedState.base64UrlEncoded]);
 
-        // Trigger auto-decode after state updates
-        setShouldAutoDecode(true);
+  // Sync verify key back to shared state when user manually changes it
+  useEffect(() => {
+    if (onKeyUpdate && !keyFromSync) {
+      if (verifyKey && verifyKey !== sharedState.secretKey) {
+        onKeyUpdate(verifyKey, publicKey, base64UrlEncoded);
       }
-    };
-    window.addEventListener("jwt:update", handler as EventListener);
-    return () => window.removeEventListener("jwt:update", handler as EventListener);
-  }, []);
+    }
+  }, [verifyKey, publicKey, base64UrlEncoded, keyFromSync, onKeyUpdate]);
 
-  // Decode function
+  // Auto-decode when token changes (from encoder or user input)
+  useEffect(() => {
+    const tokenToDecode = (input.trim() || sharedState.token.trim());
+    console.log('[JWT Decoder - Token Change Effect]', {
+      sharedStateToken: sharedState.token,
+      input,
+      tokenToDecode,
+      shouldDecode: !!tokenToDecode
+    });
+    if (tokenToDecode) {
+      decode();
+    }
+  }, [sharedState.token, input]);
+
   const decode = useCallback(() => {
+    const tokenToDecode = input.trim() || sharedState.token.trim();
     setDecodeError('');
     setHeader('');
     setPayload('');
     setSignature('');
-    setDecodedResult(null);
     setVerificationStatus(null);
     setVerificationError('');
     setIsExpired(false);
 
-    if (!input.trim()) {
+    if (!tokenToDecode) {
       setDecodeError('Please enter a JWT token');
       return;
     }
 
-    const parts = input.trim().split('.');
+    const parts = tokenToDecode.split('.');
     if (parts.length !== 3) {
       setDecodeError('Invalid JWT format. JWT must have 3 parts separated by dots.');
       return;
     }
 
     try {
-      // Decode header
-      const headerDecoded = base64UrlDecode(parts[0]);
+      const headerDecoded = JwtVerify.base64UrlDecode(parts[0]);
       const headerJson = JSON.parse(headerDecoded);
       setHeader(JSON.stringify(headerJson, null, 2));
 
-      // Decode payload
-      const payloadDecoded = base64UrlDecode(parts[1]);
+      const payloadDecoded = JwtVerify.base64UrlDecode(parts[1]);
       const payloadJson = JSON.parse(payloadDecoded);
       setPayload(JSON.stringify(payloadJson, null, 2));
 
-      // Show signature
       setSignature(parts[2]);
 
-      // Set decoded result for algorithm detection
       setDecodedResult({
         header: headerJson,
         payload: payloadJson,
         algorithm: headerJson.alg,
       });
 
-      // Check expiration
+      console.log('[JWT Decoder - Decode Success]', {
+        algorithm: headerJson.alg,
+        payload: payloadJson,
+        decodedResult: decodedResult
+      });
+
       const currentTime = Math.floor(Date.now() / 1000);
       if (payloadJson.exp !== undefined && payloadJson.exp < currentTime) {
         setIsExpired(true);
       } else {
         setIsExpired(false);
       }
+
+      // Sync with parent
+      if (tokenToDecode !== sharedState.token) {
+        onDecode(tokenToDecode);
+      }
     } catch (e) {
       setDecodeError(`Error decoding JWT: ${(e as Error).message}`);
       setDecodedResult(null);
     }
-  }, [input]);
+  }, [sharedState.token, input, onDecode]);
 
-  // Ref to keep decode function stable for useEffect
-  const decodeRef = useRef(decode);
-  decodeRef.current = decode;
-
-  // Verification function
   const verify = async () => {
     if (!decodedResult) {
       setVerificationError('Please decode a JWT first');
       return;
     }
 
-    const parts = input.trim().split('.');
-    if (parts.length !== 3) {
-      setVerificationStatus('error');
-      setVerificationError('Invalid JWT format');
-      return;
-    }
-
+    const tokenToVerify = (input.trim() || sharedState.token.trim());
     const algorithm = decodedResult.algorithm;
-    const signingInput = `${parts[0]}.${parts[1]}`;
 
     try {
-      let isValid = false;
+      let verifyResult: VerificationResult;
 
       if (algorithm.startsWith('HS')) {
-        // HMAC verification
         if (!verifyKey) {
           setVerificationStatus('error');
           setVerificationError('Secret key is required for HMAC verification');
           return;
         }
 
-        let actualKey = verifyKey;
+        let actualSecret = verifyKey;
         if (base64UrlEncoded) {
           try {
-            actualKey = base64UrlDecode(verifyKey);
+            actualSecret = JwtVerify.base64UrlDecode(verifyKey);
           } catch {
             setVerificationStatus('error');
             setVerificationError('Invalid Base64URL encoded secret');
@@ -344,46 +198,29 @@ export default function JwtDecoderClient() {
           }
         }
 
-        // Determine hash algorithm
-        let hash: 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-256';
-        if (algorithm === 'HS384') hash = 'SHA-384';
-        else if (algorithm === 'HS512') hash = 'SHA-512';
+        verifyResult = await JwtVerify.verify({
+          token: tokenToVerify,
+          secret: actualSecret
+        });
 
-        isValid = await verifyHmac(signingInput, parts[2], actualKey, hash);
-
-      } else if (algorithm.startsWith('RS')) {
-        // RSA verification
-        if (!verifyKey) {
+      } else if (algorithm.startsWith('RS') || algorithm.startsWith('ES')) {
+        const keyToUse = publicKey || verifyKey;
+        if (!keyToUse) {
           setVerificationStatus('error');
-          setVerificationError('Public key is required for RSA verification');
+          setVerificationError('Public key is required for verification');
           return;
         }
 
-        // Validate PEM format
-        if (!verifyKey.includes('-----BEGIN PUBLIC KEY-----') || !verifyKey.includes('-----END PUBLIC KEY-----')) {
+        if (!keyToUse.includes('-----BEGIN PUBLIC KEY-----') || !keyToUse.includes('-----END PUBLIC KEY-----')) {
           setVerificationStatus('error');
           setVerificationError('Invalid PEM format. Public key must be in PEM format.');
           return;
         }
 
-        isValid = await verifyRsa(signingInput, parts[2], verifyKey);
-
-      } else if (algorithm.startsWith('ES')) {
-        // ECDSA verification
-        if (!verifyKey) {
-          setVerificationStatus('error');
-          setVerificationError('Public key is required for ECDSA verification');
-          return;
-        }
-
-        // Validate PEM format
-        if (!verifyKey.includes('-----BEGIN PUBLIC KEY-----') || !verifyKey.includes('-----END PUBLIC KEY-----')) {
-          setVerificationStatus('error');
-          setVerificationError('Invalid PEM format. Public key must be in PEM format.');
-          return;
-        }
-
-        isValid = await verifyEcdsa(signingInput, parts[2], verifyKey);
+        verifyResult = await JwtVerify.verify({
+          token: tokenToVerify,
+          publicKeyPem: keyToUse
+        });
 
       } else {
         setVerificationStatus('error');
@@ -391,39 +228,47 @@ export default function JwtDecoderClient() {
         return;
       }
 
-      if (isValid) {
+      if (verifyResult.status === 'valid') {
         setVerificationStatus('valid');
         setVerificationError('Signature verified successfully');
-      } else {
+      } else if (verifyResult.status === 'invalid') {
         setVerificationStatus('invalid');
         setVerificationError('Invalid signature');
+      } else {
+        setVerificationStatus('error');
+        setVerificationError(verifyResult.reason);
       }
+
+      setIsExpired(verifyResult.isExpired);
+
     } catch (e) {
       setVerificationStatus('error');
       setVerificationError(`Verification error: ${(e as Error).message}`);
     }
   };
 
-  // Auto-verify when input or key changes
   useEffect(() => {
-    if (decodedResult && verifyKey) {
-      // Debounce verification
-      const timer = setTimeout(() => {
-        verify();
-      }, 300);
+    // Auto-verify when decoded result exists and key is available
+    const alg = decodedResult?.algorithm;
+    const hasKey = alg?.startsWith('HS') ? verifyKey : ((alg?.startsWith('RS') || alg?.startsWith('ES')) && (publicKey || verifyKey));
 
+    console.log('[JWT Decoder - Auto-verify Effect]', {
+      decodedResult: !!decodedResult,
+      decodedAlgorithm: alg,
+      publicKey,
+      verifyKey,
+      hasKey: !!hasKey,
+      shouldRun: decodedResult && hasKey
+    });
+
+    // Auto-verify if key is available
+    if (decodedResult && hasKey) {
+      const timer = setTimeout(() => verify(), 300);
       return () => clearTimeout(timer);
     }
-  }, [input, verifyKey, base64UrlEncoded]);
+  }, [decodedResult, verifyKey, publicKey]);
 
-  // Clear all
   const clearAll = () => {
-    // Clear localStorage
-    localStorage.removeItem("jwt_token");
-    localStorage.removeItem("jwt_secret");
-    localStorage.removeItem("jwt_algorithm");
-    localStorage.removeItem("jwt_base64_encoded");
-
     setInput('');
     setHeader('');
     setPayload('');
@@ -432,13 +277,12 @@ export default function JwtDecoderClient() {
     setDecodedResult(null);
     setVerifyKey('');
     setBase64UrlEncoded(false);
+    setKeyFromSync(false);
     setVerificationStatus(null);
     setVerificationError('');
     setIsExpired(false);
-    setIsAutoLoaded(false);
   };
 
-  // Load sample
   const loadSample = () => {
     setInput('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
     setDecodeError('');
@@ -449,7 +293,6 @@ export default function JwtDecoderClient() {
   const isRsa = algorithm.startsWith('RS');
   const isEcdsa = algorithm.startsWith('ES');
 
-  // Get key label
   const getKeyLabel = () => {
     if (isHmac) return 'Secret Key';
     return 'Public Key (PEM)';
@@ -460,7 +303,6 @@ export default function JwtDecoderClient() {
     return '-----BEGIN PUBLIC KEY-----\n...';
   };
 
-  // Get status UI
   const getStatusDisplay = () => {
     switch (verificationStatus) {
       case 'valid':
@@ -502,9 +344,10 @@ export default function JwtDecoderClient() {
 
   const statusDisplay = getStatusDisplay();
 
+  const effectiveInput = input || sharedState.token;
+
   return (
     <div className="space-y-6">
-      {/* JWT Token Input */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-gray-700">JWT Token</label>
@@ -516,14 +359,13 @@ export default function JwtDecoderClient() {
           </button>
         </div>
         <ToolInput
-          value={input}
+          value={effectiveInput}
           onChange={setInput}
           placeholder="Paste your JWT token here..."
           rows={4}
         />
       </div>
 
-      {/* Decode Action Button */}
       <div className="flex gap-2">
         <button
           onClick={decode}
@@ -539,17 +381,14 @@ export default function JwtDecoderClient() {
         </button>
       </div>
 
-      {/* Decode Error */}
       {decodeError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-600">{decodeError}</p>
         </div>
       )}
 
-      {/* Decoded Results */}
       {header && (
         <div className="space-y-4">
-          {/* Header */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">HEADER</span>
@@ -558,7 +397,6 @@ export default function JwtDecoderClient() {
             <ToolResult value={header} label="" language="json" />
           </div>
 
-          {/* Payload */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">PAYLOAD</span>
@@ -567,7 +405,6 @@ export default function JwtDecoderClient() {
             <ToolResult value={payload} label="" language="json" />
           </div>
 
-          {/* Signature (original) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">SIGNATURE</span>
@@ -578,47 +415,24 @@ export default function JwtDecoderClient() {
             </div>
           </div>
 
-          {/* Hint when auto-loaded */}
-          {isAutoLoaded && (
+          {sharedState.token && !input && (
             <div className="text-sm text-gray-500">
-              Last generated token loaded automatically
+              Token synced from Encode tab
             </div>
-          )}
-
-          {/* Clear token button */}
-          {localStorage.getItem("jwt_token") && (
-            <button
-              onClick={() => {
-                localStorage.removeItem("jwt_token");
-                localStorage.removeItem("jwt_secret");
-                localStorage.removeItem("jwt_algorithm");
-                localStorage.removeItem("jwt_base64_encoded");
-                setInput('');
-                setVerifyKey('');
-                setBase64UrlEncoded(false);
-                setIsAutoLoaded(false);
-              }}
-              className="text-sm text-red-600 hover:text-red-700"
-            >
-              Clear saved token
-            </button>
           )}
         </div>
       )}
 
-      {/* JWT Signature Verification Section */}
       {decodedResult && (
         <div className="border-t border-gray-200 pt-6 space-y-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             JWT Signature Verification (Optional)
           </h3>
 
-          {/* Hint */}
           <p className="text-sm text-gray-600">
             To verify this token, enter the secret or public key used during signing.
           </p>
 
-          {/* Key Input */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700">{getKeyLabel()}</label>
@@ -641,18 +455,41 @@ export default function JwtDecoderClient() {
                 </div>
               )}
             </div>
+            {publicKey && (isRsa || isEcdsa) && (
+              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-700 mb-1">
+                  Public key automatically imported from encoder
+                </p>
+                <textarea
+                  value={publicKey}
+                  readOnly
+                  rows={5}
+                  className="w-full px-2 py-1 text-xs font-mono bg-blue-50 border border-blue-200 rounded-lg focus:outline-none"
+                />
+              </div>
+            )}
             {isHmac ? (
               <input
                 type="text"
                 value={verifyKey}
-                onChange={(e) => setVerifyKey(e.target.value)}
+                onChange={(e) => {
+                  setVerifyKey(e.target.value);
+                  setKeyFromSync(false); // User manually changed the key
+                  // Clear public key if user changes the key manually
+                  setPublicKey('');
+                }}
                 placeholder={getKeyPlaceholder()}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             ) : (
               <textarea
                 value={verifyKey}
-                onChange={(e) => setVerifyKey(e.target.value)}
+                onChange={(e) => {
+                  setVerifyKey(e.target.value);
+                  setKeyFromSync(false); // User manually changed the key
+                  // Clear public key if user changes the key manually
+                  setPublicKey('');
+                }}
                 placeholder={getKeyPlaceholder()}
                 rows={10}
                 className="w-full px-3 py-2 text-xs font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -660,7 +497,6 @@ export default function JwtDecoderClient() {
             )}
           </div>
 
-          {/* Verification Status */}
           {statusDisplay && (
             <div className={`p-4 border rounded-lg ${statusDisplay.bgColor} ${statusDisplay.borderColor}`}>
               <div className="flex items-center gap-2">
@@ -687,7 +523,6 @@ export default function JwtDecoderClient() {
             </div>
           )}
 
-          {/* Algorithm Info */}
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-sm text-gray-700">
               <strong>Detected Algorithm:</strong> {decodedResult.algorithm}

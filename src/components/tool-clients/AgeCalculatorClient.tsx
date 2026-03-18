@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 export default function AgeCalculatorClient() {
   const [birthDate, setBirthDate] = useState('');
+  const [error, setError] = useState('');
   const [result, setResult] = useState<{
     years: number;
     months: number;
@@ -16,6 +17,7 @@ export default function AgeCalculatorClient() {
 
   const calculate = () => {
     if (!birthDate) return;
+    setError('');
 
     const birth = new Date(birthDate);
     const today = new Date();
@@ -86,6 +88,13 @@ export default function AgeCalculatorClient() {
       >
         Calculate Age
       </button>
+
+      {/* Error */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
 
       {/* Results */}
       {result && (

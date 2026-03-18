@@ -23,7 +23,7 @@ export default function RandomNumberGeneratorClient() {
       return minVal + (array[0] % range);
     };
 
-    const maxIterations = Math.min(count * 10, range * 100);
+    const maxIterations = Math.min(count * 10, (max - min + 1) * 100);
     let iterations = 0;
 
     while (numbers.length < count && iterations < maxIterations) {
