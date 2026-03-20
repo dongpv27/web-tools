@@ -52,12 +52,12 @@ export const RegexTesterClient = dynamic(
   () => import('@/components/tool-clients/RegexTesterClient'),
   { ssr: false }
 );
-export const JwtDecoderClient = dynamic(
-  () => import('@/components/tool-clients/JwtDecoderClient'),
+export const JwtDecoderTab = dynamic(
+  () => import('@/components/tool-clients/JwtDecoderTab'),
   { ssr: false }
 );
-export const JwtEncoderClient = dynamic(
-  () => import('@/components/tool-clients/JwtEncoderClient'),
+export const JwtEncoderTab = dynamic(
+  () => import('@/components/tool-clients/JwtEncoderTab'),
   { ssr: false }
 );
 export const JwtToolClient = dynamic(
@@ -760,7 +760,7 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'timestamp-converter': TimestampConverterClient,
   'random-password-generator': RandomPasswordGeneratorClient,
   'regex-tester': RegexTesterClient,
-  'jwt-decoder': JwtToolClient,
+  'jwt-decoder': JwtDecoderTab,
   'md5-hash-generator': Md5HashGeneratorClient,
   'sha256-hash-generator': Sha256HashGeneratorClient,
   'html-formatter': HtmlFormatterClient,
@@ -781,7 +781,7 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'random-string-generator': RandomStringGeneratorClient,
   'guid-generator': GuidGeneratorClient,
   'uuid-bulk-generator': UuidBulkGeneratorClient,
-  'jwt-encoder': JwtToolClient,
+  'jwt-encoder': JwtEncoderTab,
   'curl-to-fetch': CurlToFetchClient,
   // Text Tools
   'word-counter': WordCounterClient,

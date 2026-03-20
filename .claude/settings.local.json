@@ -31,7 +31,9 @@
       "Bash(pkill:*)",
       "Bash(npx tsx:*)",
       "Bash(powershell:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(lsof:*)",
+      "Bash(npx next:*)"
     ]
   }
 }

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import CopyButton from '@/components/ui/CopyButton';
+import { Copy, X } from 'lucide-react';
 import type { Algorithm } from './JwtToolClient';
 import { JwtVerify } from '@/lib/jwt-verify';
+import SignatureFormula from './SignatureFormula';
 
 const ALGORITHMS: Algorithm[] = ['HS256', 'RS256', 'ES256'];
 
@@ -15,7 +16,7 @@ const ALGORITHM_INFO: Record<Algorithm, {
   keyLabel: string;
   keyPlaceholder: string;
 }> = {
-  HS256: { type: 'HMAC', hash: 'SHA-256', minBytes: 32, description: 'HMAC-SHA256', keyLabel: 'Secret Key', keyPlaceholder: 'Enter your shared secret key (minimum 32 bytes)' },
+  HS256: { type: 'HMAC', hash: 'SHA-256', minBytes: 32, description: 'HMAC-SHA256', keyLabel: 'Signing Key', keyPlaceholder: 'Enter your signing key (minimum 32 bytes)' },
   RS256: { type: 'RSA', hash: 'SHA-256', description: 'RSASSA-PKCS1-v1_5-SHA256', keyLabel: 'Private Key (PEM)', keyPlaceholder: '-----BEGIN PRIVATE KEY-----\n...' },
   ES256: { type: 'ECDSA', hash: 'SHA-256', description: 'ECDSA-P256-SHA256', keyLabel: 'Private Key (PEM)', keyPlaceholder: '-----BEGIN PRIVATE KEY-----\n...' },
 };
@@ -26,18 +27,10 @@ interface KeyPair {
 }
 
 function generateSecretKey(bytes: number): string {
-  // Generate printable ASCII characters only (32-126) to avoid display issues
   const array = new Uint8Array(bytes);
   crypto.getRandomValues(array);
-  // Map to printable ASCII range (32-126)
-  const printableChars = array.map(byte => 32 + (byte % 95)); // 95 printable chars
+  const printableChars = array.map(byte => 32 + (byte % 95));
   return String.fromCharCode(...printableChars);
-}
-
-function generateSecretKeyBase64(bytes: number): string {
-  const array = new Uint8Array(bytes);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array));
 }
 
 function generateSecretKeyBase64Url(bytes: number): string {
@@ -50,18 +43,14 @@ function generateSecretKeyBase64Url(bytes: number): string {
     .replace(/=/g, '');
 }
 
-// Generate appropriate key based on algorithm and encoding option
 async function generateKeyForAlgorithm(
   algorithm: Algorithm,
   base64UrlEncoded: boolean
 ): Promise<KeyPair | string> {
   if (algorithm === 'HS256') {
-    // For HMAC, return just the secret key (no public key)
     if (base64UrlEncoded) {
-      // When Base64URL Encoded is ON, generate Base64URL encoded secret
       return generateSecretKeyBase64Url(32);
     }
-    // When Base64URL Encoded is OFF, generate plain text secret
     return generateSecretKey(32);
   } else if (algorithm === 'RS256') {
     return await generateRsaKeyPair();
@@ -152,9 +141,13 @@ function JsonEditor({ value, onChange, placeholder, rows, label }: JsonEditorPro
   };
 
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-      <div className="relative">
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      {/* Title bar */}
+      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+        <label className="text-sm font-medium text-gray-600">{label}</label>
+      </div>
+      {/* Content */}
+      <div className="p-4 bg-white relative">
         <textarea
           ref={textareaRef}
           value={value}
@@ -163,7 +156,7 @@ function JsonEditor({ value, onChange, placeholder, rows, label }: JsonEditorPro
           onBlur={() => setIsFocused(false)}
           onScroll={handleScroll}
           rows={rows}
-          className={`w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent absolute top-0 left-0 right-0 bottom-0 resize-none overflow-auto ${isFocused ? 'z-10' : 'z-0'}`}
+          className={`w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent absolute top-4 left-4 right-4 resize-none overflow-auto ${isFocused ? 'z-10' : 'z-0'}`}
           placeholder={placeholder}
           style={{ color: 'transparent', caretColor: 'black' }}
         />
@@ -178,63 +171,33 @@ function JsonEditor({ value, onChange, placeholder, rows, label }: JsonEditorPro
 }
 
 interface JwtEncoderTabProps {
-  sharedState: {
-    token: string;
-    secretKey: string;
-    algorithm: Algorithm;
-    base64UrlEncoded: boolean;
-    publicKey?: string;
-  };
-  onEncode: (token: string, secretKey: string, algorithm: Algorithm, base64UrlEncoded: boolean, publicKey?: string) => void;
+  slug?: string;
 }
 
-export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabProps) {
-  const [algorithm, setAlgorithm] = useState<Algorithm>(sharedState.algorithm);
+export default function JwtEncoderTab({ slug }: JwtEncoderTabProps) {
+  const [algorithm, setAlgorithm] = useState<Algorithm>('HS256');
   const [header, setHeader] = useState('{\n  "alg": "HS256",\n  "typ": "JWT"\n}');
   const [payload, setPayload] = useState('{\n  "sub": "1234567890",\n  "name": "John Doe",\n  "iat": 1516239022\n}');
-  const [key, setKey] = useState(sharedState.secretKey || '');
-  const [publicKey, setPublicKey] = useState<string>(sharedState.publicKey || '');
-  const [base64UrlEncoded, setBase64UrlEncoded] = useState(sharedState.base64UrlEncoded);
-  const [token, setToken] = useState(sharedState.token || '');
+  const [key, setKey] = useState('');
+  const [base64UrlEncoded, setBase64UrlEncoded] = useState(false);
+  const [token, setToken] = useState('');
   const [error, setError] = useState('');
-  const [keysAutoGenerated, setKeysAutoGenerated] = useState(false); // Track if keys were auto-generated
+  const [keysAutoGenerated, setKeysAutoGenerated] = useState(false);
 
-  // Generate key only if both local key AND shared state are empty
+  // Generate key on mount if empty
   useEffect(() => {
-    if (!key && !sharedState.secretKey) {
+    if (!key) {
       generateKeyForAlgorithm(algorithm, base64UrlEncoded).then(result => {
         if (typeof result === 'string') {
           setKey(result);
-          setKeysAutoGenerated(true); // Keys were auto-generated
+          setKeysAutoGenerated(true);
         } else {
           setKey(result.privateKey);
-          setPublicKey(result.publicKey);
-          setKeysAutoGenerated(true); // Keys were auto-generated
+          setKeysAutoGenerated(true);
         }
       });
     }
   }, []);
-
-  // Sync key from shared state when it changes
-  useEffect(() => {
-    // Always sync from shared state if it has a key
-    // This preserves manually entered keys when switching between tabs
-    if (sharedState.secretKey) {
-      setKey(sharedState.secretKey);
-      setKeysAutoGenerated(false); // Not auto-generated anymore
-    }
-    if (sharedState.publicKey) {
-      setPublicKey(sharedState.publicKey);
-    }
-  }, [sharedState.secretKey, sharedState.publicKey]);
-
-  // Sync key to shared state when user manually changes it (before encoding)
-  useEffect(() => {
-    // Only sync if key was manually entered (not auto-generated) and different from shared state
-    if (!keysAutoGenerated && key && key !== sharedState.secretKey) {
-      onEncode(sharedState.token || token, key, algorithm, base64UrlEncoded, publicKey);
-    }
-  }, [key, keysAutoGenerated, sharedState.secretKey, onEncode, algorithm, base64UrlEncoded, publicKey]);
 
   // Update header and regenerate key when algorithm changes
   useEffect(() => {
@@ -246,18 +209,11 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
       setHeader(`{\n  "alg": "${algorithm}",\n  "typ": "JWT"\n}`);
     }
 
-    // Regenerate key when algorithm changes
     generateKeyForAlgorithm(algorithm, base64UrlEncoded).then(result => {
       if (typeof result === 'string') {
         setKey(result);
-        setPublicKey('');
-        setKeysAutoGenerated(true); // Keys were auto-generated
       } else if (result && result.privateKey && result.publicKey) {
         setKey(result.privateKey);
-        setPublicKey(result.publicKey);
-        setKeysAutoGenerated(true); // Keys were auto-generated
-      } else {
-        console.error('[JWT Encoder] Invalid key result:', result);
       }
     }).catch(err => {
       console.error('[JWT Encoder] Error generating key:', err);
@@ -265,7 +221,6 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
 
     setToken('');
     setError('');
-    setAlgorithm(algorithm);
   }, [algorithm]);
 
   // Clear token when header, payload, key, or base64UrlEncoded changes
@@ -273,18 +228,6 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
     setToken('');
     setError('');
   }, [header, payload, key, base64UrlEncoded]);
-
-  // Sync public key when RSA/ECDSA key changes
-  useEffect(() => {
-    // Only clear public key if user manually changed the key (not auto-generated)
-    if ((algorithm.startsWith('RS') || algorithm.startsWith('ES')) && !keysAutoGenerated) {
-      // If user pastes a valid private key, we don't have the public key
-      // So clear it to force user to provide the public key separately
-      if (key.includes('-----BEGIN PRIVATE KEY-----') || key.includes('-----END PRIVATE KEY-----')) {
-        setPublicKey('');
-      }
-    }
-  }, [key]);
 
   // Regenerate key when Base64URL Encoded toggle changes (for HS256 only)
   useEffect(() => {
@@ -296,12 +239,7 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
       }).catch(err => {
         console.error('[JWT Encoder] Error generating key:', err);
       });
-      setKeysAutoGenerated(true); // Keys were auto-generated
-    }
-    // For RSA/ECDSA, clear public key when encoding changes (though this shouldn't happen)
-    if (algorithm.startsWith('RS') || algorithm.startsWith('ES')) {
-      setPublicKey('');
-      setKeysAutoGenerated(false); // Reset flag
+      setKeysAutoGenerated(true);
     }
   }, [base64UrlEncoded]);
 
@@ -315,13 +253,11 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
       const info = ALGORITHM_INFO[algorithm];
       const isHMAC = algorithm === 'HS256';
 
-      // Handle key based on Base64URL Encoded setting
       let cryptoKey: CryptoKey;
 
       if (info.type === 'HMAC') {
         let keyBytes: Uint8Array;
         if (base64UrlEncoded) {
-          // When Base64URL Encoded is ON, decode the Base64URL key to bytes
           try {
             keyBytes = new TextEncoder().encode(JwtVerify.base64UrlDecode(key));
           } catch (e) {
@@ -329,10 +265,8 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
             return;
           }
         } else {
-          // When Base64URL Encoded is OFF, use the plain text key as-is
           keyBytes = new TextEncoder().encode(key);
         }
-        // For HMAC, validate key length
         const minBytes = info.minBytes!;
         if (keyBytes.length < minBytes) {
           setError(`Secret key must be at least ${minBytes} bytes for ${algorithm}. Current: ${keyBytes.length} bytes.`);
@@ -375,11 +309,6 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
       const message = `${encodedHeader}.${encodedPayload}`;
       const messageData = new TextEncoder().encode(message);
 
-      console.log('[JWT Encode - Sign Data]', {
-        message,
-        messageLength: messageData.length
-      });
-
       const signature = await crypto.subtle.sign(
         info.type === 'HMAC' ? { name: 'HMAC', hash: info.hash } :
         info.type === 'ECDSA' ? { name: 'ECDSA', hash: info.hash } :
@@ -388,12 +317,6 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
         messageData
       );
 
-      const signatureBytes = new Uint8Array(signature);
-      console.log('[JWT Encode - Signature]', {
-        signatureLength: signatureBytes.length,
-        signatureHex: Array.from(signatureBytes).map(b => b.toString(16).padStart(2, '0')).join('')
-      });
-
       const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
@@ -401,18 +324,6 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
 
       const fullToken = `${message}.${signatureBase64}`;
       setToken(fullToken);
-
-      // Debug log
-      console.log('[JWT Encode]', {
-        base64UrlEncoded,
-        originalKey: key,
-        publicKey: publicKey,
-        publicKeyLength: publicKey?.length || 0
-      });
-
-      // Sync with parent - pass original key and let decoder decode it
-      // Sync with parent - include public key for RSA/ECDSA
-      onEncode(fullToken, key, algorithm, base64UrlEncoded, publicKey || undefined);
     } catch (error: any) {
       setError(error?.message || 'Error encoding JWT. Please check your inputs.');
     }
@@ -426,134 +337,198 @@ export default function JwtEncoderTab({ sharedState, onEncode }: JwtEncoderTabPr
     try {
       return JwtVerify.base64UrlDecode(key);
     } catch {
-      return key; // Return original key if decode fails
+      return key;
     }
   };
 
   const decodedKey = getDecodedKey();
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Algorithm</label>
-        <select
-          value={algorithm}
-          onChange={(e) => setAlgorithm(e.target.value as Algorithm)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-        >
-          <option value="HS256">HS256 - HMAC-SHA256</option>
-          <option value="RS256">RS256 - RSASSA-PKCS1-v1_5-SHA256</option>
-          <option value="ES256">ES256 - ECDSA-P256-SHA256</option>
-        </select>
-        <p className="text-xs text-gray-500 mt-2">
-          {isHMAC && `Secret must be at least ${info.minBytes} bytes`}
-          {!isHMAC && 'Private key in PEM format (PKCS#8)'}
-        </p>
-      </div>
-
-      <JsonEditor
-        value={header}
-        onChange={setHeader}
-        rows={4}
-        label="Header (JSON)"
-        placeholder='{"alg": "HS256", "typ": "JWT"}'
-      />
-
-      <JsonEditor
-        value={payload}
-        onChange={setPayload}
-        rows={6}
-        label="Payload (JSON)"
-        placeholder='{"sub": "1234567890", "name": "John Doe"}'
-      />
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-gray-700">{info.keyLabel}</label>
-          {isHMAC && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600">Base64URL Encoded</span>
-              <button
-                type="button"
-                onClick={() => setBase64UrlEncoded(!base64UrlEncoded)}
-                className={`relative w-11 h-6 rounded-full transition-colors ${
-                  base64UrlEncoded ? 'bg-blue-600' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                    base64UrlEncoded ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
+  // Block component
+  const JwtBlock = ({
+    title,
+    content,
+    showCopy = false,
+    showClear = false,
+    onClear,
+    children,
+    titleRight,
+  }: {
+    title: string;
+    content?: string;
+    showCopy?: boolean;
+    showClear?: boolean;
+    onClear?: () => void;
+    children?: React.ReactNode;
+    titleRight?: React.ReactNode;
+  }) => (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      {/* Title bar */}
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+        <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+        <div className="flex items-center gap-2">
+          {titleRight}
+          {showCopy && content && (
+            <button
+              onClick={() => navigator.clipboard.writeText(content)}
+              className="p-1 text-gray-400 hover:text-gray-600 rounded"
+              title="Copy"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          )}
+          {showClear && onClear && (
+            <button
+              onClick={onClear}
+              className="p-1 text-gray-400 hover:text-gray-600 rounded"
+              title="Clear"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
         </div>
-        {isHMAC ? (
-          <>
-            <input
-              type="text"
-              value={key}
-              onChange={(e) => {
-                setKey(e.target.value);
-                setKeysAutoGenerated(false); // User manually changed the key
-              }}
-              className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder={info.keyPlaceholder}
-            />
-            <div className="flex justify-between mt-1 text-xs">
-              <span className="text-gray-500">
-                {base64UrlEncoded
-                  ? `Decoded length: ${new TextEncoder().encode(decodedKey).length} bytes`
-                  : `Current length: ${new TextEncoder().encode(key).length} bytes`
-                }
-              </span>
-              <span className={new TextEncoder().encode(base64UrlEncoded ? decodedKey : key).length >= (info.minBytes || 0) ? 'text-green-600' : 'text-red-600'}>
-                Required: {info.minBytes} bytes
-              </span>
+      </div>
+      {/* Content */}
+      <div className="p-4 bg-white">
+        {children}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Left Column - Generated JWT Token */}
+      <div className="space-y-4">
+        <JwtBlock
+          title="Generated JWT Token"
+          content={token}
+          showCopy={!!token}
+        >
+          {token ? (
+            <div className="bg-gray-900 rounded-lg p-4 break-all min-h-[200px]">
+              <code className="text-sm font-mono text-green-400">{token}</code>
             </div>
-          </>
-        ) : (
-          <textarea
-            value={key}
-            onChange={(e) => {
-              setKey(e.target.value);
-              setKeysAutoGenerated(false); // User manually changed the key
-            }}
-            rows={10}
-            className="w-full px-3 py-2 text-xs font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={info.keyPlaceholder}
-          />
+          ) : (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center min-h-[200px] flex items-center justify-center">
+              <p className="text-gray-500">Configure your JWT and click Encode to generate token</p>
+            </div>
+          )}
+        </JwtBlock>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
         )}
+
+        <button
+          onClick={encodeJWT}
+          className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Encode JWT
+        </button>
       </div>
 
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{error}</p>
+      {/* Right Column - Algorithm, Header, Payload, Signing Key */}
+      <div className="space-y-4">
+        {/* Algorithm Selection */}
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <label className="block text-xs font-medium text-gray-600 mb-1">Algorithm</label>
+          <select
+            value={algorithm}
+            onChange={(e) => setAlgorithm(e.target.value as Algorithm)}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+          >
+            <option value="HS256">HS256 - HMAC-SHA256</option>
+            <option value="RS256">RS256 - RSASSA-PKCS1-v1_5-SHA256</option>
+            <option value="ES256">ES256 - ECDSA-P256-SHA256</option>
+          </select>
         </div>
-      )}
 
-      <button
-        onClick={encodeJWT}
-        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Encode JWT
-      </button>
+        {/* Header Editor */}
+        <JsonEditor
+          value={header}
+          onChange={setHeader}
+          rows={4}
+          label="Header"
+          placeholder='{"alg": "HS256", "typ": "JWT"}'
+        />
 
-      {token && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700">Generated JWT Token</label>
-            <CopyButton text={token} />
+        {/* Payload Editor */}
+        <JsonEditor
+          value={payload}
+          onChange={setPayload}
+          rows={6}
+          label="Payload"
+          placeholder='{"sub": "1234567890", "name": "John Doe"}'
+        />
+
+        {/* Signing Key */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <label className="text-sm font-medium text-gray-600">{info.keyLabel}</label>
+            {isHMAC && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-600">Base64URL Encoded</span>
+                <button
+                  type="button"
+                  onClick={() => setBase64UrlEncoded(!base64UrlEncoded)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    base64UrlEncoded ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${
+                      base64UrlEncoded ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 break-all">
-            <code className="text-sm font-mono text-green-400">{token}</code>
+          {/* Content */}
+          <div className="p-4 bg-white">
+            {isHMAC ? (
+              <>
+                <input
+                  type="text"
+                  value={key}
+                  onChange={(e) => {
+                    setKey(e.target.value);
+                    setKeysAutoGenerated(false);
+                  }}
+                  className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={info.keyPlaceholder}
+                />
+                <div className="flex justify-between mt-1 text-xs">
+                  <span className="text-gray-500">
+                    {base64UrlEncoded
+                      ? `Decoded length: ${new TextEncoder().encode(decodedKey).length} bytes`
+                      : `Current length: ${new TextEncoder().encode(key).length} bytes`
+                    }
+                  </span>
+                  <span className={new TextEncoder().encode(base64UrlEncoded ? decodedKey : key).length >= (info.minBytes || 0) ? 'text-green-600' : 'text-red-600'}>
+                    Required: {info.minBytes} bytes
+                  </span>
+                </div>
+              </>
+            ) : (
+              <textarea
+                value={key}
+                onChange={(e) => {
+                  setKey(e.target.value);
+                  setKeysAutoGenerated(false);
+                }}
+                rows={8}
+                className="w-full px-3 py-2 text-xs font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={info.keyPlaceholder}
+              />
+            )}
+
+            {/* Signature Formula */}
+            <SignatureFormula algorithm={algorithm} />
           </div>
         </div>
-      )}
-
-      <div className="text-sm text-gray-500">
-        <p>Creates a JWT token with {info.description} signature. All processing happens in your browser.</p>
       </div>
     </div>
   );
