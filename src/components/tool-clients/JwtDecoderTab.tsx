@@ -5,6 +5,8 @@ import { X, Copy } from 'lucide-react';
 import type { Algorithm } from './JwtToolClient';
 import { JwtVerify, type VerificationResult } from '@/lib/jwt-verify';
 import SignatureFormula from './SignatureFormula';
+import JwtTokenInput from './JwtTokenInput';
+import JsonInput from './JsonInput';
 
 type VerificationStatus = 'valid' | 'invalid' | 'error' | 'pending' | null;
 
@@ -55,16 +57,6 @@ function arrayBufferToPem(buffer: ArrayBuffer, label: string): string {
   return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----`;
 }
 
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
 async function generateRsaKeyPair(): Promise<{ privateKey: string; publicKey: string }> {
   const keyPair = await crypto.subtle.generateKey(
     { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' },
@@ -93,8 +85,14 @@ async function generateEcdsaKeyPair(): Promise<{ privateKey: string; publicKey: 
   };
 }
 
-async function generateKeyForAlgorithm(algorithm: Algorithm): Promise<{ privateKey: string; publicKey: string }> {
+async function generateKeyForAlgorithm(
+  algorithm: Algorithm,
+  base64UrlEncoded: boolean
+): Promise<{ privateKey: string; publicKey: string }> {
   if (algorithm === 'HS256') {
+    if (base64UrlEncoded) {
+      return { privateKey: '', publicKey: '' };
+    }
     return { privateKey: 'your-256-bit-secret', publicKey: '' };
   } else if (algorithm === 'RS256') {
     return await generateRsaKeyPair();
@@ -102,6 +100,16 @@ async function generateKeyForAlgorithm(algorithm: Algorithm): Promise<{ privateK
     return await generateEcdsaKeyPair();
   }
   return { privateKey: '', publicKey: '' };
+}
+
+function pemToArrayBuffer(pem: string): ArrayBuffer {
+  const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
 
 // JWT Encode function
@@ -162,44 +170,103 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
   const [input, setInput] = useState('');
   const [header, setHeader] = useState('');
   const [payload, setPayload] = useState('');
-  const [signature, setSignature] = useState('');
-  const [decodedResult, setDecodedResult] = useState<DecodedResult | null>(null);
+
+  // Track when user recently pasted a JWT token (for verification, not regeneration)
+  const lastInputChangeTimeRef = useRef(0);
+
+  // Track when verification was last completed (to avoid clearing decodedResult)
+  const lastVerificationTimeRef = useRef(0);
+
+  // Track if key is being changed by user (not system)
+  const isUserEditingKeyRef = useRef(false);
+
+  // Track pending generation to avoid flickering
+  const pendingGenerationRef = useRef(false);
+
+  // Loading state for token generation
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Decoding state
   const [decodeError, setDecodeError] = useState('');
+  const [decodedResult, setDecodedResult] = useState<DecodedResult | null>(null);
+  const [signature, setSignature] = useState('');
+  const [headerError, setHeaderError] = useState('');
+  const [payloadError, setPayloadError] = useState('');
+
+  // Algorithm and key state
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('HS256');
+  const [verifyKey, setVerifyKey] = useState('');
+  const [publicKey, setPublicKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
 
   // Verification state
-  const [verifyKey, setVerifyKey] = useState('');
-  const [publicKey, setPublicKey] = useState<string>('');
-  const [base64UrlEncoded, setBase64UrlEncoded] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(null);
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const [verificationError, setVerificationError] = useState('');
-  const [keyError, setKeyError] = useState(''); // Key validation error
+  const [keyError, setKeyError] = useState('');
   const [isExpired, setIsExpired] = useState(false);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('HS256');
-  const [privateKey, setPrivateKey] = useState<string>(''); // Store private key for encoding
+  const [base64UrlEncoded, setBase64UrlEncoded] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  // Track if we've loaded initial sample
+  // Track initialization
   const hasInitialized = useRef(false);
+  const [_, startTransition] = useTransition();
 
-  // Track pending algorithm change to verify after token is decoded
-  const pendingAlgorithmRef = useRef<Algorithm | null>(null);
+  // Validate JSON function
+  const isValidJson = (str: string): { isValid: boolean; error?: string } => {
+    if (!str || str.trim() === '') {
+      return { isValid: true };
+    }
+    try {
+      JSON.parse(str);
+      return { isValid: true };
+    } catch (e) {
+      return { isValid: false, error: (e as Error).message };
+    }
+  };
 
-  // Transition for smooth UI updates when switching algorithms
-  const [isPending, startTransition] = useTransition();
+  // Detect if a key is Base64URL encoded (for HS256)
+  const isBase64UrlEncoded = (key: string): boolean => {
+    if (!key) return false;
+    // Check if key looks like Base64URL encoded:
+    // - Only contains A-Z, a-z, 0-9, -, _, no spaces
+    // - Not a PEM format (doesn't contain -----)
+    // - Not plain text readable
+    const base64UrlPattern = /^[A-Za-z0-9_-]+$/;
+    return base64UrlPattern.test(key) &&
+           !key.includes('-----') &&
+           key.length > 20; // Base64URL encoded keys are usually longer
+  };
 
-  const decode = useCallback(() => {
-    const tokenToDecode = input.trim();
-    setDecodeError('');
+  // Handle clear JWT token - clear all related state
+  const handleClear = useCallback(() => {
+    setInput('');
     setHeader('');
     setPayload('');
     setSignature('');
+    setDecodedResult(null);
+    setDecodeError('');
+    setHeaderError('');
+    setPayloadError('');
     setVerificationStatus(null);
     setVerificationError('');
-    setKeyError(''); // Clear key error on new decode
+    setKeyError('');
     setIsExpired(false);
+    setBase64UrlEncoded(false);
+    setIsVerifying(false);
+    setIsGenerating(false);
+    // Keep verifyKey, publicKey, privateKey, selectedAlgorithm
+  }, []);
+
+  // Decode JWT token
+  const decode = useCallback(() => {
+    const tokenToDecode = input.trim();
+    setDecodeError('');
+    setHeaderError('');
+    setPayloadError('');
 
     if (!tokenToDecode) {
       setDecodedResult(null);
-      setIsGenerating(false); // Hide loading when decode is done
+      setIsGenerating(false);
       return;
     }
 
@@ -207,7 +274,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     if (parts.length !== 3) {
       setDecodeError('Invalid JWT format. JWT must have 3 parts separated by dots.');
       setDecodedResult(null);
-      setIsGenerating(false); // Hide loading when decode is done
+      setIsGenerating(false);
       return;
     }
 
@@ -236,18 +303,16 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         setSelectedAlgorithm(detectedAlg as Algorithm);
       }
 
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (payloadJson.exp !== undefined && payloadJson.exp < currentTime) {
-        setIsExpired(true);
-      } else {
-        setIsExpired(false);
-      }
+      // Reset Base64URL toggle when decoding new token (will be set by verify if needed)
+      setBase64UrlEncoded(false);
 
-      setIsGenerating(false); // Hide loading when decode is done
+      const currentTime = Math.floor(Date.now() / 1000);
+      setIsExpired(payloadJson.exp !== undefined && payloadJson.exp < currentTime);
+
     } catch (e) {
       setDecodeError(`Error decoding JWT: ${(e as Error).message}`);
       setDecodedResult(null);
-      setIsGenerating(false); // Hide loading when decode is done
+      setIsGenerating(false);
     }
   }, [input]);
 
@@ -259,18 +324,27 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     return () => clearTimeout(timer);
   }, [input, decode]);
 
+  // Verification function
   const verify = async () => {
+    // Set loading states
+    setIsGenerating(true);
+    setIsVerifying(true);
+    setVerificationStatus('pending');
+    setVerificationError('');
+    setKeyError('');
+
     const tokenToVerify = input.trim();
 
     if (!tokenToVerify) {
       setVerificationError('No token to verify');
+      setIsVerifying(false);
       return;
     }
 
-    // Extract algorithm from token directly (not from decodedResult to avoid timing issues)
     const parts = tokenToVerify.split('.');
     if (parts.length !== 3) {
       setVerificationError('Invalid JWT format');
+      setIsVerifying(false);
       return;
     }
 
@@ -281,11 +355,9 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
       algorithm = headerJson.alg;
     } catch {
       setVerificationError('Failed to decode token header');
+      setIsVerifying(false);
       return;
     }
-
-    // Clear key error before verification
-    setKeyError('');
 
     try {
       let verifyResult: VerificationResult;
@@ -295,21 +367,22 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           setKeyError('Secret key is required for HMAC verification');
           setVerificationStatus(null);
           setVerificationError('');
+          setIsVerifying(false);
           return;
         }
 
-        // Use key directly - token is created with the key in its current format
         verifyResult = await JwtVerify.verify({
           token: tokenToVerify,
           secret: verifyKey
         });
 
       } else if (algorithm.startsWith('RS') || algorithm.startsWith('ES')) {
-        const keyToUse = publicKey || verifyKey;
+        const keyToUse = verifyKey;
         if (!keyToUse) {
           setKeyError('Public key is required for verification');
           setVerificationStatus(null);
           setVerificationError('');
+          setIsVerifying(false);
           return;
         }
 
@@ -317,110 +390,108 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           setKeyError('Invalid PEM format. Public key must be in PEM format.');
           setVerificationStatus(null);
           setVerificationError('');
+          setIsVerifying(false);
           return;
         }
-
-        console.log('[JWT Decoder] Verifying with algorithm:', algorithm);
-        console.log('[JWT Decoder] Public key (first 50 chars):', keyToUse.substring(0, 50));
 
         verifyResult = await JwtVerify.verify({
           token: tokenToVerify,
           publicKeyPem: keyToUse
         });
 
-        console.log('[JWT Decoder] Verification result:', verifyResult);
-
       } else {
         setKeyError(`Unsupported algorithm: ${algorithm}`);
         setVerificationStatus(null);
         setVerificationError('');
+        setIsVerifying(false);
         return;
       }
 
       if (verifyResult.status === 'valid') {
         setVerificationStatus('valid');
         setVerificationError('Signature verified successfully');
+        // Track when verification was completed
+        lastVerificationTimeRef.current = Date.now();
+
+        // Auto-detect Base64URL encoding for HS256 and set toggle
+        if (algorithm.startsWith('HS') && isBase64UrlEncoded(verifyKey)) {
+          setBase64UrlEncoded(true);
+        }
       } else if (verifyResult.status === 'invalid') {
         setVerificationStatus('invalid');
         setVerificationError('Invalid signature');
+        lastVerificationTimeRef.current = Date.now();
       } else {
         setVerificationStatus('error');
         setVerificationError(verifyResult.reason);
+        lastVerificationTimeRef.current = Date.now();
       }
 
       setIsExpired(verifyResult.isExpired);
 
     } catch (e: any) {
-      console.error('[JWT Decoder] Verification error:', e);
-      const errorMessage = (e as Error).message || '';
-      const errorString = errorMessage.toLowerCase();
-
-      // Check if this is a key-related error (more comprehensive check)
-      const isKeyError =
-        errorString.includes('invalid public key') ||
-        errorString.includes('key') ||
-        errorString.includes('pem') ||
-        errorString.includes('asn.1') ||
-        errorString.includes('dataerror') ||
-        errorString.includes('atob') ||
-        errorString.includes('base64') ||
-        errorString.includes('spki') ||
-        errorString.includes('importkey') ||
-        errorString.includes('incorrect') ||
-        errorString.includes('corrupted');
-
-      console.log('[JWT Decoder] Is key error?', isKeyError, 'Error message:', errorMessage);
-
-      if (isKeyError) {
-        setKeyError(errorMessage);
-        setVerificationStatus(null);
-        setVerificationError('');
-      } else {
-        setVerificationStatus('error');
-        setVerificationError(`Verification error: ${errorMessage}`);
-      }
+      setVerificationStatus('error');
+      setVerificationError(`Verification error: ${e?.message || 'Unknown error'}`);
+      lastVerificationTimeRef.current = Date.now();
+    } finally {
+      // Always clear loading states at the end
+      setIsVerifying(false);
+      setIsGenerating(false);
     }
   };
 
+  // Auto-verify when decoded result exists and key is available
   useEffect(() => {
-    // Auto-verify when decoded result exists and key is available
     const alg = decodedResult?.algorithm;
     const hasKey = alg?.startsWith('HS') ? verifyKey : ((alg?.startsWith('RS') || alg?.startsWith('ES')) && (publicKey || verifyKey));
 
-    if (decodedResult && hasKey) {
-      const timer = setTimeout(() => verify(), 300);
-      return () => clearTimeout(timer);
+    if (!decodedResult || !hasKey) {
+      return;
     }
+
+    const timer = setTimeout(() => {
+      verify();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [decodedResult, verifyKey, publicKey]);
 
   // Validate key format and show error immediately
   useEffect(() => {
     if (!decodedResult || !decodedResult.algorithm) {
       setKeyError('');
+      setHeaderError('');
+      setPayloadError('');
       return;
     }
 
-    const alg = decodedResult.algorithm;
-    const keyToUse = publicKey || verifyKey;
+    const alg = decodedResult?.algorithm;
 
-    // Clear previous errors
-    setKeyError('');
-
-    // Validate key format based on algorithm
+    // Validate Header JSON
     if (alg && alg.startsWith('HS')) {
-      // For HMAC, key can be any value, no format validation needed
-      // Base64URL encoding is now handled at token creation time
+      const headerValidation = isValidJson(header);
+      if (!headerValidation.isValid) {
+        setHeaderError(headerValidation.error || 'Invalid Header JSON format');
+      }
     } else if (alg && (alg.startsWith('RS') || alg.startsWith('ES'))) {
-      // For RSA/ECDSA, key is required
-      if (!keyToUse || !keyToUse.trim()) {
-        setKeyError('Public key is required for verification');
-      } else if (!keyToUse.includes('-----BEGIN PUBLIC KEY-----')) {
-        setKeyError('Invalid PEM format. Missing "-----BEGIN PUBLIC KEY-----" header');
-      } else if (!keyToUse.includes('-----END PUBLIC KEY-----')) {
-        setKeyError('Invalid PEM format. Missing "-----END PUBLIC KEY-----" footer');
+      const headerValidation = isValidJson(header);
+      if (!headerValidation.isValid) {
+        setHeaderError(headerValidation.error || 'Invalid Header JSON format');
       }
     }
-  }, [decodedResult, verifyKey, publicKey, base64UrlEncoded]);
+
+    // Validate Payload JSON
+    if (alg && alg.startsWith('HS')) {
+      const payloadValidation = isValidJson(payload);
+      if (!payloadValidation.isValid) {
+        setPayloadError(payloadValidation.error || 'Invalid Payload JSON format');
+      }
+    } else if (alg && (alg.startsWith('RS') || alg.startsWith('ES'))) {
+      const payloadValidation = isValidJson(payload);
+      if (!payloadValidation.isValid) {
+        setPayloadError(payloadValidation.error || 'Invalid Payload JSON format');
+      }
+    }
+  }, [header, payload, decodedResult?.algorithm]);
 
   // Handle Base64URL encoding toggle for HS256 (legacy - now handled directly in button)
   // Load sample and generate key for a specific algorithm
@@ -429,6 +500,9 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     setVerificationStatus(null);
     setVerificationError('');
     setKeyError('');
+    setHeaderError('');
+    setPayloadError('');
+
     setSelectedAlgorithm(alg);
 
     // Mark as system update (not user editing key)
@@ -448,7 +522,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         setPublicKey('');
         setPrivateKey('');
         setBase64UrlEncoded(base64Url);
-        setDecodedResult(null); // Clear decoded result to trigger re-decode
+        setDecodedResult(null);
       });
     } else {
       // For RS256 and ES256, generate key pair and create signed token
@@ -459,13 +533,14 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
       setKeyError('');
       setVerificationStatus(null);
       setVerificationError('');
-      setDecodedResult(null);
+      setHeaderError('');
+      setPayloadError('');
 
       // Small delay to ensure UI is updated
       await new Promise(resolve => setTimeout(resolve, 50));
 
       // Generate key pair
-      const keyPair = await generateKeyForAlgorithm(alg);
+      const keyPair = await generateKeyForAlgorithm(alg, base64Url);
 
       // Encode JWT using the same method as JwtEncoderTab
       const header = { alg: alg, typ: 'JWT' };
@@ -485,8 +560,8 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           false,
           ['sign']
         );
-        signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, messageData);
-      } else {
+        signature = await crypto.subtle.sign({ name: 'RSASSA-PKCS1-v1_5' }, cryptoKey, messageData);
+      } else if (alg === 'ES256') {
         const keyData = pemToArrayBuffer(keyPair.privateKey);
         const cryptoKey = await crypto.subtle.importKey(
           'pkcs8',
@@ -496,6 +571,8 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           ['sign']
         );
         signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, cryptoKey, messageData);
+      } else {
+        return;
       }
 
       const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
@@ -515,6 +592,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         setVerifyKey(keyPair.publicKey);
         setInput(token);
         setBase64UrlEncoded(false);
+        setDecodedResult(null);
       });
     }
   };
@@ -525,6 +603,9 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     setVerificationStatus(null);
     setVerificationError('');
     setKeyError('');
+    setHeaderError('');
+    setPayloadError('');
+
     await loadSampleForKey(newAlgorithm);
   };
 
@@ -534,17 +615,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
       hasInitialized.current = true;
       loadSampleForKey('HS256', false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Track if key is being changed by user (not system)
-  const isUserEditingKeyRef = useRef(false);
-
-  // Track pending generation to avoid flickering
-  const pendingGenerationRef = useRef(false);
-
-  // Loading state for token generation
-  const [isGenerating, setIsGenerating] = useState(false);
 
   // Regenerate token when key changes (for HS256 only)
   useEffect(() => {
@@ -557,6 +628,22 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
 
     // Skip if no key
     if (!verifyKey) {
+      return;
+    }
+
+    // Skip regeneration if key change happened shortly after input change
+    // This indicates that user is pasting a JWT token with its key for verification
+    const timeSinceInputChanged = Date.now() - lastInputChangeTimeRef.current;
+    if (timeSinceInputChanged < 2000) {
+      console.log('[JWT Decoder] Skipping token regeneration - user is pasting JWT with key for verification');
+      return;
+    }
+
+    // Skip regeneration if verification was recently completed
+    // This prevents clearing decodedResult after verification
+    const timeSinceVerification = Date.now() - lastVerificationTimeRef.current;
+    if (timeSinceVerification < 5000) {
+      console.log('[JWT Decoder] Skipping token regeneration - verification was recently completed');
       return;
     }
 
@@ -583,14 +670,14 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         if (pendingGenerationRef.current) {
           // Update token and clear decoded result to trigger re-decode
           setInput(newToken);
-          setDecodedResult(null); // This will trigger decode() to update header/payload
+          setDecodedResult(null);
           // Note: isGenerating will be set to false in decode() callback
           pendingGenerationRef.current = false;
         }
       } catch (error) {
         console.error('[JWT Decoder] Error regenerating token:', error);
         if (pendingGenerationRef.current) {
-          setIsGenerating(false); // Hide loading on error
+          setIsGenerating(false);
           pendingGenerationRef.current = false;
         }
       }
@@ -598,9 +685,8 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
 
     return () => {
       clearTimeout(timer);
-      // Don't clear loading here - a new effect is about to run
     };
-  }, [verifyKey]); // Only depend on verifyKey changes
+  }, [verifyKey]);
 
   const algorithm = decodedResult?.algorithm || selectedAlgorithm;
   const isHmac = algorithm.startsWith('HS');
@@ -618,6 +704,17 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
   };
 
   const getStatusDisplay = () => {
+    // Priority: loading > verification status
+    if (isVerifying) {
+      return {
+        icon: '⏳',
+        text: 'Verifying...',
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        textColor: 'text-yellow-700',
+      };
+    }
+
     switch (verificationStatus) {
       case 'valid':
         return {
@@ -666,6 +763,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     showClear = false,
     onClear,
     children,
+    titleRight,
   }: {
     title: string;
     content?: string;
@@ -673,12 +771,14 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     showClear?: boolean;
     onClear?: () => void;
     children?: React.ReactNode;
+    titleRight?: React.ReactNode;
   }) => (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
       {/* Title bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
         <h3 className="text-sm font-medium text-gray-600">{title}</h3>
         <div className="flex items-center gap-2">
+          {titleRight}
           {showCopy && content && (
             <button
               onClick={() => navigator.clipboard.writeText(content)}
@@ -706,19 +806,6 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
     </div>
   );
 
-  // Parse JWT token for color display
-  const parseJwtToken = (token: string) => {
-    if (!token) return { header: '', payload: '', signature: '' };
-    const parts = token.split('.');
-    return {
-      header: parts[0] || '',
-      payload: parts[1] || '',
-      signature: parts[2] || '',
-    };
-  };
-
-  const tokenParts = parseJwtToken(input);
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left Column - JWT Token Input */}
@@ -728,29 +815,24 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           content={input}
           showCopy={!!input}
           showClear={!!input}
-          onClear={() => setInput('')}
+          onClear={handleClear}
         >
           {/* JWT Token with 3 colors - textarea has transparent text */}
-          <div className="relative">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste your JWT token here..."
-              rows={10}
-              className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
-              style={{ color: 'transparent', caretColor: 'black' }}
-            />
-            {input && (
-              <div className="absolute top-0 left-0 right-0 px-3 py-2 pointer-events-none">
-                <div className="flex flex-wrap text-sm font-mono">
-                  <span className="text-blue-600 break-all">{tokenParts.header}</span>
-                  <span className="text-purple-600 break-all">.{tokenParts.payload}</span>
-                  <span className="text-orange-600 break-all">.{tokenParts.signature}</span>
-                </div>
-              </div>
-            )}
-          </div>
+          <JwtTokenInput
+            input={input}
+            onChange={setInput}
+          />
         </JwtBlock>
+
+        {/* JSON Validation Errors */}
+        {(headerError || payloadError) && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">❌</span>
+              <span className="text-sm font-medium text-red-700">{headerError || payloadError}</span>
+            </div>
+          </div>
+        )}
 
         {decodeError && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -758,7 +840,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           </div>
         )}
 
-        {isGenerating ? (
+        {isGenerating && (
           <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
             <div className="flex items-center justify-center gap-3">
               <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -768,57 +850,56 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
               <span className="text-sm font-medium text-blue-700">Generating token...</span>
             </div>
           </div>
-        ) : (
-          <>
-            {signature && (
-              <JwtBlock title="Signature" content={signature} showCopy>
-                <code className="text-sm font-mono text-orange-600 break-all">{signature}</code>
-              </JwtBlock>
-            )}
+        )}
 
-            {/* Signature Verification Status - Moved to left column */}
-            {(statusDisplay || keyError) && (
-              <div className={`p-4 border rounded-lg ${keyError ? 'bg-red-50 border-red-200' : (statusDisplay ? `${statusDisplay.bgColor} ${statusDisplay.borderColor}` : '')}`}>
-                {keyError ? (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">❌</span>
-                      <span className="text-sm font-medium text-red-700">{keyError}</span>
-                    </div>
-                  </>
-                ) : statusDisplay ? (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{statusDisplay.icon}</span>
-                      <span className={`text-sm font-medium ${statusDisplay.textColor}`}>
-                        {statusDisplay.text}
-                      </span>
-                    </div>
-                    {(isExpired || (!isExpired && verificationStatus === 'valid' && decodedResult?.payload?.exp)) && (
-                      <p className={`text-sm mt-2 ${statusDisplay.textColor}`}>
-                        {isExpired
-                          ? `This token has expired (exp: ${decodedResult?.payload?.exp})`
-                          : `This token is not expired (exp: ${decodedResult?.payload?.exp})`
-                        }
-                      </p>
-                    )}
-                  </>
-                ) : null}
-              </div>
-            )}
-          </>
+        {/* Signature - only show when decoded */}
+        {decodedResult && decodedResult.signature && (
+          <JwtBlock title="Signature" content={decodedResult.signature} showCopy>
+            <code className="text-sm font-mono text-orange-600 break-all">{decodedResult.signature}</code>
+          </JwtBlock>
+        )}
+
+        {/* Signature Verification Status - Moved to left column */}
+        {(statusDisplay || keyError) && (
+          <div className={`p-4 border rounded-lg ${keyError ? 'bg-red-50 border-red-200' : (statusDisplay ? `${statusDisplay.bgColor} ${statusDisplay.borderColor}` : '')}`}>
+            {keyError ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">❌</span>
+                  <span className="text-sm font-medium text-red-700">{keyError}</span>
+                </div>
+              </>
+            ) : statusDisplay ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{statusDisplay.icon}</span>
+                  <span className={`text-sm font-medium ${statusDisplay.textColor}`}>
+                    {statusDisplay.text}
+                  </span>
+                </div>
+                {(isExpired || (!isExpired && verificationStatus === 'valid' && decodedResult?.payload?.exp)) && (
+                  <p className={`text-sm mt-2 ${statusDisplay.textColor}`}>
+                    {isExpired
+                      ? `This token has expired (exp: ${decodedResult?.payload?.exp})`
+                      : `This token is not expired (exp: ${decodedResult?.payload?.exp})`
+                    }
+                  </p>
+                )}
+              </>
+            ) : null}
+          </div>
         )}
       </div>
 
-      {/* Right Column - Header, Payload, Signing Key */}
+      {/* Right Column - Algorithm, Header, Payload, Signing Key */}
       <div className="space-y-4">
         {/* Algorithm Selection */}
-        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
           <label className="block text-xs font-medium text-gray-600 mb-1">Algorithm</label>
           <select
             value={selectedAlgorithm}
             onChange={(e) => handleAlgorithmChange(e.target.value as Algorithm)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
           >
             <option value="HS256">HS256 - HMAC-SHA256</option>
             <option value="RS256">RS256 - RSASSA-PKCS1-v1_5-SHA256</option>
@@ -827,34 +908,71 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         </div>
 
         {/* Header Section */}
-        {header && (
-          <JwtBlock title="Header" content={header} showCopy>
-            <pre
-              className="text-sm font-mono"
-              dangerouslySetInnerHTML={{ __html: highlightJson(header) }}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-600">Header</h3>
+            <div className="flex items-center gap-2">
+              {headerError && (
+                <span className="text-xl">⚠️</span>
+              )}
+              {header && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(header)}
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                  title="Copy Header"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Content */}
+          <div className="p-4 bg-white">
+            <JsonInput
+              value={header}
+              rows={header ? 10 : 2}
+              placeholder=""
+              error={headerError}
+              readOnly
             />
-          </JwtBlock>
-        )}
+          </div>
+        </div>
 
         {/* Payload Section */}
-        {payload && (
-          <div>
-            <JwtBlock title="Payload" content={payload} showCopy>
-              <pre
-                className="text-sm font-mono"
-                dangerouslySetInnerHTML={{ __html: highlightJson(payload) }}
-              />
-            </JwtBlock>
-            {isExpired && (
-              <p className="text-sm text-yellow-700 mt-2 flex items-center gap-1 px-3">
-                ⚠️ This token has expired (exp: {decodedResult?.payload?.exp})
-              </p>
-            )}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-600">Payload</h3>
+            <div className="flex items-center gap-2">
+              {payloadError && (
+                <span className="text-xl">⚠️</span>
+              )}
+              {payload && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(payload)}
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                  title="Copy Payload"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
-        )}
+          {/* Content */}
+          <div className="p-4 bg-white">
+            <JsonInput
+              value={payload}
+              rows={payload ? 15 : 2}
+              placeholder=""
+              error={payloadError}
+              readOnly
+            />
+          </div>
+        </div>
 
         {/* Signing Key Section */}
-        {decodedResult && (
+        {(decodedResult || input || selectedAlgorithm) && (
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             {/* Title bar */}
             <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
@@ -905,8 +1023,6 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
                             setDecodedResult(null);
                           });
                         }
-                      } else {
-                        setBase64UrlEncoded(newValue);
                       }
                     }}
                     className={`relative w-11 h-6 rounded-full transition-colors ${
@@ -925,29 +1041,44 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
             {/* Content */}
             <div className="p-4 bg-white">
               {isHmac ? (
-                <input
-                  type="text"
-                  value={verifyKey}
-                  onChange={(e) => {
-                    isUserEditingKeyRef.current = true; // Mark as user editing
-                    setVerifyKey(e.target.value);
-                    setPublicKey('');
-                    setKeyError(''); // Clear key error when user types
-                  }}
-                  placeholder={getKeyPlaceholder()}
-                  className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <>
+                  <input
+                    type="text"
+                    value={verifyKey}
+                    onChange={(e) => {
+                      isUserEditingKeyRef.current = true; // Mark as user editing
+                      setVerifyKey(e.target.value);
+                      setPublicKey('');
+                      setKeyError('');
+                    }}
+                    className={`w-full px-3 py-2 text-sm font-mono border rounded-lg focus:outline-none focus:ring-2 ${
+                      keyError ? 'focus:ring-red-500 bg-red-50' : 'focus:ring-blue-500 bg-white'
+                    }`}
+                    placeholder={getKeyPlaceholder()}
+                  />
+                  <div className="flex justify-between mt-1 text-xs">
+                    <span className="text-gray-500">
+                      {base64UrlEncoded
+                        ? `Decoded length: ${new TextEncoder().encode(verifyKey).length} bytes`
+                        : `Current length: ${new TextEncoder().encode(verifyKey).length} bytes`
+                    }
+                    </span>
+                    <span className={new TextEncoder().encode(verifyKey).length >= 32 ? 'text-green-600' : 'text-red-600'}>
+                      Required: 32 bytes
+                    </span>
+                  </div>
+                </>
               ) : (
                 <textarea
-                  value={publicKey || verifyKey}
+                  value={verifyKey}
                   onChange={(e) => {
-                    setPublicKey(e.target.value);
                     setVerifyKey(e.target.value);
-                    setKeyError(''); // Clear key error when user types
+                    setPublicKey(e.target.value);
+                    setKeyError('');
                   }}
+                  rows={8}
+                  className="w-full px-3 py-2 text-xs font-mono border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={getKeyPlaceholder()}
-                  rows={6}
-                  className="w-full px-3 py-2 text-xs font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               )}
 
