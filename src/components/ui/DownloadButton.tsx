@@ -28,23 +28,17 @@ export default function DownloadButton({
   return (
     <button
       onClick={handleDownload}
-      className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+      className={`flex items-center justify-center w-9 h-9 rounded-md transition-colors ${
         downloaded
-          ? 'bg-green-100 text-green-700 hover:bg-green-100'
+          ? 'bg-green-100 text-green-700'
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       } ${className}`}
       title={downloaded ? 'Downloaded!' : 'Download file'}
     >
       {downloaded ? (
-        <>
-          <Check className="w-4 h-4" />
-          <span>Downloaded!</span>
-        </>
+        <Check className="w-4 h-4" />
       ) : (
-        <>
-          <Download className="w-4 h-4" />
-          <span>Download</span>
-        </>
+        <Download className="w-4 h-4" />
       )}
     </button>
   );

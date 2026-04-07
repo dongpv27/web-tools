@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { X, Check } from 'lucide-react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 
@@ -8,6 +9,7 @@ export default function Sha256HashGeneratorClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [cleared, setCleared] = useState(false);
 
   const sha256 = async (text: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -37,6 +39,8 @@ export default function Sha256HashGeneratorClient() {
     setInput('');
     setOutput('');
     setError('');
+    setCleared(true);
+    setTimeout(() => setCleared(false), 2000);
   };
 
   return (
@@ -64,9 +68,18 @@ export default function Sha256HashGeneratorClient() {
         </button>
         <button
           onClick={clearAll}
-          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+          className={`flex items-center justify-center w-9 h-9 rounded-md transition-colors ${
+            cleared
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+          title={cleared ? 'Cleared!' : 'Clear all'}
         >
-          Clear
+          {cleared ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <X className="w-4 h-4" />
+          )}
         </button>
       </div>
 

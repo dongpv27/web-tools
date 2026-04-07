@@ -225,16 +225,19 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
   };
 
   // Detect if a key is Base64URL encoded (for HS256)
+  // Uses round-trip check: decode then re-encode, if result matches → it's Base64URL
   const isBase64UrlEncoded = (key: string): boolean => {
     if (!key) return false;
-    // Check if key looks like Base64URL encoded:
-    // - Only contains A-Z, a-z, 0-9, -, _, no spaces
-    // - Not a PEM format (doesn't contain -----)
-    // - Not plain text readable
+    if (key.includes('-----')) return false; // PEM format
     const base64UrlPattern = /^[A-Za-z0-9_-]+$/;
-    return base64UrlPattern.test(key) &&
-           !key.includes('-----') &&
-           key.length > 20; // Base64URL encoded keys are usually longer
+    if (!base64UrlPattern.test(key)) return false;
+    try {
+      const decoded = JwtVerify.base64UrlDecode(key);
+      const reEncoded = JwtVerify.base64UrlEncode(decoded);
+      return reEncoded === key;
+    } catch {
+      return false;
+    }
   };
 
   // Handle clear JWT token - clear all related state
@@ -359,6 +362,10 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
       return;
     }
 
+    // Use the Base64URL toggle value set by user
+    // Do NOT auto-detect - raw printable keys can be mistaken for Base64URL
+    let shouldDecodeKey = base64UrlEncoded;
+
     try {
       let verifyResult: VerificationResult;
 
@@ -371,9 +378,14 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
           return;
         }
 
+        // If Base64URL Encoded is toggled ON, decode the key first
+        const secretToUse = shouldDecodeKey
+          ? JwtVerify.base64UrlDecode(verifyKey)
+          : verifyKey;
+
         verifyResult = await JwtVerify.verify({
           token: tokenToVerify,
-          secret: verifyKey
+          secret: secretToUse
         });
 
       } else if (algorithm.startsWith('RS') || algorithm.startsWith('ES')) {
@@ -412,11 +424,6 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         setVerificationError('Signature verified successfully');
         // Track when verification was completed
         lastVerificationTimeRef.current = Date.now();
-
-        // Auto-detect Base64URL encoding for HS256 and set toggle
-        if (algorithm.startsWith('HS') && isBase64UrlEncoded(verifyKey)) {
-          setBase64UrlEncoded(true);
-        }
       } else if (verifyResult.status === 'invalid') {
         setVerificationStatus('invalid');
         setVerificationError('Invalid signature');
@@ -618,6 +625,9 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
   }, []);
 
   // Regenerate token when key changes (for HS256 only)
+  // DISABLED: This interferes with user input when entering verification key
+  // Users should paste JWT token with key for verification, not have token regenerated
+  /*
   useEffect(() => {
     const alg = decodedResult?.algorithm;
 
@@ -687,6 +697,7 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
       clearTimeout(timer);
     };
   }, [verifyKey]);
+  */
 
   const algorithm = decodedResult?.algorithm || selectedAlgorithm;
   const isHmac = algorithm.startsWith('HS');
@@ -853,123 +864,11 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
         )}
 
         {/* Signature - only show when decoded */}
-        {decodedResult && decodedResult.signature && (
-          <JwtBlock title="Signature" content={decodedResult.signature} showCopy>
-            <code className="text-sm font-mono text-orange-600 break-all">{decodedResult.signature}</code>
+        {decodedResult && signature && (
+          <JwtBlock title="Signature" content={signature} showCopy>
+            <code className="text-sm font-mono text-orange-600 break-all">{signature}</code>
           </JwtBlock>
         )}
-
-        {/* Signature Verification Status - Moved to left column */}
-        {(statusDisplay || keyError) && (
-          <div className={`p-4 border rounded-lg ${keyError ? 'bg-red-50 border-red-200' : (statusDisplay ? `${statusDisplay.bgColor} ${statusDisplay.borderColor}` : '')}`}>
-            {keyError ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">❌</span>
-                  <span className="text-sm font-medium text-red-700">{keyError}</span>
-                </div>
-              </>
-            ) : statusDisplay ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{statusDisplay.icon}</span>
-                  <span className={`text-sm font-medium ${statusDisplay.textColor}`}>
-                    {statusDisplay.text}
-                  </span>
-                </div>
-                {(isExpired || (!isExpired && verificationStatus === 'valid' && decodedResult?.payload?.exp)) && (
-                  <p className={`text-sm mt-2 ${statusDisplay.textColor}`}>
-                    {isExpired
-                      ? `This token has expired (exp: ${decodedResult?.payload?.exp})`
-                      : `This token is not expired (exp: ${decodedResult?.payload?.exp})`
-                    }
-                  </p>
-                )}
-              </>
-            ) : null}
-          </div>
-        )}
-      </div>
-
-      {/* Right Column - Algorithm, Header, Payload, Signing Key */}
-      <div className="space-y-4">
-        {/* Algorithm Selection */}
-        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <label className="block text-xs font-medium text-gray-600 mb-1">Algorithm</label>
-          <select
-            value={selectedAlgorithm}
-            onChange={(e) => handleAlgorithmChange(e.target.value as Algorithm)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-          >
-            <option value="HS256">HS256 - HMAC-SHA256</option>
-            <option value="RS256">RS256 - RSASSA-PKCS1-v1_5-SHA256</option>
-            <option value="ES256">ES256 - ECDSA-P256-SHA256</option>
-          </select>
-        </div>
-
-        {/* Header Section */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          {/* Title bar */}
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-600">Header</h3>
-            <div className="flex items-center gap-2">
-              {headerError && (
-                <span className="text-xl">⚠️</span>
-              )}
-              {header && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(header)}
-                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                  title="Copy Header"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Content */}
-          <div className="p-4 bg-white">
-            <JsonInput
-              value={header}
-              rows={header ? 10 : 2}
-              placeholder=""
-              error={headerError}
-              readOnly
-            />
-          </div>
-        </div>
-
-        {/* Payload Section */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          {/* Title bar */}
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-600">Payload</h3>
-            <div className="flex items-center gap-2">
-              {payloadError && (
-                <span className="text-xl">⚠️</span>
-              )}
-              {payload && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(payload)}
-                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                  title="Copy Payload"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Content */}
-          <div className="p-4 bg-white">
-            <JsonInput
-              value={payload}
-              rows={payload ? 15 : 2}
-              placeholder=""
-              error={payloadError}
-              readOnly
-            />
-          </div>
-        </div>
 
         {/* Signing Key Section */}
         {(decodedResult || input || selectedAlgorithm) && (
@@ -1047,9 +946,15 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
                     value={verifyKey}
                     onChange={(e) => {
                       isUserEditingKeyRef.current = true; // Mark as user editing
-                      setVerifyKey(e.target.value);
+                      const newKey = e.target.value;
+                      setVerifyKey(newKey);
                       setPublicKey('');
                       setKeyError('');
+                      // Auto-detect Base64URL encoding when key changes
+                      const alg = decodedResult?.algorithm;
+                      if (alg?.startsWith('HS')) {
+                        setBase64UrlEncoded(isBase64UrlEncoded(newKey));
+                      }
                     }}
                     className={`w-full px-3 py-2 text-sm font-mono border rounded-lg focus:outline-none focus:ring-2 ${
                       keyError ? 'focus:ring-red-500 bg-red-50' : 'focus:ring-blue-500 bg-white'
@@ -1085,6 +990,120 @@ export default function JwtDecoderTab({ slug }: JwtDecoderTabProps) {
               {/* Signature Formula */}
               <SignatureFormula algorithm={algorithm as Algorithm} />
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Right Column - Algorithm, Header, Payload, Verification Status */}
+      <div className="space-y-4">
+        {/* Algorithm Selection */}
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <label className="block text-xs font-medium text-gray-600 mb-1">Algorithm</label>
+          <select
+            value={selectedAlgorithm}
+            onChange={(e) => handleAlgorithmChange(e.target.value as Algorithm)}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+          >
+            <option value="HS256">HS256 - HMAC-SHA256</option>
+            <option value="RS256">RS256 - RSASSA-PKCS1-v1_5-SHA256</option>
+            <option value="ES256">ES256 - ECDSA-P256-SHA256</option>
+          </select>
+        </div>
+
+        {/* Header Section */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-600">Header</h3>
+            <div className="flex items-center gap-2">
+              {headerError && (
+                <span className="text-xl">⚠️</span>
+              )}
+              {header && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(header)}
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                  title="Copy Header"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Content */}
+          <div className="p-4 bg-white">
+            <JsonInput
+              value={header}
+              rows={4}
+              autoHeight
+              placeholder=""
+              error={headerError}
+              readOnly
+            />
+          </div>
+        </div>
+
+        {/* Payload Section */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-600">Payload</h3>
+            <div className="flex items-center gap-2">
+              {payloadError && (
+                <span className="text-xl">⚠️</span>
+              )}
+              {payload && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(payload)}
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                  title="Copy Payload"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Content */}
+          <div className="p-4 bg-white">
+            <JsonInput
+              value={payload}
+              rows={6}
+              autoHeight
+              placeholder=""
+              error={payloadError}
+              readOnly
+            />
+          </div>
+        </div>
+
+        {/* Signature Verification Status */}
+        {(statusDisplay || keyError) && (
+          <div className={`p-4 border rounded-lg ${keyError ? 'bg-red-50 border-red-200' : (statusDisplay ? `${statusDisplay.bgColor} ${statusDisplay.borderColor}` : '')}`}>
+            {keyError ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">❌</span>
+                  <span className="text-sm font-medium text-red-700">{keyError}</span>
+                </div>
+              </>
+            ) : statusDisplay ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{statusDisplay.icon}</span>
+                  <span className={`text-sm font-medium ${statusDisplay.textColor}`}>
+                    {statusDisplay.text}
+                  </span>
+                </div>
+                {(isExpired || (!isExpired && verificationStatus === 'valid' && decodedResult?.payload?.exp)) && (
+                  <p className={`text-sm mt-2 ${statusDisplay.textColor}`}>
+                    {isExpired
+                      ? `This token has expired (exp: ${decodedResult?.payload?.exp})`
+                      : `This token is not expired (exp: ${decodedResult?.payload?.exp})`
+                    }
+                  </p>
+                )}
+              </>
+            ) : null}
           </div>
         )}
       </div>

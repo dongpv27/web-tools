@@ -24,23 +24,17 @@ export default function CopyButton({ text, className = '' }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+      className={`flex items-center justify-center w-9 h-9 rounded-md transition-colors ${
         copied
-          ? 'bg-green-100 text-green-700 hover:bg-green-100'
+          ? 'bg-green-100 text-green-700'
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       } ${className}`}
       title={copied ? 'Copied!' : 'Copy to clipboard'}
     >
       {copied ? (
-        <>
-          <Check className="w-4 h-4" />
-          <span>Copied!</span>
-        </>
+        <Check className="w-4 h-4" />
       ) : (
-        <>
-          <Copy className="w-4 h-4" />
-          <span>Copy</span>
-        </>
+        <Copy className="w-4 h-4" />
       )}
     </button>
   );
