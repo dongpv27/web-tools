@@ -113,6 +113,7 @@ export default function JsonToYamlClient() {
           onChange={setInput}
           placeholder='{"key": "value"}'
           rows={10}
+        lineNumbers
         />
       </div>
 

@@ -72,6 +72,7 @@ Honeydew`);
           onChange={setInput}
           placeholder="Enter lines to sort..."
           rows={8}
+        lineNumbers
         />
       </div>
 

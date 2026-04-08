@@ -58,6 +58,7 @@ export default function Base64EncodeClient() {
           onChange={setInput}
           placeholder="Enter text to encode to Base64..."
           rows={6}
+        lineNumbers
         />
       </div>
 

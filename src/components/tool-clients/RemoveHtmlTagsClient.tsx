@@ -56,6 +56,7 @@ export default function RemoveHtmlTagsClient() {
           onChange={setInput}
           placeholder="Paste HTML content..."
           rows={8}
+        lineNumbers
         />
       </div>
 

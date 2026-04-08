@@ -8,10 +8,10 @@ export default function HtmlFormatterClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [indent, setIndent] = useState(2);
+  const [indent, setIndent] = useState<number|string>(2);
 
-  const formatHtml = (html: string, indentSize: number): string => {
-    const indent = ' '.repeat(indentSize);
+  const formatHtml = (html: string, indentValue: number|string): string => {
+    const indentStr = indentValue === 'tab' ? '\t' : ' '.repeat(indentValue as number);
     let formatted = '';
     let currentIndent = 0;
     let inPre = false;
@@ -55,11 +55,11 @@ export default function HtmlFormatterClient() {
 
       if (isClosing) {
         currentIndent = Math.max(0, currentIndent - 1);
-        formatted += '\n' + indent.repeat(currentIndent) + token;
+        formatted += '\n' + indentStr.repeat(currentIndent) + token;
       } else if (isSelfClosing) {
-        formatted += '\n' + indent.repeat(currentIndent) + token;
+        formatted += '\n' + indentStr.repeat(currentIndent) + token;
       } else if (isOpening) {
-        formatted += '\n' + indent.repeat(currentIndent) + token;
+        formatted += '\n' + indentStr.repeat(currentIndent) + token;
         currentIndent++;
       } else {
         // Text content
@@ -133,6 +133,7 @@ export default function HtmlFormatterClient() {
           onChange={setInput}
           placeholder="<html>...</html>"
           rows={10}
+        lineNumbers
         />
       </div>
 
@@ -141,11 +142,13 @@ export default function HtmlFormatterClient() {
         <label className="text-sm text-gray-600">Indent:</label>
         <select
           value={indent}
-          onChange={(e) => setIndent(Number(e.target.value))}
-          className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => setIndent(e.target.value === 'tab' ? 'tab' : Number(e.target.value))}
+          className="appearance-none px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.375rem_center] bg-no-repeat"
         >
-          <option value={2}>2 spaces</option>
-          <option value={4}>4 spaces</option>
+          {[1,2,3,4,5,6,7,8,9,10].map(n => (
+            <option key={n} value={n}>{n} space{n > 1 ? 's' : ''}</option>
+          ))}
+          <option value="tab">Tab</option>
         </select>
       </div>
 
@@ -180,7 +183,7 @@ export default function HtmlFormatterClient() {
 
       {/* Output */}
       {output && !error && (
-        <ToolResult value={output} label="Formatted HTML" language="html" />
+        <ToolResult value={output} label="Formatted HTML" language="html" theme="light" />
       )}
 
       {/* Stats */}

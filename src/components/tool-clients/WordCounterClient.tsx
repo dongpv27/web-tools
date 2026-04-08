@@ -86,6 +86,7 @@ And here's a third one with a question? And an exclamation!`);
           onChange={setInput}
           placeholder="Start typing or paste your text here..."
           rows={8}
+        lineNumbers
         />
       </div>
 

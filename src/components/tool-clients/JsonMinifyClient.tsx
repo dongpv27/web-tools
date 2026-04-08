@@ -87,6 +87,7 @@ export default function JsonMinifyClient() {
           onChange={setInput}
           placeholder='{"key": "value"}'
           rows={10}
+        lineNumbers
         />
       </div>
 

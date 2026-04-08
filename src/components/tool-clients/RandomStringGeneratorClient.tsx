@@ -154,7 +154,7 @@ export default function RandomStringGeneratorClient() {
               <DownloadButton content={result} filename="strings.txt" />
             </div>
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+          <div className="bg-gray-900 rounded-lg p-4 space-y-1 max-h-96 overflow-y-auto">
             {result.split('\n').map((str, index) => (
               <div key={index} className="flex items-center justify-between group">
                 <code className="text-sm font-mono text-green-400 break-all">{str}</code>

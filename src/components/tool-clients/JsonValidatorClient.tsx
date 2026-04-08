@@ -153,6 +153,7 @@ export default function JsonValidatorClient() {
           onChange={setInput}
           placeholder='{"key": "value"}'
           rows={10}
+          lineNumbers
         />
       </div>
 

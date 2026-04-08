@@ -84,6 +84,7 @@ export default function HtmlEncodeDecodeClient() {
           onChange={setInput}
           placeholder={mode === 'encode' ? 'Enter text to encode...' : 'Enter HTML entities to decode...'}
           rows={6}
+        lineNumbers
         />
       </div>
 

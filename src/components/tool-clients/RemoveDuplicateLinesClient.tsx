@@ -71,6 +71,7 @@ cherry`);
           onChange={setInput}
           placeholder="Enter text with duplicate lines..."
           rows={8}
+        lineNumbers
         />
       </div>
 
