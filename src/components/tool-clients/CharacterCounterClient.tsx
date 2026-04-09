@@ -22,12 +22,12 @@ export default function CharacterCounterClient() {
     const text = input;
 
     return {
-      total: text.length,
+      total: text.replace(/\n/g, '').length,
       letters: (text.match(/[a-zA-Z]/g) || []).length,
       numbers: (text.match(/[0-9]/g) || []).length,
       spaces: (text.match(/\s/g) || []).length,
-      punctuation: (text.match(/[.,!?;:'"()-]/g) || []).length,
-      symbols: (text.match(/[^a-zA-Z0-9\s.,!?;:'"()-]/g) || []).length,
+      punctuation: (text.match(/[.,!?;:'"]/g) || []).length,
+      symbols: (text.match(/[^a-zA-Z0-9\s.,!?;:'"]/g) || []).length,
       uppercase: (text.match(/[A-Z]/g) || []).length,
       lowercase: (text.match(/[a-z]/g) || []).length,
       lines: text ? text.split('\n').length : 0,

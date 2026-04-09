@@ -11,6 +11,7 @@ interface ToolResultProps {
   showDownload?: boolean;
   downloadFilename?: string;
   theme?: 'dark' | 'light';
+  textClassName?: string;
 }
 
 // ─── JSON highlighter ───────────────────────────────────────────────────────
@@ -146,6 +147,7 @@ export default function ToolResult({
   showDownload = false,
   downloadFilename = 'result.txt',
   theme = 'dark',
+  textClassName = 'text-green-500',
 }: ToolResultProps) {
   if (!value) return null;
 
@@ -167,7 +169,7 @@ export default function ToolResult({
           className={`w-full px-4 py-3 text-sm font-mono rounded-lg overflow-x-auto ${
             isLight
               ? 'bg-white border border-gray-200 text-gray-800'
-              : `bg-gray-900 text-gray-100 ${language ? `language-${language}` : ''}`
+              : `bg-gray-900 ${language ? `language-${language}` : ''} ${textClassName}`
           }`}
         >
           <code>{isLight ? highlightLines(value, language) : value}</code>

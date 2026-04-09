@@ -113,7 +113,7 @@ cherry`);
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Unique Lines" />
+        <ToolResult value={output} label="Unique Lines" textClassName="text-gray-100" />
       )}
     </div>
   );

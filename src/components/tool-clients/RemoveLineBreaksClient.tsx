@@ -109,7 +109,7 @@ And this is line five after an empty line.`);
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Result (Single Line)" />
+        <ToolResult value={output} label="Result (Single Line)" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}

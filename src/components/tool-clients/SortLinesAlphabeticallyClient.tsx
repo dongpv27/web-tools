@@ -141,7 +141,7 @@ Honeydew`);
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Sorted Lines" />
+        <ToolResult value={output} label="Sorted Lines" textClassName="text-gray-100" />
       )}
     </div>
   );

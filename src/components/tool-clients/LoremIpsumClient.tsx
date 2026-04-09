@@ -166,7 +166,7 @@ export default function LoremIpsumClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Generated Lorem Ipsum" />
+        <ToolResult value={output} label="Generated Lorem Ipsum" textClassName="text-gray-100" />
       )}
 
       {/* Word Count */}

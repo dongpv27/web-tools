@@ -127,7 +127,7 @@ export default function TextCleanerClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Cleaned Text" />
+        <ToolResult value={output} label="Cleaned Text" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}

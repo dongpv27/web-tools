@@ -78,7 +78,7 @@ export default function RemoveHtmlTagsClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Plain Text" />
+        <ToolResult value={output} label="Plain Text" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}

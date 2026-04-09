@@ -113,7 +113,7 @@ export default function TextToListClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="List Output" />
+        <ToolResult value={output} label="List Output" textClassName="text-gray-100" />
       )}
     </div>
   );

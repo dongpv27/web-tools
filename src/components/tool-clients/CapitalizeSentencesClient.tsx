@@ -59,7 +59,7 @@ export default function CapitalizeSentencesClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Capitalized Text" />
+        <ToolResult value={output} label="Capitalized Text" textClassName="text-gray-100" />
       )}
     </div>
   );

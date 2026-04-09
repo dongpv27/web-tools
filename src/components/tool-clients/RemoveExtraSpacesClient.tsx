@@ -120,7 +120,7 @@ export default function RemoveExtraSpacesClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Cleaned Text" />
+        <ToolResult value={output} label="Cleaned Text" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}

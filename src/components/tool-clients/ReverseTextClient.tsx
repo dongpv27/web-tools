@@ -113,7 +113,7 @@ export default function ReverseTextClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Reversed Text" />
+        <ToolResult value={output} label="Reversed Text" textClassName="text-gray-100" />
       )}
     </div>
   );

@@ -134,6 +134,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
             input={tool.exampleOutput.input}
             output={tool.exampleOutput.output}
             description={tool.exampleOutput.description}
+            textClassName={tool.category === 'text' ? 'text-gray-100' : 'text-green-400'}
           />
         )}
       </div>

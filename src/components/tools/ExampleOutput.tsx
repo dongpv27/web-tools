@@ -4,9 +4,10 @@ interface ExampleOutputProps {
   input?: string;
   output: string;
   description?: string;
+  textClassName?: string;
 }
 
-export default function ExampleOutput({ input, output, description }: ExampleOutputProps) {
+export default function ExampleOutput({ input, output, description, textClassName = 'text-green-400' }: ExampleOutputProps) {
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mt-6">
       <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
@@ -34,7 +35,7 @@ export default function ExampleOutput({ input, output, description }: ExampleOut
           <label className="text-xs font-medium text-blue-600 uppercase tracking-wide">Output</label>
           <CopyButton text={output} className="text-xs" />
         </div>
-        <div className="px-3 py-2 bg-gray-900 rounded-lg text-sm font-mono text-green-400 overflow-x-auto">
+        <div className={`px-3 py-2 bg-gray-900 rounded-lg text-sm font-mono ${textClassName} overflow-x-auto`}>
           <pre className="whitespace-pre-wrap break-all">{output}</pre>
         </div>
       </div>

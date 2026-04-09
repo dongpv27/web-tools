@@ -120,7 +120,7 @@ export default function RandomTextGeneratorClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Generated Text" showDownload downloadFilename="generated-text.txt" />
+        <ToolResult value={output} label="Generated Text" showDownload downloadFilename="generated-text.txt" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}

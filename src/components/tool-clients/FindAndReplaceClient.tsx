@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import ToolInput from '@/components/tools/ToolInput';
-import ToolResult from '@/components/tools/ToolResult';
 
 export default function FindAndReplaceClient() {
   const [input, setInput] = useState('');
@@ -85,7 +85,7 @@ export default function FindAndReplaceClient() {
       </div>
 
       {/* Find and Replace */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Find</label>
           <input
@@ -96,7 +96,15 @@ export default function FindAndReplaceClient() {
             className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <div>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => { const tmp = find; setFind(replace); setReplace(tmp); setOutput(''); setReplaceCount(0); }}
+            className="absolute -left-7 top-[38px] p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            title="Swap Find and Replace"
+          >
+            <ArrowLeftRight className="w-4 h-4" />
+          </button>
           <label className="block text-sm font-medium text-gray-700 mb-2">Replace with</label>
           <input
             type="text"
@@ -162,13 +170,21 @@ export default function FindAndReplaceClient() {
       {/* Replace Count */}
       {replaceCount > 0 && (
         <div className="text-sm text-gray-600">
-          Replaced <strong>{replaceCount}</strong> occurrence{replaceCount !== 1 ? 's' : ''}
+          Replaced <strong className="text-green-600 text-lg">{replaceCount}</strong> occurrence{replaceCount !== 1 ? 's' : ''}
         </div>
       )}
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Result" />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Result</label>
+          <textarea
+            readOnly
+            value={output}
+            rows={6}
+            className="w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[200px]"
+          />
+        </div>
       )}
     </div>
   );

@@ -80,7 +80,7 @@ export default function TextFormatterClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Formatted Text" theme="light" />
+        <ToolResult value={output} label="Formatted Text" textClassName="text-gray-100" />
       )}
 
       {/* Stats */}
