@@ -210,10 +210,6 @@ export const TextCleanerClient = dynamic(
   () => import('@/components/tool-clients/TextCleanerClient'),
   { ssr: false }
 );
-export const TextFormatterClient = dynamic(
-  () => import('@/components/tool-clients/TextFormatterClient'),
-  { ssr: false }
-);
 
 // Image Tools
 export const ImageResizeClient = dynamic(
@@ -803,7 +799,6 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'remove-extra-spaces': RemoveExtraSpacesClient,
   'capitalize-sentences': CapitalizeSentencesClient,
   'text-cleaner': TextCleanerClient,
-  'text-formatter': TextFormatterClient,
   'rot13-encoder': Rot13EncoderClient,
   'rot13-decoder': Rot13DecoderClient,
   'morse-code-translator': MorseCodeTranslatorClient,

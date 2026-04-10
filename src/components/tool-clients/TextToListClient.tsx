@@ -7,7 +7,8 @@ import ToolResult from '@/components/tools/ToolResult';
 export default function TextToListClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [listType, setListType] = useState<'bullet' | 'numbered' | 'letter'>('bullet');
+  const [listType, setListType] = useState<'bullet' | 'numbered' | 'letter' | 'custom'>('bullet');
+  const [customPrefix, setCustomPrefix] = useState('');
   const [separator, setSeparator] = useState<'newline' | 'comma' | 'space'>('newline');
 
   const convert = () => {
@@ -43,6 +44,10 @@ export default function TextToListClient() {
         const letters = 'abcdefghijklmnopqrstuvwxyz';
         result = items.map((item, i) => `${letters[i % 26]}. ${item}`).join('\n');
         break;
+      case 'custom':
+        const prefix = customPrefix || '>';
+        result = items.map(item => `${prefix} ${item}`).join('\n');
+        break;
     }
 
     setOutput(result);
@@ -53,11 +58,21 @@ export default function TextToListClient() {
     setOutput('');
   };
 
+  const loadSample = () => {
+    setInput('Apple\nBanana\nCherry\nDate\nElderberry');
+    setOutput('');
+  };
+
   return (
     <div className="space-y-6">
       {/* Input */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Input Text</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-gray-700">Input Text</label>
+          <button onClick={loadSample} className="text-sm text-blue-600 hover:text-blue-700">
+            Load Sample
+          </button>
+        </div>
         <ToolInput
           value={input}
           onChange={setInput}
@@ -91,7 +106,17 @@ export default function TextToListClient() {
             <option value="bullet">Bullet points (•)</option>
             <option value="numbered">Numbered (1. 2. 3.)</option>
             <option value="letter">Lettered (a. b. c.)</option>
+            <option value="custom">Custom Prefix</option>
           </select>
+          {listType === 'custom' && (
+            <input
+              type="text"
+              value={customPrefix}
+              onChange={(e) => setCustomPrefix(e.target.value)}
+              placeholder="Enter custom prefix (e.g. →, -, *, #)"
+              className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          )}
         </div>
       </div>
 

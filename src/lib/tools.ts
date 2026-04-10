@@ -1887,7 +1887,7 @@ export const tools: Tool[] = [
         answer: 'The tool works best with properly spaced text. Consider using the Remove Extra Spaces tool first to clean up spacing before capitalizing sentences.',
       },
     ],
-    relatedTools: ['text-case-converter', 'text-cleaner', 'text-formatter'],
+    relatedTools: ['text-case-converter', 'text-cleaner', 'remove-extra-spaces'],
   },
   {
     id: 'text-cleaner',
@@ -1922,40 +1922,6 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['remove-extra-spaces', 'text-case-converter', 'remove-html-tags'],
-  },
-  {
-    id: 'text-formatter',
-    name: 'Text Formatter',
-    seoTitle: 'Text Formatter – Format & Beautify Text Online (Free Tool)',
-    description: 'Free online Text Formatter tool to format and transform text with various options. Apply case changes, line break removal, and text cleaning in one place. Perfect for content preparation and editing.',
-    shortDescription: 'Format text online',
-    category: 'text',
-    slug: 'text-formatter',
-    icon: 'TextCursor',
-    keywords: ['text formatter', 'format text', 'text styling', 'text layout'],
-    faq: [
-      {
-        question: 'What formatting options are available?',
-        answer: 'You can change text case (uppercase, lowercase, title case), remove line breaks, add or remove indentation, and apply various text transformations in one place.',
-      },
-      {
-        question: 'Can I apply multiple formatting changes at once?',
-        answer: 'Yes, you can combine multiple formatting options such as changing case and removing extra spaces simultaneously to achieve your desired output.',
-      },
-      {
-        question: 'Is this tool suitable for code formatting?',
-        answer: 'This tool is designed for general text formatting. For code formatting, consider using a dedicated code formatter specific to your programming language.',
-      },
-      {
-        question: 'How is this different from the Text Cleaner tool?',
-        answer: 'Text Formatter focuses on transforming text appearance (case, alignment, structure), while Text Cleaner focuses on removing unwanted elements like extra spaces and special characters.',
-      },
-      {
-        question: 'Can I preview changes before applying them?',
-        answer: 'Yes, the tool shows the formatted output in real-time as you apply options, allowing you to see and adjust changes before copying the result.',
-      },
-    ],
-    relatedTools: ['text-cleaner', 'text-case-converter', 'remove-line-breaks'],
   },
   {
     id: 'rot13-encoder',

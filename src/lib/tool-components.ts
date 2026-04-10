@@ -68,7 +68,6 @@ export const RandomNameGeneratorClient = dynamic(() => import('@/components/tool
 export const RemoveExtraSpacesClient = dynamic(() => import('@/components/tool-clients/RemoveExtraSpacesClient'), { ssr: false });
 export const CapitalizeSentencesClient = dynamic(() => import('@/components/tool-clients/CapitalizeSentencesClient'), { ssr: false });
 export const TextCleanerClient = dynamic(() => import('@/components/tool-clients/TextCleanerClient'), { ssr: false });
-export const TextFormatterClient = dynamic(() => import('@/components/tool-clients/TextFormatterClient'), { ssr: false });
 
 export const textToolComponents: Record<string, ComponentType> = {
   'word-counter': WordCounterClient,
@@ -90,7 +89,6 @@ export const textToolComponents: Record<string, ComponentType> = {
   'remove-extra-spaces': RemoveExtraSpacesClient,
   'capitalize-sentences': CapitalizeSentencesClient,
   'text-cleaner': TextCleanerClient,
-  'text-formatter': TextFormatterClient,
 };
 
 // ==================== IMAGE TOOLS ====================

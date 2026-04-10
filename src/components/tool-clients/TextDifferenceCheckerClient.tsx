@@ -100,12 +100,24 @@ export default function TextDifferenceCheckerClient() {
     setModifiedSegments([]);
   };
 
+  const loadSample = () => {
+    setText1('The quick brown fox jumps over the lazy dog.');
+    setText2('The quick red fox jumps over the lazy cat.');
+    setOriginalSegments([]);
+    setModifiedSegments([]);
+  };
+
   return (
     <div className="space-y-6">
       {/* Input Texts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Original Text</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">Original Text</label>
+            <button onClick={loadSample} className="text-sm text-blue-600 hover:text-blue-700">
+              Load Sample
+            </button>
+          </div>
           <textarea
             value={text1}
             onChange={(e) => setText1(e.target.value)}

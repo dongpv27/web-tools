@@ -13,6 +13,7 @@ interface ToolInputProps {
   rows?: number;
   className?: string;
   lineNumbers?: boolean;
+  allowTab?: boolean;
 }
 
 export default function ToolInput({
@@ -25,11 +26,13 @@ export default function ToolInput({
   rows = 10,
   className = '',
   lineNumbers = false,
+  allowTab = false,
 }: ToolInputProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumRef = useRef<HTMLDivElement>(null);
+  const pendingCursorRef = useRef<number | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -69,6 +72,27 @@ export default function ToolInput({
   const handleClear = () => {
     onChange('');
   };
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (allowTab && e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.currentTarget.selectionStart;
+      const end = e.currentTarget.selectionEnd;
+      pendingCursorRef.current = start + 1;
+      onChange(value.substring(0, start) + '\t' + value.substring(end));
+    }
+  };
+
+  // Restore cursor position after React re-render from Tab insertion
+  useEffect(() => {
+    if (pendingCursorRef.current !== null) {
+      const el = textareaRef.current;
+      if (el) {
+        el.selectionStart = el.selectionEnd = pendingCursorRef.current;
+        pendingCursorRef.current = null;
+      }
+    }
+  }, [value]);
 
   const syncScroll = useCallback(() => {
     if (textareaRef.current && lineNumRef.current) {
@@ -116,6 +140,7 @@ export default function ToolInput({
               ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleTabKeyDown}
               onScroll={syncScroll}
               placeholder={placeholder}
               rows={rows}
@@ -125,8 +150,10 @@ export default function ToolInput({
           </div>
         ) : (
           <textarea
+            ref={textareaRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleTabKeyDown}
             placeholder={placeholder}
             rows={rows}
             className="w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[200px]"

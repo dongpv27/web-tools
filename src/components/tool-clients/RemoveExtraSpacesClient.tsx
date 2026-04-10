@@ -11,17 +11,12 @@ export default function RemoveExtraSpacesClient() {
     multipleSpaces: true,
     leadingTrailing: true,
     emptyLines: false,
-    tabsToSpaces: false,
   });
 
   const clean = () => {
     if (!input.trim()) return;
 
     let result = input;
-
-    if (options.tabsToSpaces) {
-      result = result.replace(/\t/g, '    ');
-    }
 
     if (options.multipleSpaces) {
       result = result.replace(/[^\S\n]+/g, ' ');
@@ -89,16 +84,6 @@ export default function RemoveExtraSpacesClient() {
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
           <span className="text-sm text-gray-600">Remove empty lines</span>
-        </label>
-
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={options.tabsToSpaces}
-            onChange={(e) => setOptions({ ...options, tabsToSpaces: e.target.checked })}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-600">Convert tabs to spaces</span>
         </label>
       </div>
 
