@@ -12,13 +12,26 @@ export default function ImageBrightnessClient() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+  };
 
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       setImage(event.target?.result as string);
       setProcessedImage(null);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   };
 
   const applyBrightness = () => {
@@ -58,7 +71,11 @@ export default function ImageBrightnessClient() {
   return (
     <div className="space-y-6">
       {!image ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+        >
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
           <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Upload Image</button>
         </div>

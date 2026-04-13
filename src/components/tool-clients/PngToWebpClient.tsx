@@ -11,11 +11,8 @@ export default function PngToWebpClient() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setFileSizes({ original: file.size, converted: 0 });
+  
+  const processFile = (file: File) => {setFileSizes({ original: file.size, converted: 0 });
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -28,6 +25,11 @@ export default function PngToWebpClient() {
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const convert = () => {
@@ -84,7 +86,10 @@ export default function PngToWebpClient() {
     <div className="space-y-6">
       {/* Upload */}
       {!image ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <input
             ref={fileInputRef}
             type="file"

@@ -10,11 +10,8 @@ export default function JsonToExcelClient() {
   const [fileName, setFileName] = useState<string>('converted');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setFileName(file.name.replace(/\.[^/.]+$/, ''));
+  
+  const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -23,6 +20,11 @@ export default function JsonToExcelClient() {
       validateAndPreview(text);
     };
     reader.readAsText(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const validateAndPreview = (text: string) => {
@@ -81,7 +83,10 @@ export default function JsonToExcelClient() {
     <div className="space-y-6">
       {/* Upload or Paste */}
       <div className="space-y-4">
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
           <input
             ref={fileInputRef}
             type="file"

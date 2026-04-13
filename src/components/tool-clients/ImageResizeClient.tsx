@@ -8,13 +8,18 @@ export default function ImageResizeClient() {
   const [height, setHeight] = useState(600);
   const [maintainRatio, setMaintainRatio] = useState(true);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+  const [isResized, setIsResized] = useState(false);
+  const [resizedSize, setResizedSize] = useState({ width: 0, height: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+  };
 
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -27,6 +32,16 @@ export default function ImageResizeClient() {
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   };
 
   const handleWidthChange = (newWidth: number) => {
@@ -55,6 +70,8 @@ export default function ImageResizeClient() {
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
+      setResizedSize({ width, height });
+      setIsResized(true);
     };
     img.src = image;
   };
@@ -73,13 +90,18 @@ export default function ImageResizeClient() {
     setWidth(800);
     setHeight(600);
     setOriginalSize({ width: 0, height: 0 });
+    setIsResized(false);
   };
 
   return (
     <div className="space-y-6">
       {/* Upload */}
       {!image ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -140,17 +162,29 @@ export default function ImageResizeClient() {
             <span className="text-sm text-gray-600">Maintain aspect ratio</span>
           </label>
 
+          {/* Success Message */}
+          {isResized && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+              Image resized successfully to {resizedSize.width} × {resizedSize.height} px
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2">
             <button
               onClick={resize}
               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Resize
+              {isResized ? 'Re-resize' : 'Resize'}
             </button>
             <button
               onClick={download}
-              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+              disabled={!isResized}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isResized
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-green-300 text-white cursor-not-allowed'
+              }`}
             >
               Download
             </button>

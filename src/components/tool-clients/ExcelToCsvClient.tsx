@@ -12,11 +12,8 @@ export default function ExcelToCsvClient() {
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setFileName(file.name.replace(/\.[^/.]+$/, ''));
+  
+  const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
     setCsvOutput('');
     setPreview([]);
 
@@ -36,6 +33,11 @@ export default function ExcelToCsvClient() {
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const showPreview = (wb: XLSX.WorkBook, sheetName: string) => {
@@ -102,7 +104,10 @@ export default function ExcelToCsvClient() {
     <div className="space-y-6">
       {/* Upload */}
       {!workbook ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <input
             ref={fileInputRef}
             type="file"

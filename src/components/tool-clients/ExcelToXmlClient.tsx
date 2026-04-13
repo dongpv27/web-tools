@@ -14,11 +14,8 @@ export default function ExcelToXmlClient() {
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setFileName(file.name.replace(/\.[^/.]+$/, ''));
+  
+  const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
     setXmlOutput('');
 
     const reader = new FileReader();
@@ -37,6 +34,11 @@ export default function ExcelToXmlClient() {
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const showPreview = (wb: XLSX.WorkBook, sheetName: string) => {
@@ -126,7 +128,10 @@ export default function ExcelToXmlClient() {
   return (
     <div className="space-y-6">
       {!workbook ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <input
             ref={fileInputRef}
             type="file"

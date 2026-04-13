@@ -12,7 +12,10 @@ export default function ImageRotateClient() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+  };
 
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       setOriginalImage(event.target?.result as string);
@@ -20,6 +23,16 @@ export default function ImageRotateClient() {
       setRotation(0);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   };
 
   const applyRotation = () => {
@@ -71,7 +84,11 @@ export default function ImageRotateClient() {
     <div className="space-y-6">
       {/* Upload */}
       {!image ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+        >
           <input
             ref={fileInputRef}
             type="file"

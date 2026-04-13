@@ -13,11 +13,8 @@ export default function RemoveEmptyRowsExcelClient() {
   const [rawData, setRawData] = useState<string[][]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setFileName(file.name.replace(/\.[^/.]+$/, ''));
+  
+  const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
     setStats(null);
     setPreview(null);
 
@@ -37,6 +34,11 @@ export default function RemoveEmptyRowsExcelClient() {
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const loadData = (wb: XLSX.WorkBook, sheetName: string) => {
@@ -111,7 +113,10 @@ export default function RemoveEmptyRowsExcelClient() {
     <div className="space-y-6">
       {/* Upload */}
       {!workbook ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <input
             ref={fileInputRef}
             type="file"

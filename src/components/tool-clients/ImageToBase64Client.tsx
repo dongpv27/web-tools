@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import ToolResult from '@/components/tools/ToolResult';
+import { toast } from 'sonner';
 
 export default function ImageToBase64Client() {
   const [base64, setBase64] = useState('');
@@ -12,7 +12,10 @@ export default function ImageToBase64Client() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+  };
 
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result as string;
@@ -35,13 +38,25 @@ export default function ImageToBase64Client() {
     reader.readAsDataURL(file);
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  };
+
   const copyDataUri = () => {
     navigator.clipboard.writeText(base64);
+    toast.success('Data URI copied!');
   };
 
   const copyBase64Only = () => {
     const base64Only = base64.split(',')[1];
     navigator.clipboard.writeText(base64Only);
+    toast.success('Base64 copied!');
   };
 
   const clear = () => {
@@ -54,7 +69,11 @@ export default function ImageToBase64Client() {
     <div className="space-y-6">
       {/* Upload */}
       {!base64 ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -85,7 +104,15 @@ export default function ImageToBase64Client() {
           </div>
 
           {/* Result */}
-          <ToolResult value={base64} label="Base64 Data URI" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Base64 Data URI</label>
+            <textarea
+              readOnly
+              value={base64}
+              rows={6}
+              className="w-full px-4 py-3 text-sm font-mono bg-white border border-gray-300 rounded-lg text-gray-800 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
           {/* Copy Buttons */}
           <div className="flex gap-2">

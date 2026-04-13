@@ -27,11 +27,8 @@ export default function FaviconGeneratorClient() {
     { size: 512, label: '512×512', desc: 'PWA' },
   ];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
+  
+  const processFile = (file: File) => {const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
@@ -43,6 +40,11 @@ export default function FaviconGeneratorClient() {
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
   const toggleSize = (size: number) => {
@@ -164,7 +166,10 @@ export default function FaviconGeneratorClient() {
     <div className="space-y-6">
       {/* Upload */}
       {!image ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); }}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <input
             ref={fileInputRef}
             type="file"
