@@ -234,18 +234,26 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={generateFavicons}
-            disabled={selectedSizes.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Generate Favicons
-          </button>
+          {/* Generate & Clear Buttons */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={generateFavicons}
+              disabled={selectedSizes.length === 0}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Generate Favicons
+            </button>
+            <button
+              onClick={clear}
+              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
 
           {/* Generated Favicons */}
           {generatedFavicons.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-700">Generated Favicons</h3>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {generatedFavicons.map((favicon) => (
@@ -294,14 +302,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               </div>
             </div>
           )}
-
-          {/* Clear Button */}
-          <button
-            onClick={clear}
-            className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Clear
-          </button>
 
           <canvas ref={canvasRef} className="hidden" />
         </div>

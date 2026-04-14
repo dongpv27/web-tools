@@ -15,14 +15,18 @@ export default function GifMakerClient() {
   const [gifUrl, setGifUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const addFiles = (files: File[]) => {
     const newImages = files.map(file => ({
       id: Math.random().toString(36).substr(2, 9),
       src: URL.createObjectURL(file),
       file,
     }));
     setImages(prev => [...prev, ...newImages]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    addFiles(files);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -154,7 +158,15 @@ export default function GifMakerClient() {
   return (
     <div className="space-y-6">
       {/* File Upload */}
-      <div>
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const files = Array.from(e.dataTransfer.files);
+          if (files.length) addFiles(files);
+        }}
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -165,13 +177,11 @@ export default function GifMakerClient() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <div className="text-center">
-            <div className="text-gray-600 mb-2">Click to add images</div>
-            <div className="text-sm text-gray-400">Add multiple images to create an animated GIF</div>
-          </div>
+          Upload Image
         </button>
+        <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
       </div>
 
       {/* Options */}

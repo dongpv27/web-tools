@@ -200,17 +200,25 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           </div>
 
-          {/* Extract Button */}
-          <button
-            onClick={extractColors}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Extract Colors
-          </button>
+          {/* Extract & Clear Buttons */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={extractColors}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Extract Colors
+            </button>
+            <button
+              onClick={clear}
+              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
 
           {/* Color Palette */}
           {colors.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-700">Extracted Colors</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {colors.map((color, i) => (
@@ -238,27 +246,19 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="flex gap-2">
                 <button
                   onClick={exportAsCss}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                 >
                   Export CSS
                 </button>
                 <button
                   onClick={exportAsJson}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                 >
                   Export JSON
                 </button>
               </div>
             </div>
           )}
-
-          {/* Clear Button */}
-          <button
-            onClick={clear}
-            className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Clear
-          </button>
 
           <canvas ref={canvasRef} className="hidden" />
         </div>

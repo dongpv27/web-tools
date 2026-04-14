@@ -12,21 +12,25 @@ export default function PngCompressorClient() {
   const [fileName, setFileName] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const processFile = (file: File) => {
+    if (file.type !== 'image/png') {
+      alert('Please select a PNG image');
+      return;
+    }
+    setOriginalSize(file.size);
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setOriginalImage(event.target?.result as string);
+      setCompressedImage(null);
+      setCompressedSize(0);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'image/png') {
-      setOriginalSize(file.size);
-      setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setOriginalImage(event.target?.result as string);
-        setCompressedImage(null);
-        setCompressedSize(0);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert('Please select a PNG image');
-    }
+    if (file) processFile(file);
   };
 
   const compressImage = async () => {
@@ -91,7 +95,15 @@ export default function PngCompressorClient() {
   return (
     <div className="space-y-6">
       {/* File Upload */}
-      <div>
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file) processFile(file);
+        }}
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -101,13 +113,11 @@ export default function PngCompressorClient() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <div className="text-center">
-            <div className="text-gray-600 mb-2">Click to select a PNG image</div>
-            <div className="text-sm text-gray-400">Only PNG files are supported</div>
-          </div>
+          Upload Image
         </button>
+        <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
       </div>
 
       {/* File Name */}

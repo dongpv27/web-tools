@@ -142,7 +142,7 @@ export default function ImageColorPickerClient() {
           )}
 
           {colors.length > 0 && (
-            <div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Color Palette</span>
                 <button onClick={clearPalette} className="text-sm text-red-600 hover:text-red-700">Clear</button>

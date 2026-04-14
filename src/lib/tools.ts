@@ -2071,6 +2071,24 @@ export const tools: Tool[] = [
     slug: 'image-resize',
     icon: 'Scaling',
     keywords: ['image resize', 'resize photo', 'picture resizer', 'image size'],
+    faq: [
+      {
+        question: 'How do I resize an image without losing quality?',
+        answer: 'Upload your image, enter the desired width and height in pixels, and click Resize. For best results, use the "Maintain aspect ratio" option to prevent stretching. Reducing dimensions preserves quality, while enlarging may cause slight blurriness.',
+      },
+      {
+        question: 'What image formats are supported for resizing?',
+        answer: 'Our Image Resizer supports all major formats including PNG, JPEG, WebP, GIF, and BMP. You can upload any common image format and download the resized result as PNG.',
+      },
+      {
+        question: 'Can I resize multiple images at once?',
+        answer: 'Currently, you can resize one image at a time. For batch resizing, process each image individually. All processing happens locally in your browser, so your images remain private and secure.',
+      },
+      {
+        question: 'Does resizing reduce image file size?',
+        answer: 'Yes, reducing image dimensions typically reduces file size because there are fewer pixels to store. For example, halving both width and height reduces the pixel count by 75%, which can significantly reduce file size.',
+      },
+    ],
     relatedTools: ['resize-image-percentage', 'crop-image', 'rotate-image'],
   },
   {
@@ -2083,6 +2101,20 @@ export const tools: Tool[] = [
     slug: 'image-to-base64',
     icon: 'Binary',
     keywords: ['image to base64', 'base64 image', 'encode image', 'image encoder'],
+    faq: [
+      {
+        question: 'What is Base64 encoding for images?',
+        answer: 'Base64 encoding converts image binary data into a text string using ASCII characters. This allows you to embed images directly in HTML, CSS, or JSON files without needing separate image files.',
+      },
+      {
+        question: 'When should I use Base64 images?',
+        answer: 'Base64 images are useful for small icons, email templates, CSS backgrounds, and API responses. Avoid using Base64 for large images as the encoded string is about 33% larger than the original file.',
+      },
+      {
+        question: 'Does Base64 encoding reduce image quality?',
+        answer: 'No, Base64 encoding is lossless. The decoded image is identical to the original. The trade-off is increased file size (roughly 33% larger), not quality loss.',
+      },
+    ],
     relatedTools: ['base64-to-image', 'base64-encode', 'image-resize'],
   },
   {
@@ -2095,6 +2127,16 @@ export const tools: Tool[] = [
     slug: 'base64-to-image',
     icon: 'Image',
     keywords: ['base64 to image', 'decode image', 'base64 decoder', 'image decoder'],
+    faq: [
+      {
+        question: 'How do I convert a Base64 string to an image?',
+        answer: 'Paste your Base64 encoded string (with or without the data URI prefix) into the tool, and it will automatically decode and display the image. You can then download it as a standard image file.',
+      },
+      {
+        question: 'What Base64 formats are supported?',
+        answer: 'The tool supports all common Base64 image formats including data URIs with MIME type prefixes (data:image/png;base64,...) and raw Base64 strings for PNG, JPEG, GIF, WebP, and SVG images.',
+      },
+    ],
     relatedTools: ['image-to-base64', 'base64-decode', 'image-resize'],
   },
   {
@@ -2107,6 +2149,20 @@ export const tools: Tool[] = [
     slug: 'image-to-ico',
     icon: 'FileImage',
     keywords: ['image to ico', 'ico converter', 'favicon generator', 'icon maker'],
+    faq: [
+      {
+        question: 'What is an ICO file?',
+        answer: 'ICO is an image file format used for icons in Microsoft Windows. It can contain multiple sizes of the same icon in one file. ICO files are commonly used as favicons for websites.',
+      },
+      {
+        question: 'What sizes should my favicon be?',
+        answer: 'The most common favicon sizes are 16x16 (browser tab), 32x32 (browser tab Retina), 48x48 (Windows taskbar), and 180x180 (Apple Touch Icon). Our tool generates all these sizes from a single image.',
+      },
+      {
+        question: 'Can I convert PNG to ICO?',
+        answer: 'Yes, you can convert PNG, JPEG, or WebP images to ICO format. For best results, use a square PNG image with transparency. Upload your image, select the desired sizes, and download the ICO file.',
+      },
+    ],
     relatedTools: ['favicon-generator', 'image-resize', 'svg-to-png'],
   },
   {
@@ -2119,6 +2175,20 @@ export const tools: Tool[] = [
     slug: 'webp-to-png',
     icon: 'ImageDown',
     keywords: ['webp to png', 'convert webp', 'webp converter', 'image converter'],
+    faq: [
+      {
+        question: 'Why should I convert WebP to PNG?',
+        answer: 'PNG offers wider compatibility across all applications and platforms. It also supports lossless compression with transparency, making it ideal for graphics, logos, and screenshots where pixel-perfect quality matters.',
+      },
+      {
+        question: 'Does converting WebP to PNG reduce quality?',
+        answer: 'No, converting WebP to PNG is lossless. The PNG output preserves all the visual data from the original WebP image, including transparency (alpha channel).',
+      },
+      {
+        question: 'Will the PNG file be larger than WebP?',
+        answer: 'Yes, PNG files are typically larger than WebP files because WebP uses more efficient compression. If file size is a concern, consider keeping the WebP format or using our Image Compressor tool.',
+      },
+    ],
     relatedTools: ['png-to-webp', 'jpg-to-png', 'svg-to-png'],
   },
   {
@@ -2131,6 +2201,20 @@ export const tools: Tool[] = [
     slug: 'png-to-webp',
     icon: 'ImageUp',
     keywords: ['png to webp', 'convert png', 'webp converter', 'image optimization'],
+    faq: [
+      {
+        question: 'Why convert PNG to WebP?',
+        answer: 'WebP files are typically 25-35% smaller than PNG files at equivalent quality. This means faster page loads, reduced bandwidth costs, and better website performance. WebP also supports both lossy and lossless compression with transparency.',
+      },
+      {
+        question: 'Do all browsers support WebP?',
+        answer: 'WebP is supported by all modern browsers including Chrome, Firefox, Safari, Edge, and Opera. It has over 97% global browser support as of 2024. Only very old browsers may not support it.',
+      },
+      {
+        question: 'Does WebP support transparency like PNG?',
+        answer: 'Yes, WebP supports alpha channel transparency just like PNG. You can convert transparent PNG images to WebP without losing the transparent background.',
+      },
+    ],
     relatedTools: ['webp-to-png', 'png-to-jpg', 'image-compressor'],
   },
   {
@@ -2143,6 +2227,16 @@ export const tools: Tool[] = [
     slug: 'jpg-to-png',
     icon: 'ImageOff',
     keywords: ['jpg to png', 'jpeg to png', 'convert jpg', 'image converter'],
+    faq: [
+      {
+        question: 'When should I convert JPG to PNG?',
+        answer: 'Convert JPG to PNG when you need transparency, lossless quality, or crisp edges (like logos and text). PNG is better for graphics and screenshots, while JPG is better for photographs.',
+      },
+      {
+        question: 'Does JPG to PNG conversion improve quality?',
+        answer: 'Converting JPG to PNG preserves the current quality but does not restore data already lost to JPG compression. However, it prevents further quality loss during editing since PNG is lossless.',
+      },
+    ],
     relatedTools: ['png-to-jpg', 'webp-to-png', 'jpeg-compressor'],
   },
   {
@@ -2155,6 +2249,16 @@ export const tools: Tool[] = [
     slug: 'png-to-jpg',
     icon: 'ImagePlus',
     keywords: ['png to jpg', 'convert png', 'jpg converter', 'image converter'],
+    faq: [
+      {
+        question: 'Why convert PNG to JPG?',
+        answer: 'JPG files are significantly smaller than PNG files for photographs and complex images. Converting PNG to JPG reduces file size, making images faster to upload, share, and load on websites.',
+      },
+      {
+        question: 'What happens to transparency when converting PNG to JPG?',
+        answer: 'JPG does not support transparency. When you convert a transparent PNG to JPG, the transparent areas are filled with a background color (white by default). You can choose a custom background color in the tool.',
+      },
+    ],
     relatedTools: ['jpg-to-png', 'png-to-webp', 'jpeg-compressor'],
   },
   {
@@ -2167,6 +2271,20 @@ export const tools: Tool[] = [
     slug: 'resize-image-percentage',
     icon: 'Percent',
     keywords: ['resize percentage', 'scale image', 'image percentage', 'resize by percent'],
+    faq: [
+      {
+        question: 'How do I resize an image by percentage?',
+        answer: 'Upload your image, select a preset percentage or enter a custom value, and click Resize. The image will be scaled proportionally. For example, 50% reduces the image to half its original dimensions.',
+      },
+      {
+        question: 'What percentage should I use to reduce file size?',
+        answer: 'Reducing to 50% scales dimensions to half, which reduces pixel count by 75% and typically reduces file size significantly. For moderate reduction, try 75%. For thumbnails, 25% works well.',
+      },
+      {
+        question: 'Does percentage resizing maintain aspect ratio?',
+        answer: 'Yes, percentage resizing always maintains the original aspect ratio. Both width and height are scaled by the same percentage, so the image will never be stretched or distorted.',
+      },
+    ],
     relatedTools: ['image-resize', 'crop-image'],
   },
 {
@@ -2179,6 +2297,20 @@ export const tools: Tool[] = [
     slug: 'rotate-image',
     icon: 'RotateCw',
     keywords: ['rotate image', 'rotate photo', 'image rotation', 'flip image'],
+    faq: [
+      {
+        question: 'How do I rotate an image?',
+        answer: 'Upload your image, select a rotation angle using the preset buttons (90°, 180°, 270°) or the slider for custom angles, then click Apply Rotation. Download the rotated image in PNG format.',
+      },
+      {
+        question: 'Will rotating an image reduce its quality?',
+        answer: 'Rotating by 90°, 180°, or 270° preserves quality perfectly as pixels are just rearranged. Rotating by other angles may cause slight quality loss due to pixel interpolation, but the difference is usually negligible.',
+      },
+      {
+        question: 'What is the difference between rotating and flipping?',
+        answer: 'Rotation turns the image around a center point (like turning a photo on a table). Flipping creates a mirror reflection along the horizontal or vertical axis. Use rotation to change orientation and flipping to create mirror images.',
+      },
+    ],
     relatedTools: ['flip-image-horizontal', 'flip-image-vertical', 'image-resize'],
   },
   {
@@ -2191,6 +2323,16 @@ export const tools: Tool[] = [
     slug: 'flip-image-horizontal',
     icon: 'FlipHorizontal',
     keywords: ['flip horizontal', 'mirror image', 'horizontal flip', 'flip photo'],
+    faq: [
+      {
+        question: 'What does flipping an image horizontally do?',
+        answer: 'Flipping horizontally creates a left-to-right mirror image. Everything on the left side appears on the right and vice versa, like looking at the image in a mirror.',
+      },
+      {
+        question: 'Why would I flip an image horizontally?',
+        answer: 'Common reasons include correcting selfies that appear mirrored, creating symmetrical designs, fixing incorrectly scanned documents, or achieving a specific artistic effect.',
+      },
+    ],
     relatedTools: ['flip-image-vertical', 'rotate-image', 'crop-image'],
   },
   {
@@ -2203,6 +2345,16 @@ export const tools: Tool[] = [
     slug: 'flip-image-vertical',
     icon: 'FlipVertical',
     keywords: ['flip vertical', 'vertical flip', 'flip photo', 'mirror vertical'],
+    faq: [
+      {
+        question: 'What does flipping an image vertically do?',
+        answer: 'Flipping vertically creates a top-to-bottom mirror image. The top of the image appears at the bottom and vice versa, turning the image upside down while maintaining left-right orientation.',
+      },
+      {
+        question: 'When should I flip an image vertically?',
+        answer: 'Vertical flipping is useful for creating reflection effects, correcting upside-down images from scanners or cameras, or creating artistic compositions with mirrored elements.',
+      },
+    ],
     relatedTools: ['flip-image-horizontal', 'rotate-image', 'crop-image'],
   },
   {
@@ -2215,6 +2367,20 @@ export const tools: Tool[] = [
     slug: 'blur-image',
     icon: 'EyeOff',
     keywords: ['blur image', 'image blur', 'blur photo', 'blur effect'],
+    faq: [
+      {
+        question: 'Why would I blur an image?',
+        answer: 'Blurring is commonly used to protect privacy (hiding faces, license plates, or sensitive information), create depth-of-field effects, soften backgrounds, or add artistic effects to photos.',
+      },
+      {
+        question: 'Is this blur tool free and private?',
+        answer: 'Yes, this tool is completely free and processes everything locally in your browser. Your images are never uploaded to any server, ensuring complete privacy.',
+      },
+      {
+        question: 'Can I adjust the blur intensity?',
+        answer: 'Yes, use the slider to adjust blur amount from 0 (no blur) to 10 (heavy blur). The preview updates in real-time so you can see the effect before downloading.',
+      },
+    ],
     relatedTools: ['pixelate-image', 'grayscale-image', 'adjust-brightness'],
   },
   {
@@ -2227,6 +2393,20 @@ export const tools: Tool[] = [
     slug: 'pixelate-image',
     icon: 'Grid3x3',
     keywords: ['pixelate image', 'pixel effect', 'mosaic effect', 'pixelate photo'],
+    faq: [
+      {
+        question: 'What is image pixelation?',
+        answer: 'Pixelation reduces image detail by grouping pixels into larger blocks of uniform color, creating a mosaic-like effect. Higher pixel size values create a more abstract, blocky appearance.',
+      },
+      {
+        question: 'What is the difference between blurring and pixelating?',
+        answer: 'Blurring smoothly blends colors together for a soft effect, while pixelation creates distinct square blocks. Pixelation is often preferred for censoring content as it makes details completely unrecognizable.',
+      },
+      {
+        question: 'How do I pixelate a face in a photo?',
+        answer: 'Upload your photo, adjust the pixel size slider to control the level of obscurity, and download the result. For faces, a pixel size of 10-20 usually provides good privacy protection.',
+      },
+    ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-border'],
   },
   {
@@ -2239,6 +2419,20 @@ export const tools: Tool[] = [
     slug: 'grayscale-image',
     icon: 'CircleHalf',
     keywords: ['grayscale', 'black and white', 'bw image', 'monochrome'],
+    faq: [
+      {
+        question: 'What is a grayscale image?',
+        answer: 'A grayscale image uses only shades of gray, from black to white, removing all color information. Each pixel is represented by a single lightness value instead of RGB color values.',
+      },
+      {
+        question: 'Why convert an image to grayscale?',
+        answer: 'Grayscale conversion is used for artistic effects, reducing visual complexity, preparing images for printing, meeting document requirements, or creating a classic, timeless aesthetic.',
+      },
+      {
+        question: 'Does converting to grayscale reduce file size?',
+        answer: 'Yes, grayscale images are typically smaller than color images because they store one channel instead of three (RGB). The reduction can be significant for PNG files.',
+      },
+    ],
     relatedTools: ['blur-image', 'pixelate-image', 'adjust-brightness'],
   },
   {
@@ -2251,6 +2445,20 @@ export const tools: Tool[] = [
     slug: 'adjust-brightness',
     icon: 'Sun',
     keywords: ['brightness', 'adjust brightness', 'image brightness', 'photo brightness'],
+    faq: [
+      {
+        question: 'How do I adjust image brightness?',
+        answer: 'Upload your image and use the brightness slider. Values below 100% darken the image, 100% keeps the original, and values above 100% brighten it. The preview updates in real-time.',
+      },
+      {
+        question: 'What brightness value should I use?',
+        answer: 'For slightly dark photos, try 110-130%. For overexposed images, try 70-90%. The default is 100% (original brightness). Use the preview to find the best value for your image.',
+      },
+      {
+        question: 'What is the difference between brightness and contrast?',
+        answer: 'Brightness uniformly increases or decreases all light values in the image. Contrast adjusts the difference between the lightest and darkest areas. Increasing brightness makes everything lighter, while increasing contrast makes lights lighter and darks darker.',
+      },
+    ],
     relatedTools: ['grayscale-image', 'blur-image', 'image-border'],
   },
   {
@@ -2263,6 +2471,20 @@ export const tools: Tool[] = [
     slug: 'image-color-picker',
     icon: 'Pipette',
     keywords: ['color picker', 'image color', 'pick color', 'extract color'],
+    faq: [
+      {
+        question: 'How do I pick a color from an image?',
+        answer: 'Upload your image and click anywhere on it to instantly get the HEX and RGB color values of that pixel. You can copy the values with one click and add colors to your palette.',
+      },
+      {
+        question: 'What color formats does the tool support?',
+        answer: 'The tool shows color values in HEX (e.g., #FF5733) and RGB (e.g., rgb(255, 87, 51)) formats. Both formats can be copied to clipboard with a single click.',
+      },
+      {
+        question: 'Can I pick multiple colors from one image?',
+        answer: 'Yes, click on different parts of the image to pick colors. Use the "Add to Palette" button to save each picked color. All saved colors are displayed in a palette list with their HEX and RGB values.',
+      },
+    ],
     relatedTools: ['color-picker', 'extract-colors', 'image-border'],
   },
   {
@@ -2275,6 +2497,20 @@ export const tools: Tool[] = [
     slug: 'extract-colors',
     icon: 'Palette',
     keywords: ['extract colors', 'color palette', 'dominant colors', 'image colors'],
+    faq: [
+      {
+        question: 'How does color extraction work?',
+        answer: 'The tool analyzes your image and identifies the most frequently occurring colors. It groups similar colors together and ranks them by how much of the image they cover, giving you the dominant color palette.',
+      },
+      {
+        question: 'How many colors can I extract?',
+        answer: 'You can choose to extract 5, 10, 15, or 20 dominant colors from your image. More colors give a more complete palette, while fewer colors highlight the most important ones.',
+      },
+      {
+        question: 'Can I export the extracted colors?',
+        answer: 'Yes, you can export the color palette as CSS variables or JSON format using the export buttons. This makes it easy to use the colors in your web development or design projects.',
+      },
+    ],
     relatedTools: ['color-palette-generator', 'image-color-picker', 'color-picker'],
   },
   {
@@ -2287,6 +2523,20 @@ export const tools: Tool[] = [
     slug: 'image-border',
     icon: 'Frame',
     keywords: ['image border', 'add border', 'photo border', 'picture frame'],
+    faq: [
+      {
+        question: 'How do I add a border to my image?',
+        answer: 'Upload your image, set the border width and color, then click Download. The preview updates in real-time so you can see exactly how the border will look before saving.',
+      },
+      {
+        question: 'What border colors are available?',
+        answer: 'You can choose any color using the color picker. Common choices include black, white, and gray for clean looks, or custom colors to match your brand or design theme.',
+      },
+      {
+        question: 'Will adding a border increase the image dimensions?',
+        answer: 'Yes, the border adds to the overall image dimensions. For example, adding a 10px border to a 800x600 image results in an 820x620 image. The original image content is not cropped or scaled.',
+      },
+    ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-color-picker'],
   },
   {
@@ -2299,6 +2549,20 @@ export const tools: Tool[] = [
     slug: 'favicon-generator',
     icon: 'Star',
     keywords: ['favicon', 'favicon generator', 'website icon', 'browser icon'],
+    faq: [
+      {
+        question: 'What sizes do I need for a favicon?',
+        answer: 'You need multiple sizes: 16x16 and 32x32 for browser tabs, 48x48 for Windows, 180x180 for Apple Touch Icon, 192x192 for Android Chrome, and 512x512 for PWA splash screens.',
+      },
+      {
+        question: 'What image should I use for a favicon?',
+        answer: 'Use a square image (ideally 512x512 or larger) with a simple, recognizable design. PNG with transparency works best. Avoid complex details as favicons are displayed very small.',
+      },
+      {
+        question: 'How do I add a favicon to my website?',
+        answer: 'Generate your favicons, download them, and place them in your website root directory. Copy the provided HTML snippet into the <head> section of your pages. The tool generates the correct code for you.',
+      },
+    ],
     relatedTools: ['image-to-ico', 'image-resize', 'svg-to-png'],
   },
   {

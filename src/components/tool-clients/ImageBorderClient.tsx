@@ -6,6 +6,7 @@ export default function ImageBorderClient() {
   const [image, setImage] = useState<string | null>(null);
   const [borderWidth, setBorderWidth] = useState(0);
   const [borderColor, setBorderColor] = useState('#000000');
+  const [borderRadius, setBorderRadius] = useState(0);
   const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,6 +22,7 @@ export default function ImageBorderClient() {
     reader.onload = (event) => {
       setImage(event.target?.result as string);
       setBorderWidth(0);
+      setBorderRadius(0);
       setFileName(file.name);
     };
     reader.readAsDataURL(file);
@@ -45,9 +47,21 @@ export default function ImageBorderClient() {
       canvas.width = img.width + borderWidth * 2;
       canvas.height = img.height + borderWidth * 2;
 
-      ctx.fillStyle = borderColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, borderWidth, borderWidth);
+      if (borderRadius > 0) {
+        ctx.fillStyle = borderColor;
+        roundedRect(ctx, 0, 0, canvas.width, canvas.height, borderRadius);
+        ctx.fill();
+
+        ctx.save();
+        roundedRect(ctx, borderWidth, borderWidth, img.width, img.height, borderRadius);
+        ctx.clip();
+        ctx.drawImage(img, borderWidth, borderWidth);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = borderColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, borderWidth, borderWidth);
+      }
 
       const link = document.createElement('a');
       link.download = 'image-with-border.png';
@@ -61,7 +75,22 @@ export default function ImageBorderClient() {
     setImage(null);
     setBorderWidth(0);
     setBorderColor('#000000');
+    setBorderRadius(0);
     setFileName('');
+  };
+
+  const roundedRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
   };
 
   return (
@@ -84,7 +113,7 @@ export default function ImageBorderClient() {
             <span className="truncate max-w-xs">{fileName}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-gray-600 mb-1">Border Width</label>
               <input type="number" min="0" max="100" value={borderWidth} onChange={(e) => setBorderWidth(Number(e.target.value))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md" />
@@ -93,14 +122,22 @@ export default function ImageBorderClient() {
               <label className="block text-sm text-gray-600 mb-1">Border Color</label>
               <input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="w-full h-10 rounded-md cursor-pointer" />
             </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Border Radius</label>
+              <input type="number" min="0" max="200" value={borderRadius} onChange={(e) => setBorderRadius(Number(e.target.value))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md" />
+            </div>
           </div>
 
           {/* Preview */}
           <div
-            className="border border-gray-200 rounded-lg p-2 inline-block mx-auto"
-            style={{ backgroundColor: borderWidth > 0 ? borderColor : 'transparent', padding: borderWidth > 0 ? `${borderWidth}px` : undefined }}
+            className="inline-block mx-auto overflow-hidden"
+            style={{
+              backgroundColor: borderWidth > 0 ? borderColor : 'transparent',
+              padding: borderWidth > 0 ? `${borderWidth}px` : undefined,
+              borderRadius: borderRadius > 0 ? `${borderRadius}px` : undefined,
+            }}
           >
-            <img src={image} alt="Preview" className="max-h-64 mx-auto block" />
+            <img src={image} alt="Preview" className="max-h-64 mx-auto block" style={{ borderRadius: borderRadius > 0 ? `${borderRadius}px` : undefined }} />
           </div>
 
           {/* Actions */}

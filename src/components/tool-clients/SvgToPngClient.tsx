@@ -14,40 +14,42 @@ export default function SvgToPngClient() {
   const [fileName, setFileName] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const processFile = (file: File) => {
+    setOriginalSize(file.size);
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setSvgContent(content);
+      setPngUrl(null);
+      setPngSize(0);
+
+      // Try to parse SVG dimensions
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, 'image/svg+xml');
+      const svg = doc.querySelector('svg');
+      if (svg) {
+        const viewBox = svg.getAttribute('viewBox');
+        if (viewBox) {
+          const parts = viewBox.split(' ').map(Number);
+          if (parts.length === 4) {
+            setWidth(parts[2] || 800);
+            setHeight(parts[3] || 600);
+          }
+        } else {
+          const w = parseInt(svg.getAttribute('width') || '800');
+          const h = parseInt(svg.getAttribute('height') || '600');
+          setWidth(w);
+          setHeight(h);
+        }
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setOriginalSize(file.size);
-      setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
-        setSvgContent(content);
-        setPngUrl(null);
-        setPngSize(0);
-
-        // Try to parse SVG dimensions
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, 'image/svg+xml');
-        const svg = doc.querySelector('svg');
-        if (svg) {
-          const viewBox = svg.getAttribute('viewBox');
-          if (viewBox) {
-            const parts = viewBox.split(' ').map(Number);
-            if (parts.length === 4) {
-              setWidth(parts[2] || 800);
-              setHeight(parts[3] || 600);
-            }
-          } else {
-            const w = parseInt(svg.getAttribute('width') || '800');
-            const h = parseInt(svg.getAttribute('height') || '600');
-            setWidth(w);
-            setHeight(h);
-          }
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (file) processFile(file);
   };
 
   const convertToPng = async () => {
@@ -127,7 +129,15 @@ export default function SvgToPngClient() {
   return (
     <div className="space-y-6">
       {/* File Upload */}
-      <div>
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file) processFile(file);
+        }}
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -137,13 +147,11 @@ export default function SvgToPngClient() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <div className="text-center">
-            <div className="text-gray-600 mb-2">Click to select an SVG file</div>
-            <div className="text-sm text-gray-400">Only SVG files are supported</div>
-          </div>
+          Upload Image
         </button>
+        <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
       </div>
 
       {/* File Name */}
