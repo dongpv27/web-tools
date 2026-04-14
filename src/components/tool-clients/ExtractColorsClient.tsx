@@ -14,14 +14,15 @@ export default function ExtractColorsClient() {
   const [colors, setColors] = useState<ColorInfo[]>([]);
   const [numColors, setNumColors] = useState(10);
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
   const processFile = (file: File) => {const reader = new FileReader();
     reader.onload = (event) => {
       setImage(event.target?.result as string);
       setColors([]);
+      setFileName(file.name);
     };
     reader.readAsDataURL(file);
   };
@@ -139,6 +140,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const clear = () => {
     setImage(null);
     setColors([]);
+    setFileName('');
   };
 
   return (
@@ -162,10 +164,17 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           >
             Upload Image
           </button>
-          <p className="text-sm text-gray-500 mt-2">Extract dominant colors from any image</p>
+          <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
+          <p className="text-sm text-gray-400">Extract dominant colors from any image</p>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
             <img src={image} alt="Preview" className="max-h-48 mx-auto" />

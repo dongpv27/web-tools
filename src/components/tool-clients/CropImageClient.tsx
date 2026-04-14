@@ -9,6 +9,7 @@ export default function CropImageClient() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,6 +25,7 @@ export default function CropImageClient() {
           setCropArea({ x: 0, y: 0, width: img.width / 2, height: img.height / 2 });
         };
         setImageSrc(event.target?.result as string);
+        setFileName(file.name);
       };
       reader.readAsDataURL(file);
     }
@@ -123,6 +125,14 @@ export default function CropImageClient() {
           </div>
         </button>
       </div>
+
+      {/* File Name */}
+      {imageSrc && (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span className="font-medium">File:</span>
+          <span className="truncate max-w-xs">{fileName}</span>
+        </div>
+      )}
 
       {/* Aspect Ratio Selection */}
       {imageSrc && (

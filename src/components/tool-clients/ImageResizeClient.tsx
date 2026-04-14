@@ -10,6 +10,7 @@ export default function ImageResizeClient() {
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
   const [isResized, setIsResized] = useState(false);
   const [resizedSize, setResizedSize] = useState({ width: 0, height: 0 });
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,6 +29,7 @@ export default function ImageResizeClient() {
         setWidth(img.width);
         setHeight(img.height);
         setImage(event.target?.result as string);
+        setFileName(file.name);
       };
       img.src = event.target?.result as string;
     };
@@ -91,6 +93,7 @@ export default function ImageResizeClient() {
     setHeight(600);
     setOriginalSize({ width: 0, height: 0 });
     setIsResized(false);
+    setFileName('');
   };
 
   return (
@@ -119,6 +122,12 @@ export default function ImageResizeClient() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
             <img src={image} alt="Preview" className="max-h-64 mx-auto" />

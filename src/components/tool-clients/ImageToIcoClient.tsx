@@ -9,6 +9,7 @@ export default function ImageToIcoClient() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [icoBlob, setIcoBlob] = useState<Blob | null>(null);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,6 +49,7 @@ export default function ImageToIcoClient() {
         setImage(event.target?.result as string);
         setPreviewUrl(null);
         setIcoBlob(null);
+        setFileName(file.name);
       };
       img.src = event.target?.result as string;
     };
@@ -146,6 +148,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIcoBlob(null);
     setSelectedSize(null);
     setOriginalSize({ width: 0, height: 0 });
+    setFileName('');
   };
 
   return (
@@ -173,6 +176,12 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Original Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-2 text-center">Original Image</p>

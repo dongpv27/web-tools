@@ -2071,7 +2071,7 @@ export const tools: Tool[] = [
     slug: 'image-resize',
     icon: 'Scaling',
     keywords: ['image resize', 'resize photo', 'picture resizer', 'image size'],
-    relatedTools: ['resize-image-percentage', 'resize-image-dimensions', 'crop-image', 'rotate-image'],
+    relatedTools: ['resize-image-percentage', 'crop-image', 'rotate-image'],
   },
   {
     id: 'image-to-base64',
@@ -2167,21 +2167,9 @@ export const tools: Tool[] = [
     slug: 'resize-image-percentage',
     icon: 'Percent',
     keywords: ['resize percentage', 'scale image', 'image percentage', 'resize by percent'],
-    relatedTools: ['image-resize', 'resize-image-dimensions', 'crop-image'],
+    relatedTools: ['image-resize', 'crop-image'],
   },
-  {
-    id: 'resize-image-dimensions',
-    name: 'Resize Image by Dimensions',
-    seoTitle: 'Resize Image by Dimensions – Free Online Tool',
-    description: 'Resize images to specific width and height. Set exact pixel dimensions for your images.',
-    shortDescription: 'Resize image to specific dimensions',
-    category: 'image',
-    slug: 'resize-image-dimensions',
-    icon: 'Maximize',
-    keywords: ['resize dimensions', 'exact size', 'image dimensions', 'pixel size'],
-    relatedTools: ['image-resize', 'resize-image-percentage', 'crop-image'],
-  },
-  {
+{
     id: 'rotate-image',
     name: 'Rotate Image',
     seoTitle: 'Rotate Image – Free Online Tool',

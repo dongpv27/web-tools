@@ -8,11 +8,13 @@ export default function PngToWebpClient() {
   const [quality, setQuality] = useState(80);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
   const [fileSizes, setFileSizes] = useState({ original: 0, converted: 0 });
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   
   const processFile = (file: File) => {setFileSizes({ original: file.size, converted: 0 });
+    setFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -70,6 +72,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProcessedImage(null);
     setOriginalSize({ width: 0, height: 0 });
     setFileSizes({ original: 0, converted: 0 });
+    setFileName('');
   };
 
   const formatFileSize = (bytes: number) => {
@@ -107,6 +110,12 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
           <div className="grid grid-cols-2 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">

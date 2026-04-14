@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 
 export default function ImageGrayscaleClient() {
   const [image, setImage] = useState<string | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -18,22 +18,19 @@ export default function ImageGrayscaleClient() {
     const reader = new FileReader();
     reader.onload = (event) => {
       setImage(event.target?.result as string);
-      setProcessedImage(null);
+      setFileName(file.name);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); };
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file) processFile(file);
   };
 
-  const applyGrayscale = () => {
+  const download = () => {
     if (!image || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -44,41 +41,33 @@ export default function ImageGrayscaleClient() {
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
-
       ctx.drawImage(img, 0, 0);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
-
       for (let i = 0; i < data.length; i += 4) {
         const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        data[i] = avg;     // Red
-        data[i + 1] = avg; // Green
-        data[i + 2] = avg; // Blue
+        data[i] = avg;
+        data[i + 1] = avg;
+        data[i + 2] = avg;
       }
-
       ctx.putImageData(imageData, 0, 0);
-      setProcessedImage(canvas.toDataURL('image/png'));
+
+      const link = document.createElement('a');
+      link.download = 'grayscale-image.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
     };
     img.src = image;
   };
 
-  const download = () => {
-    if (!processedImage) return;
-    const link = document.createElement('a');
-    link.download = 'grayscale-image.png';
-    link.href = processedImage;
-    link.click();
-  };
-
   const clear = () => {
     setImage(null);
-    setProcessedImage(null);
+    setFileName('');
   };
 
   return (
     <div className="space-y-6">
-      {/* Upload */}
       {!image ? (
         <div
           onDragOver={handleDragOver}
@@ -98,53 +87,30 @@ export default function ImageGrayscaleClient() {
           >
             Upload Image
           </button>
+          <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Original</p>
-              <div className="border border-gray-200 rounded-lg p-2">
-                <img src={image} alt="Original" className="max-h-48 mx-auto" />
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Grayscale</p>
-              <div className="border border-gray-200 rounded-lg p-2 bg-gray-50">
-                {processedImage ? (
-                  <img src={processedImage} alt="Grayscale" className="max-h-48 mx-auto" />
-                ) : (
-                  <div className="h-48 flex items-center justify-center text-gray-400">
-                    Click convert
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="border border-gray-200 rounded-lg p-4">
+            <img
+              src={image}
+              alt="Grayscale"
+              className="max-h-64 mx-auto"
+              style={{ filter: 'grayscale(100%)' }}
+            />
           </div>
 
           {/* Actions */}
           <div className="flex gap-2">
-            <button
-              onClick={applyGrayscale}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Convert to Grayscale
-            </button>
-            {processedImage && (
-              <button
-                onClick={download}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Download
-              </button>
-            )}
-            <button
-              onClick={clear}
-              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Clear
-            </button>
+            <button onClick={download} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">Download</button>
+            <button onClick={clear} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Clear</button>
           </div>
 
           <canvas ref={canvasRef} className="hidden" />

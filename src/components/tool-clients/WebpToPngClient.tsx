@@ -6,6 +6,7 @@ export default function WebpToPngClient() {
   const [image, setImage] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -23,6 +24,7 @@ export default function WebpToPngClient() {
         setOriginalSize({ width: img.width, height: img.height });
         setImage(event.target?.result as string);
         setProcessedImage(null);
+        setFileName(file.name);
       };
       img.src = event.target?.result as string;
     };
@@ -71,6 +73,7 @@ export default function WebpToPngClient() {
     setImage(null);
     setProcessedImage(null);
     setOriginalSize({ width: 0, height: 0 });
+    setFileName('');
   };
 
   return (
@@ -99,6 +102,12 @@ export default function WebpToPngClient() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
           <div className="grid grid-cols-2 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">

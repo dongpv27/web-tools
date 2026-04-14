@@ -7,6 +7,9 @@ export default function ResizeImagePercentageClient() {
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [percentage, setPercentage] = useState(100);
   const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+  const [isResized, setIsResized] = useState(false);
+  const [resizedSize, setResizedSize] = useState({ width: 0, height: 0 });
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -20,6 +23,7 @@ export default function ResizeImagePercentageClient() {
         setOriginalSize({ width: img.width, height: img.height });
         setImage(event.target?.result as string);
         setProcessedImage(null);
+        setFileName(file.name);
       };
       img.src = event.target?.result as string;
     };
@@ -50,6 +54,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       ctx.drawImage(img, 0, 0, calculatedSize.width, calculatedSize.height);
 
       setProcessedImage(canvas.toDataURL('image/png'));
+      setIsResized(true);
+      setResizedSize(calculatedSize);
     };
     img.src = image;
   };
@@ -68,6 +74,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProcessedImage(null);
     setPercentage(100);
     setOriginalSize({ width: 0, height: 0 });
+    setIsResized(false);
+    setFileName('');
   };
 
   return (
@@ -95,6 +103,12 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           {/* Preview */}
           <div className="grid grid-cols-2 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">
@@ -167,18 +181,29 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             <span className="ml-2 text-sm text-gray-500">%</span>
           </div>
 
+          {/* Success Message */}
+          {isResized && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+              Image resized successfully to {resizedSize.width} × {resizedSize.height} px
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2">
             <button
               onClick={resize}
               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Resize
+              {isResized ? 'Re-resize' : 'Resize'}
             </button>
             <button
               onClick={download}
-              disabled={!processedImage}
-              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isResized}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isResized
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-green-300 text-white cursor-not-allowed'
+              }`}
             >
               Download
             </button>

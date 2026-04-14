@@ -9,12 +9,14 @@ export default function PngCompressorClient() {
   const [compressedSize, setCompressedSize] = useState(0);
   const [compressionLevel, setCompressionLevel] = useState(6);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [fileName, setFileName] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === 'image/png') {
       setOriginalSize(file.size);
+      setFileName(file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
         setOriginalImage(event.target?.result as string);
@@ -107,6 +109,14 @@ export default function PngCompressorClient() {
           </div>
         </button>
       </div>
+
+      {/* File Name */}
+      {originalImage && (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span className="font-medium">File:</span>
+          <span className="truncate max-w-xs">{fileName}</span>
+        </div>
+      )}
 
       {/* Info about PNG compression */}
       {originalImage && (

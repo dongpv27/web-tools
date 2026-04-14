@@ -11,12 +11,14 @@ export default function ImageCompressorClient() {
   const [quality, setQuality] = useState(80);
   const [format, setFormat] = useState<'image/jpeg' | 'image/png' | 'image/webp'>('image/jpeg');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [fileName, setFileName] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setOriginalSize(file.size);
+      setFileName(file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
         setOriginalImage(event.target?.result as string);
@@ -104,6 +106,14 @@ export default function ImageCompressorClient() {
           </div>
         </button>
       </div>
+
+      {/* File Name */}
+      {originalImage && (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span className="font-medium">File:</span>
+          <span className="truncate max-w-xs">{fileName}</span>
+        </div>
+      )}
 
       {/* Options */}
       {originalImage && (

@@ -207,6 +207,7 @@ export default function GifMakerClient() {
                 <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
                   {index + 1}
                 </div>
+                <p className="text-[10px] text-gray-500 truncate mt-0.5 text-center">{img.file.name}</p>
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                   <button
                     onClick={() => moveImage(index, 'up')}

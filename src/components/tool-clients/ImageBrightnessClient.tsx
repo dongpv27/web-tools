@@ -4,8 +4,8 @@ import { useState, useRef } from 'react';
 
 export default function ImageBrightnessClient() {
   const [image, setImage] = useState<string | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [brightness, setBrightness] = useState(100);
+  const [fileName, setFileName] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -19,22 +19,20 @@ export default function ImageBrightnessClient() {
     const reader = new FileReader();
     reader.onload = (event) => {
       setImage(event.target?.result as string);
-      setProcessedImage(null);
+      setBrightness(100);
+      setFileName(file.name);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); };
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file) processFile(file);
   };
 
-  const applyBrightness = () => {
+  const download = () => {
     if (!image || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -45,27 +43,21 @@ export default function ImageBrightnessClient() {
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
-
       ctx.filter = `brightness(${brightness}%)`;
       ctx.drawImage(img, 0, 0);
 
-      setProcessedImage(canvas.toDataURL('image/png'));
+      const link = document.createElement('a');
+      link.download = 'brightness-adjusted-image.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
     };
     img.src = image;
   };
 
-  const download = () => {
-    if (!processedImage) return;
-    const link = document.createElement('a');
-    link.download = 'brightness-adjusted-image.png';
-    link.href = processedImage;
-    link.click();
-  };
-
   const clear = () => {
     setImage(null);
-    setProcessedImage(null);
     setBrightness(100);
+    setFileName('');
   };
 
   return (
@@ -78,9 +70,16 @@ export default function ImageBrightnessClient() {
         >
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
           <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Upload Image</button>
+          <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* File Name */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">File:</span>
+            <span className="truncate max-w-xs">{fileName}</span>
+          </div>
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">Brightness</label>
@@ -90,14 +89,19 @@ export default function ImageBrightnessClient() {
             <div className="flex justify-between text-xs text-gray-400"><span>Darker</span><span>Normal</span><span>Brighter</span></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div><p className="text-sm text-gray-500 mb-2">Original</p><div className="border border-gray-200 rounded-lg p-2"><img src={image} alt="Original" className="max-h-48 mx-auto" /></div></div>
-            <div><p className="text-sm text-gray-500 mb-2">Adjusted</p><div className="border border-gray-200 rounded-lg p-2 bg-gray-50">{processedImage ? <img src={processedImage} alt="Adjusted" className="max-h-48 mx-auto" /> : <div className="h-48 flex items-center justify-center text-gray-400">Click apply</div>}</div></div>
+          {/* Preview */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <img
+              src={image}
+              alt="Preview"
+              className="max-h-64 mx-auto"
+              style={{ filter: `brightness(${brightness}%)` }}
+            />
           </div>
 
+          {/* Actions */}
           <div className="flex gap-2">
-            <button onClick={applyBrightness} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Apply Brightness</button>
-            {processedImage && <button onClick={download} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">Download</button>}
+            <button onClick={download} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">Download</button>
             <button onClick={clear} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Clear</button>
           </div>
 

@@ -821,7 +821,6 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'webp-to-png': WebpToPngClient,
   'png-to-webp': PngToWebpClient,
   'resize-image-percentage': ResizeImagePercentageClient,
-  'resize-image-dimensions': ImageResizeClient,
   'extract-colors': ExtractColorsClient,
   'image-to-ico': ImageToIcoClient,
   'favicon-generator': FaviconGeneratorClient,
