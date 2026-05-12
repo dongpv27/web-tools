@@ -280,10 +280,10 @@ export default function CropImageClient() {
           </div>
 
           {/* Image Preview with Crop Selection */}
+          <div className="flex justify-center">
           <div
             ref={containerRef}
-            className="relative border border-gray-300 rounded-lg overflow-hidden select-none"
-            style={{ maxHeight: '500px' }}
+            className="relative inline-block border border-gray-300 rounded-lg overflow-hidden select-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -292,8 +292,8 @@ export default function CropImageClient() {
             <img
               src={imageSrc}
               alt="Preview"
-              className="w-full h-auto block"
-              style={{ maxHeight: '500px', objectFit: 'contain' }}
+              className="block"
+              style={{ maxWidth: '100%', maxHeight: '500px' }}
               draggable={false}
             />
             {/* Dark overlay outside crop */}
@@ -377,6 +377,7 @@ export default function CropImageClient() {
                 })}
               </>
             )}
+          </div>
           </div>
 
           {/* Crop size info */}

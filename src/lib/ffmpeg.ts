@@ -5,44 +5,61 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 let ffmpeg: FFmpeg | null = null;
 let loadPromise: Promise<void> | null = null;
+let currentProgressHandler: ((event: { progress: number; time: number }) => void) | null = null;
 
 export interface FFmpegProgress {
   ratio: number;
   time: number;
 }
 
+function setProgressHandler(instance: FFmpeg, onProgress?: (progress: number) => void) {
+  if (currentProgressHandler) {
+    instance.off('progress', currentProgressHandler);
+    currentProgressHandler = null;
+  }
+  if (onProgress) {
+    currentProgressHandler = ({ progress }) => {
+      onProgress(Math.max(0, Math.min(1, progress)));
+    };
+    instance.on('progress', currentProgressHandler);
+  }
+}
+
 export async function getFFmpeg(
   onProgress?: (progress: number) => void
 ): Promise<FFmpeg> {
   if (ffmpeg && ffmpeg.loaded) {
+    setProgressHandler(ffmpeg, onProgress);
     return ffmpeg;
   }
 
   if (loadPromise) {
     await loadPromise;
     if (ffmpeg && ffmpeg.loaded) {
+      setProgressHandler(ffmpeg, onProgress);
       return ffmpeg;
     }
   }
 
   ffmpeg = new FFmpeg();
-
-  if (onProgress) {
-    ffmpeg.on('progress', (event) => {
-      // @ts-expect-error - FFmpeg progress event has ratio property
-      onProgress(event.ratio as number);
-    });
-  }
+  setProgressHandler(ffmpeg, onProgress);
 
   ffmpeg.on('log', ({ message }) => {
     console.log('[FFmpeg]', message);
   });
 
   loadPromise = (async () => {
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    const coreBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    // Served from /public so the worker is same-origin and its relative
+    // imports resolve. Must be absolute because @ffmpeg/ffmpeg resolves it
+    // against import.meta.url of a Turbopack chunk, which can be file://.
+    // Setting classWorkerURL also bypasses @ffmpeg/ffmpeg's internal bundled
+    // worker, whose dynamic import() Turbopack can't handle.
+    const classWorkerURL = `${window.location.origin}/ffmpeg/worker.js`;
     await ffmpeg!.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      coreURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${coreBaseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      classWorkerURL,
     });
   })();
 
