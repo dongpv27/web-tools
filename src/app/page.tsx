@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { Code, FileText, Image, Video, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Zap, Shield, Globe } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
 import ToolGrid from '@/components/tools/ToolGrid';
+import RecentTools from '@/components/tools/RecentTools';
 import MainLayout from '@/components/layout/MainLayout';
 import { tools } from '@/lib/tools';
 import { categories } from '@/lib/categories';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
@@ -44,8 +46,40 @@ const features = [
 export default function HomePage() {
   const popularTools = tools.slice(0, 8);
 
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/tools?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon`,
+  };
+
   return (
     <MainLayout showTopBanner showBottomBanner showMobileAnchor>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
       {/* Hero Section */}
       <section className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -67,6 +101,9 @@ export default function HomePage() {
           <span>100% Free</span>
         </div>
       </section>
+
+      {/* Recently used tools (client-rendered, hidden if empty) */}
+      <RecentTools variant="inline" />
 
       {/* Features */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

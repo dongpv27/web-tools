@@ -17,13 +17,42 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   FileSpreadsheet,
 };
 
-export const metadata: Metadata = {
-  title: 'All Tools - Free Online Tools',
-  description: 'Browse all free online tools. JSON formatter, Base64 encoder, color picker, and more.',
-};
-
 interface ToolsPageProps {
   searchParams: Promise<{ search?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: ToolsPageProps): Promise<Metadata> {
+  const { search } = await searchParams;
+  const query = (search || '').trim();
+
+  if (query) {
+    // Search result pages should not be indexed (query-param duplicates) but
+    // crawlers should still follow internal links. Canonical points back to
+    // the clean /tools index.
+    return {
+      title: `Search: "${query}" - Love Web Tools`,
+      description: `Search results for "${query}" across all Love Web Tools utilities.`,
+      alternates: { canonical: '/tools' },
+      robots: { index: false, follow: true },
+    };
+  }
+
+  return {
+    title: 'All Tools - Free Online Tools',
+    description: 'Browse all free online tools. JSON formatter, Base64 encoder, color picker, and more.',
+    alternates: { canonical: '/tools' },
+    openGraph: {
+      title: 'All Tools - Free Online Tools',
+      description: 'Browse all free online tools. JSON formatter, Base64 encoder, color picker, and more.',
+      type: 'website',
+      url: '/tools',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'All Tools - Free Online Tools',
+      description: 'Browse all free online tools.',
+    },
+  };
 }
 
 export default async function ToolsPage({ searchParams }: ToolsPageProps) {

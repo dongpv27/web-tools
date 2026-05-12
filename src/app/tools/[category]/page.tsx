@@ -5,8 +5,10 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import ToolGrid from '@/components/tools/ToolGrid';
 import MainLayout from '@/components/layout/MainLayout';
+import CtaBlock from '@/components/seo/CtaBlock';
 import { getToolsByCategory } from '@/lib/tools';
 import { categories, getCategoryBySlug } from '@/lib/categories';
+import { absoluteUrl, SITE_NAME, TWITTER_HANDLE, toolOgImage } from '@/lib/site';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
@@ -37,9 +39,29 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     return { title: 'Category Not Found' };
   }
 
+  const canonical = `/tools/${category.slug}`;
+  const title = `${category.name} - Free Online Tools`;
+  const ogImage = toolOgImage(category.name, 'Category');
+
   return {
-    title: `${category.name} - Free Online Tools`,
+    title,
     description: category.description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description: category.description,
+      type: 'website',
+      url: absoluteUrl(canonical),
+      siteName: SITE_NAME,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: category.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: category.description,
+      site: TWITTER_HANDLE,
+      images: [ogImage],
+    },
   };
 }
 
@@ -59,23 +81,53 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     { label: category.name },
   ];
 
+  const featuredTools = categoryTools.slice(0, 4);
+  const categoryLow = category.name.toLowerCase();
+
   const categoryFaqs = [
     {
-      question: `What are ${category.name.toLowerCase()}?`,
-      answer: `${category.name} are online tools designed to help you with ${category.description.toLowerCase()}. All tools are free and run entirely in your browser.`,
+      question: `What are ${categoryLow}?`,
+      answer: `${category.name} are online tools designed to help you with ${category.description.toLowerCase()} All tools are free and run entirely in your browser, so your data never leaves your device.`,
     },
     {
-      question: `Are these ${category.name.toLowerCase()} free to use?`,
-      answer: `Yes, all ${category.name.toLowerCase()} on Love Web Tools are completely free to use with no hidden costs or limitations.`,
+      question: `Are these ${categoryLow} free to use?`,
+      answer: `Yes, every tool in our ${categoryLow} collection is completely free with no signup, no hidden costs, and no usage limits.`,
     },
     {
       question: `Is my data safe when using these tools?`,
-      answer: 'Absolutely! All processing happens in your browser. Your data is never sent to any server, ensuring complete privacy and security.',
+      answer: 'All processing happens locally in your browser. We do not upload, store, or transmit any of your input — there are no servers involved in the actual processing.',
+    },
+    {
+      question: `Do I need to install anything?`,
+      answer: `No installation required. Open the tool in any modern browser on desktop or mobile and start using it instantly.`,
+    },
+    {
+      question: `Can I use these ${categoryLow} on mobile?`,
+      answer: 'Yes — every tool is responsive and works on phones and tablets in addition to desktop browsers.',
     },
   ];
 
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: category.name,
+    description: category.description,
+    numberOfItems: categoryTools.length,
+    itemListElement: categoryTools.map((t, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: absoluteUrl(`/${t.slug}`),
+      name: t.name,
+      description: t.shortDescription,
+    })),
+  };
+
   return (
     <MainLayout showTopBanner showMobileAnchor>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="flex items-center gap-4 mb-4">
@@ -88,13 +140,35 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
 
-      <p className="text-gray-600 mb-8 max-w-3xl">
+      <p className="text-gray-600 mb-6 max-w-3xl">
         {category.description}
       </p>
 
-      {/* Tools Grid */}
+      {/* Long-form intro */}
+      <section className="prose prose-sm max-w-3xl text-gray-600 mb-8">
+        <p>
+          Our {categoryLow} collection brings together {categoryTools.length}+ utilities that
+          run entirely in your browser. No accounts, no uploads, no usage caps — open a tool
+          and get an answer in seconds. Whether you&apos;re troubleshooting an issue, working
+          on a personal project, or shipping production code, you can chain these tools
+          together to handle most day-to-day tasks without leaving the page.
+        </p>
+      </section>
+
+      {/* Featured tools */}
+      {featuredTools.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Featured in {category.name}</h2>
+          <ToolGrid tools={featuredTools} columns={4} />
+        </section>
+      )}
+
+      {/* All tools in category */}
       {categoryTools.length > 0 ? (
-        <ToolGrid tools={categoryTools} columns={3} />
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">All {category.name}</h2>
+          <ToolGrid tools={categoryTools} columns={3} />
+        </section>
       ) : (
         <div className="text-center py-12 bg-white border border-gray-200 rounded-xl">
           <p className="text-gray-500 mb-4">No tools available in this category yet.</p>
@@ -104,6 +178,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       {/* FAQ Section */}
       <FaqSection items={categoryFaqs} />
+
+      {/* CTA */}
+      <CtaBlock
+        title="Looking for something else?"
+        description="Browse the full library or pick another category."
+        links={[
+          { label: 'All tools', href: '/tools' },
+          { label: 'Homepage', href: '/' },
+        ]}
+      />
     </MainLayout>
   );
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { absoluteUrl, SITE_URL } from '@/lib/site';
 
 export interface BreadcrumbItem {
   label: string;
@@ -19,13 +20,13 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: typeof window !== 'undefined' ? window.location.origin : '',
+        item: SITE_URL,
       },
       ...items.map((item, index) => ({
         '@type': 'ListItem' as const,
         position: index + 2,
         name: item.label,
-        ...(item.href && { item: typeof window !== 'undefined' ? `${window.location.origin}${item.href}` : item.href }),
+        ...(item.href && { item: absoluteUrl(item.href) }),
       })),
     ],
   };

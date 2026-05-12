@@ -34,7 +34,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(lsof:*)",
       "Bash(npx next:*)",
-      "Bash(do sed:*)"
+      "Bash(do sed:*)",
+      "Bash(tee /tmp/build.log)"
     ]
   }
 }

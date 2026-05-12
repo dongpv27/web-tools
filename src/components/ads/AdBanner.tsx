@@ -112,7 +112,30 @@ export default function AdBanner({
     }
   }, [mounted]);
 
-  // Show placeholder when ADS_ENABLED is false and SHOW_PLACEHOLDERS is true
+  // CLS-safe: when ads are disabled and we are NOT showing placeholders we still
+  // reserve the slot height so toggling ads on later doesn't cause layout shift.
+  // Returning `null` would collapse the slot and shift everything below.
+  if (!ADS_ENABLED && !SHOW_PLACEHOLDERS && !showPlaceholder) {
+    // Mobile anchor lives in a fixed overlay — no in-flow space to reserve.
+    if (slot === 'mobile-anchor') return null;
+    return (
+      <div className={className} aria-hidden="true">
+        {config.desktop.width > 0 && (
+          <div
+            className="hidden md:block mx-auto"
+            style={{ minHeight: config.desktop.height, width: config.desktop.width, maxWidth: '100%' }}
+          />
+        )}
+        {config.mobile.width > 0 && (
+          <div
+            className="md:hidden mx-auto"
+            style={{ minHeight: config.mobile.height, width: config.mobile.width, maxWidth: '100%' }}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (!ADS_ENABLED) {
     if (SHOW_PLACEHOLDERS || showPlaceholder) {
       // Mobile anchor - fixed at bottom on mobile only
@@ -198,41 +221,48 @@ export default function AdBanner({
     return null;
   }
 
-  // Don't render until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return null;
-  }
-
-  // Google AdSense implementation with responsive ads
+  // Google AdSense implementation with responsive ads.
+  // We always render the reserved-height wrapper so the slot height is stable
+  // across SSR/hydration/ad-load — only the inner <ins> is gated by `mounted`.
   const slotId = ADSENSE_SLOTS[slot];
 
   return (
     <div className={`ad-container ${className}`}>
       {/* Desktop Ad */}
       {config.desktop.width > 0 && (
-        <div className="hidden md:block">
-          <ins
-            className="adsbygoogle"
-            style={{ display: 'block', width: config.desktop.width, height: config.desktop.height }}
-            data-ad-client={ADSENSE_CLIENT_ID}
-            data-ad-slot={slotId}
-            data-ad-format={format}
-            data-full-width-responsive="false"
-          />
+        <div
+          className="hidden md:block mx-auto"
+          style={{ minHeight: config.desktop.height, width: config.desktop.width, maxWidth: '100%' }}
+        >
+          {mounted && (
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', width: config.desktop.width, height: config.desktop.height }}
+              data-ad-client={ADSENSE_CLIENT_ID}
+              data-ad-slot={slotId}
+              data-ad-format={format}
+              data-full-width-responsive="false"
+            />
+          )}
         </div>
       )}
 
       {/* Mobile Ad */}
       {config.mobile.width > 0 && (
-        <div className="md:hidden">
-          <ins
-            className="adsbygoogle"
-            style={{ display: 'block', width: config.mobile.width, height: config.mobile.height }}
-            data-ad-client={ADSENSE_CLIENT_ID}
-            data-ad-slot={slotId}
-            data-ad-format={format}
-            data-full-width-responsive="true"
-          />
+        <div
+          className="md:hidden mx-auto"
+          style={{ minHeight: config.mobile.height, width: config.mobile.width, maxWidth: '100%' }}
+        >
+          {mounted && (
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', width: config.mobile.width, height: config.mobile.height }}
+              data-ad-client={ADSENSE_CLIENT_ID}
+              data-ad-slot={slotId}
+              data-ad-format={format}
+              data-full-width-responsive="true"
+            />
+          )}
         </div>
       )}
     </div>

@@ -6,6 +6,13 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 export const metadata: Metadata = {
   title: 'About Us - Love Web Tools',
   description: 'Learn about Love Web Tools - free online tools for developers, designers, and everyone. 100% client-side processing for your privacy.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Us - Love Web Tools',
+    description: 'Learn about Love Web Tools - free online tools for developers, designers, and everyone.',
+    type: 'website',
+    url: '/about',
+  },
 };
 
 export default function AboutPage() {

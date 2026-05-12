@@ -1,23 +1,18 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import {
-  Braces, CheckCircle, FileCode, Lock, Unlock, Link2, Unlink, Hash,
-  AlignLeft, Pipette, Image, Scaling, Clock, Key, Fingerprint, Text,
-  FileText, Type, CaseSensitive, Eraser, TextCursor, Binary, Code, Shield,
-  Film, Scissors, Camera, Minimize2, Crop, FileDown, FileImage, ArrowLeftRight,
-  Palette, Wind, Thermometer, Ruler, Scale, Dice5, Dices, Circle, Timer, Barcode, Percent,
-  Globe, Monitor, Server, ExternalLink, Terminal, Radio, Zap, Star, Frame,
-} from 'lucide-react';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import FaqSection from '@/components/seo/FaqSection';
 import { SeoContent } from '@/components/seo/SeoContent';
 import RelatedTools from '@/components/tools/RelatedTools';
+import RecentTools from '@/components/tools/RecentTools';
+import CtaBlock from '@/components/seo/CtaBlock';
 import ToolRenderer from '@/components/tools/ToolRenderer';
 import ExampleOutput from '@/components/tools/ExampleOutput';
 import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
 import { getCategoryById } from '@/lib/categories';
+import { absoluteUrl, SITE_NAME, TWITTER_HANDLE, toolOgImage } from '@/lib/site';
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
@@ -38,15 +33,29 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   }
 
   const pageTitle = tool.seoTitle || `${tool.name} - Free Online Tool`;
+  const canonical = `/${tool.slug}`;
+  const category = getCategoryById(tool.category);
+  const ogImage = toolOgImage(tool.name, category?.name);
 
   return {
     title: pageTitle,
     description: tool.description,
     keywords: tool.keywords.join(', '),
+    alternates: { canonical },
     openGraph: {
       title: pageTitle,
       description: tool.shortDescription,
       type: 'website',
+      url: absoluteUrl(canonical),
+      siteName: SITE_NAME,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: tool.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: tool.shortDescription,
+      site: TWITTER_HANDLE,
+      images: [ogImage],
     },
   };
 }
@@ -62,23 +71,44 @@ export default async function ToolPage({ params }: ToolPageProps) {
   const category = getCategoryById(tool.category);
   const relatedTools = getRelatedTools(tool.id);
 
+  // Breadcrumb component prepends "Home" automatically — don't add it here
+  // or the JSON-LD ends up with duplicate position-1/2 entries.
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
     { label: category?.name || 'Tools', href: category ? `/tools/${category.slug}` : '/tools' },
     { label: tool.name },
   ];
+
+  const categoryAppMap: Record<string, string> = {
+    dev: 'DeveloperApplication',
+    text: 'UtilitiesApplication',
+    image: 'MultimediaApplication',
+    video: 'MultimediaApplication',
+    color: 'DesignApplication',
+    converter: 'UtilitiesApplication',
+    office: 'BusinessApplication',
+    misc: 'UtilitiesApplication',
+  };
 
   const toolSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: tool.name,
     description: tool.description,
-    applicationCategory: 'UtilityApplication',
+    url: absoluteUrl(`/${tool.slug}`),
+    applicationCategory: categoryAppMap[tool.category] || 'UtilitiesApplication',
     operatingSystem: 'Web Browser',
+    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    inLanguage: 'en',
+    isAccessibleForFree: true,
     offers: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: absoluteUrl('/'),
     },
   };
 
@@ -86,6 +116,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
   const popularTools = tools.slice(0, 8);
   const sidebarContent = (
     <div className="space-y-6">
+      <RecentTools currentSlug={tool.slug} />
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <h3 className="font-semibold text-gray-900 mb-4">Popular Tools</h3>
         <div className="space-y-2">
@@ -142,7 +173,10 @@ export default async function ToolPage({ params }: ToolPageProps) {
       {/* SEO Content */}
       <SeoContent.WhatIs
         name={tool.name}
-        description={`${tool.name} is a free online tool that ${tool.shortDescription.toLowerCase()}. This tool processes your data entirely in your browser, ensuring your privacy and security. No data is ever sent to any server.`}
+        description={
+          tool.seoContent?.intro ||
+          `${tool.name} is a free online tool that ${tool.shortDescription.toLowerCase()}. This tool processes your data entirely in your browser, ensuring your privacy and security. No data is ever sent to any server.`
+        }
       />
 
       <SeoContent.WhyUse
@@ -164,13 +198,35 @@ export default async function ToolPage({ params }: ToolPageProps) {
         ]}
       />
 
+      {tool.seoContent?.examples?.length ? (
+        <SeoContent.Examples examples={tool.seoContent.examples} />
+      ) : null}
+
+      {tool.seoContent?.useCases?.length ? (
+        <SeoContent.UseCases items={tool.seoContent.useCases} />
+      ) : null}
+
+      {tool.seoContent?.troubleshooting?.length ? (
+        <SeoContent.Troubleshooting items={tool.seoContent.troubleshooting} />
+      ) : null}
+
       {/* FAQ Section */}
       {tool.faq && <FaqSection items={tool.faq} />}
 
       {/* Related Tools */}
       {relatedTools.length > 0 && (
-        <RelatedTools tools={relatedTools} />
+        <RelatedTools tools={relatedTools} title="Try these related tools" />
       )}
+
+      {/* CTA — explore more in the same category + all tools */}
+      <CtaBlock
+        title={`Explore more ${category?.name || 'tools'}`}
+        description={`Discover other free, privacy-first tools in ${category?.name || 'our collection'}.`}
+        links={[
+          ...(category ? [{ label: `All ${category.name}`, href: `/tools/${category.slug}` }] : []),
+          { label: 'Browse all tools', href: '/tools' },
+        ]}
+      />
     </MainLayout>
   );
 }

@@ -69,10 +69,62 @@ function HowToUse({ steps }: HowToUseProps) {
   );
 }
 
+interface ExamplesProps {
+  examples: { title: string; body: string }[];
+}
+
+function Examples({ examples }: ExamplesProps) {
+  if (!examples.length) return null;
+  return (
+    <SeoSection title="Examples">
+      <div className="space-y-4">
+        {examples.map((ex, i) => (
+          <div key={i} className="border-l-4 border-blue-200 pl-4">
+            <h3 className="font-semibold text-gray-900 mb-1">{ex.title}</h3>
+            <p className="text-gray-600 whitespace-pre-wrap">{ex.body}</p>
+          </div>
+        ))}
+      </div>
+    </SeoSection>
+  );
+}
+
+function UseCases({ items }: { items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <SeoSection title="Common use cases">
+      <SeoList items={items} />
+    </SeoSection>
+  );
+}
+
+interface TroubleshootingProps {
+  items: { problem: string; solution: string }[];
+}
+
+function Troubleshooting({ items }: TroubleshootingProps) {
+  if (!items.length) return null;
+  return (
+    <SeoSection title="Troubleshooting">
+      <dl className="space-y-3">
+        {items.map((it, i) => (
+          <div key={i}>
+            <dt className="font-semibold text-gray-900">{it.problem}</dt>
+            <dd className="text-gray-600 ml-0">{it.solution}</dd>
+          </div>
+        ))}
+      </dl>
+    </SeoSection>
+  );
+}
+
 export const SeoContent = Object.assign(SeoSection, {
   Paragraph: SeoParagraph,
   List: SeoList,
   WhatIs,
   WhyUse,
   HowToUse,
+  Examples,
+  UseCases,
+  Troubleshooting,
 });

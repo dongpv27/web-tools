@@ -8,6 +8,9 @@ export interface Tool {
   slug: string;
   icon: string;
   keywords: string[];
+  /** Lightweight topical tags used to compute related tools and for internal linking.
+   *  When absent, related logic falls back to keywords + category. */
+  tags?: string[];
   faq?: {
     question: string;
     answer: string;
@@ -18,6 +21,19 @@ export interface Tool {
     input?: string;
     output: string;
     description?: string;
+  };
+  /** Rich, per-tool SEO sections. When omitted, the tool page falls back to
+   *  the generic SeoContent components. Populating these for top tools is
+   *  the easiest way to reduce duplicate content across the site. */
+  seoContent?: {
+    /** Custom intro paragraph replacing the auto-generated one. */
+    intro?: string;
+    /** Worked examples: short scenarios the user might paste in. */
+    examples?: { title: string; body: string }[];
+    /** Real-world developer/designer use cases. */
+    useCases?: string[];
+    /** Common errors and how to fix them. */
+    troubleshooting?: { problem: string; solution: string }[];
   };
 }
 
@@ -33,6 +49,7 @@ export const tools: Tool[] = [
     slug: 'json-formatter',
     icon: 'Braces',
     keywords: ['json', 'formatter', 'beautify', 'format json', 'json parser', 'json validator'],
+    tags: ['json', 'formatter', 'beautify', 'developer', 'parser'],
     faq: [
       {
         question: 'What is JSON Formatter?',
@@ -62,6 +79,48 @@ export const tools: Tool[] = [
       'The result will appear in the output area',
       'Use the copy button to copy the result to your clipboard',
     ],
+    seoContent: {
+      intro:
+        'JSON Formatter takes minified, hand-written, or API-response JSON and produces a clean, indented version that is easy to scan and diff. Use it to inspect a payload from your network tab, normalize input before committing to git, or quickly check whether two responses differ in structure or just whitespace. The whole transformation happens in your browser — your data never leaves the page.',
+      examples: [
+        {
+          title: 'Beautify a one-line API response',
+          body: 'Input:  {"user":{"id":1,"roles":["admin","editor"]}}\nOutput is rewritten with 2-space indentation, one key per line, so it can be diffed line-by-line in a code review.',
+        },
+        {
+          title: 'Normalize before committing',
+          body: 'Paste a config blob copied from a chat thread, format with tabs, and the result matches your team\'s editorconfig without any local tooling.',
+        },
+        {
+          title: 'Toggle between formatted and minified',
+          body: 'Use Format to expand for reading, then Minify to compress for embedding in an HTML data-* attribute or a URL fragment.',
+        },
+      ],
+      useCases: [
+        'Inspecting REST/GraphQL API responses while debugging',
+        'Diffing two JSON payloads in a code review or pull request',
+        'Cleaning up JSON copied out of a log line or chat message',
+        'Preparing fixtures and seed data for tests',
+        'Embedding compact JSON in an HTML attribute after minifying',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Unexpected token error on a valid-looking payload.',
+          solution:
+            'Most often a trailing comma, unquoted key, or single-quoted string. JSON only accepts double quotes and no trailing commas — fix those and reformat.',
+        },
+        {
+          problem: 'Numbers look truncated (e.g. trailing zeros disappear).',
+          solution:
+            'Large integers above 2^53 lose precision when parsed as JavaScript Number. Wrap the value in quotes before parsing so it stays a string.',
+        },
+        {
+          problem: 'Output looks identical to input.',
+          solution:
+            'The input is already canonical at the indentation you chose. Try a different indent setting or use Minify to verify the round-trip.',
+        },
+      ],
+    },
   },
   {
     id: 'json-validator',
@@ -73,6 +132,7 @@ export const tools: Tool[] = [
     slug: 'json-validator',
     icon: 'CheckCircle',
     keywords: ['json', 'validator', 'validate json', 'json checker', 'json lint'],
+    tags: ['json', 'validator', 'lint', 'developer', 'syntax'],
     faq: [
       {
         question: 'What is JSON validation?',
@@ -112,6 +172,7 @@ export const tools: Tool[] = [
     slug: 'json-to-yaml',
     icon: 'FileCode',
     keywords: ['json', 'yaml', 'converter', 'json to yaml', 'convert json'],
+    tags: ['json', 'yaml', 'converter', 'developer'],
     faq: [
       {
         question: 'Why convert JSON to YAML?',
@@ -146,6 +207,7 @@ export const tools: Tool[] = [
     slug: 'yaml-to-json',
     icon: 'FileCode',
     keywords: ['yaml', 'json', 'converter', 'yaml to json', 'convert yaml'],
+    tags: ['yaml', 'json', 'converter', 'developer'],
     faq: [
       {
         question: 'Why convert YAML to JSON?',
@@ -180,6 +242,7 @@ export const tools: Tool[] = [
     slug: 'base64-encode',
     icon: 'Lock',
     keywords: ['base64', 'encode', 'encoder', 'base64 encode', 'text encoder'],
+    tags: ['base64', 'encoder', 'encoding', 'developer'],
     faq: [
       {
         question: 'What is Base64 encoding?',
@@ -203,6 +266,48 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['base64-decode', 'url-encode', 'text-to-base64'],
+    seoContent: {
+      intro:
+        'Base64 Encoder turns arbitrary bytes — text, images, or binary blobs — into an ASCII-safe string that survives transport channels that only accept printable characters. It is the same encoding used by HTTP Basic Auth headers, JWT payloads, and inline data: URLs. The conversion runs entirely in your browser, so secrets you paste never reach a server.',
+      examples: [
+        {
+          title: 'Encode credentials for Basic Auth',
+          body: 'Encode "user:p@ss" to "dXNlcjpwQHNz". The resulting string is what goes after "Authorization: Basic " in an HTTP request.',
+        },
+        {
+          title: 'Inline an SVG icon',
+          body: 'Encode the SVG markup to Base64 and use it as `url("data:image/svg+xml;base64,...")` in CSS to remove an HTTP request.',
+        },
+        {
+          title: 'Round-trip a binary buffer',
+          body: 'Encode raw bytes here, ship the string in JSON, decode on the other side with the Base64 Decoder tool to get the original buffer back.',
+        },
+      ],
+      useCases: [
+        'Embedding small images and fonts in CSS / HTML to cut requests',
+        'Building HTTP Basic Auth headers by hand',
+        'Encoding API keys before sending them in JSON',
+        'Preparing payloads for JWT or webhook signatures',
+        'Storing binary blobs in databases that only accept text',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Decoded result has mojibake / question marks.',
+          solution:
+            'The input was treated as a different encoding. UTF-8 text encodes safely; if you started from a Latin-1 source, convert to UTF-8 first.',
+        },
+        {
+          problem: 'Output is ~33% larger than input.',
+          solution:
+            'That overhead is intrinsic to Base64 — 3 bytes in, 4 characters out. If size matters, consider Base85 or gzip + Base64 instead.',
+        },
+        {
+          problem: 'I get padding-error when decoding elsewhere.',
+          solution:
+            'Some libraries reject inputs whose length is not a multiple of 4. Re-add trailing "=" padding characters or switch to a URL-safe variant.',
+        },
+      ],
+    },
   },
   {
     id: 'base64-decode',
@@ -214,6 +319,7 @@ export const tools: Tool[] = [
     slug: 'base64-decode',
     icon: 'Unlock',
     keywords: ['base64', 'decode', 'decoder', 'base64 decode', 'text decoder'],
+    tags: ['base64', 'decoder', 'encoding', 'developer'],
     faq: [
       {
         question: 'What is Base64 decoding?',
@@ -248,6 +354,7 @@ export const tools: Tool[] = [
     slug: 'url-encode',
     icon: 'Link',
     keywords: ['url', 'encode', 'encoder', 'url encode', 'percent encoding'],
+    tags: ['url', 'encoder', 'encoding', 'web', 'developer'],
     faq: [
       {
         question: 'What is URL encoding?',
@@ -282,6 +389,7 @@ export const tools: Tool[] = [
     slug: 'url-decode',
     icon: 'Unlink',
     keywords: ['url', 'decode', 'decoder', 'url decode', 'percent decoding'],
+    tags: ['url', 'decoder', 'encoding', 'web', 'developer'],
     faq: [
       {
         question: 'What is URL decoding?',
@@ -316,6 +424,7 @@ export const tools: Tool[] = [
     slug: 'uuid-generator',
     icon: 'Fingerprint',
     keywords: ['uuid', 'guid', 'generator', 'unique id', 'uuid v4'],
+    tags: ['uuid', 'guid', 'generator', 'identifier', 'developer'],
     faq: [
       {
         question: 'What is a UUID?',
@@ -358,6 +467,7 @@ export const tools: Tool[] = [
     slug: 'timestamp-converter',
     icon: 'Clock',
     keywords: ['timestamp', 'unix', 'converter', 'epoch', 'date converter'],
+    tags: ['timestamp', 'unix', 'epoch', 'date', 'converter', 'developer'],
     faq: [
       {
         question: 'What is a Unix timestamp?',
@@ -392,6 +502,7 @@ export const tools: Tool[] = [
     slug: 'random-password-generator',
     icon: 'Key',
     keywords: ['password', 'generator', 'random', 'secure password', 'password maker'],
+    tags: ['password', 'generator', 'random', 'security'],
     faq: [
       {
         question: 'What makes a password secure?',
@@ -430,6 +541,7 @@ export const tools: Tool[] = [
     slug: 'regex-tester',
     icon: 'Regex',
     keywords: ['regex', 'regexp', 'regular expression', 'tester', 'pattern matcher'],
+    tags: ['regex', 'pattern', 'tester', 'developer'],
     faq: [
       {
         question: 'What is a regular expression?',
@@ -464,6 +576,7 @@ export const tools: Tool[] = [
     slug: 'jwt-decoder',
     icon: 'Shield',
     keywords: ['jwt', 'json web token', 'decoder', 'token', 'authentication'],
+    tags: ['jwt', 'token', 'decoder', 'auth', 'security', 'developer'],
     faq: [
       {
         question: 'What is a JWT?',
@@ -487,6 +600,48 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['jwt-encoder', 'base64-decode', 'json-formatter'],
+    seoContent: {
+      intro:
+        'JWT Decoder splits a JSON Web Token into its three parts — header, payload, signature — and base64url-decodes the first two so you can read the claims. It is the same view you get from jwt.io, but the token is decoded locally; nothing is uploaded. Use it when you need to confirm the algorithm, inspect the `exp` claim, or just see what your auth provider actually puts in the payload.',
+      examples: [
+        {
+          title: 'Inspect an expiring token',
+          body: 'Paste a token and read the `exp` claim. Compare its value (Unix seconds) to the current time to see how long the session has left.',
+        },
+        {
+          title: 'Confirm the signing algorithm',
+          body: 'The header shows `alg`. If you expect RS256 but see HS256, your library may be misconfigured — this is a classic JWT vulnerability vector.',
+        },
+        {
+          title: 'Debug claim shape',
+          body: 'Login fails because the backend expects `sub` but the IdP issues `user_id`. Decoding the token surfaces the mismatch instantly.',
+        },
+      ],
+      useCases: [
+        'Debugging "401 Unauthorized" errors in API calls',
+        'Verifying that an access token contains the expected scopes/roles',
+        'Inspecting token expiry before retrying a failed request',
+        'Comparing tokens issued by different identity providers',
+        'Training and onboarding when explaining how JWTs work',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid token" error.',
+          solution:
+            'Make sure you pasted exactly three base64url segments separated by dots. Stray quotation marks, leading "Bearer ", or whitespace break the parse.',
+        },
+        {
+          problem: 'Payload claims look garbled.',
+          solution:
+            'The token uses base64url (not standard base64). Our decoder handles that, but if you decoded by hand elsewhere, substitute "-" with "+" and "_" with "/" and add padding.',
+        },
+        {
+          problem: 'I can see the payload — is my token compromised?',
+          solution:
+            'Any holder of the token can read its payload; that is by design. Confidentiality comes from how you store and transmit the token, not from JWT itself.',
+        },
+      ],
+    },
   },
   {
     id: 'md5-hash-generator',
@@ -498,6 +653,7 @@ export const tools: Tool[] = [
     slug: 'md5-hash-generator',
     icon: 'Hash',
     keywords: ['md5', 'hash', 'generator', 'checksum', 'md5 hash'],
+    tags: ['md5', 'hash', 'checksum', 'security', 'developer'],
     faq: [
       {
         question: 'What is MD5 hash used for?',
@@ -537,6 +693,7 @@ export const tools: Tool[] = [
     slug: 'sha256-hash-generator',
     icon: 'Hash',
     keywords: ['sha256', 'hash', 'generator', 'checksum', 'secure hash'],
+    tags: ['sha256', 'hash', 'checksum', 'security', 'developer'],
     faq: [
       {
         question: 'Why use SHA-256 over MD5?',
@@ -576,6 +733,7 @@ export const tools: Tool[] = [
     slug: 'html-formatter',
     icon: 'Code',
     keywords: ['html', 'formatter', 'beautify', 'format html', 'html prettifier'],
+    tags: ['html', 'formatter', 'beautify', 'web', 'developer'],
     faq: [
       {
         question: 'What is HTML formatting?',
@@ -610,6 +768,7 @@ export const tools: Tool[] = [
     slug: 'css-formatter',
     icon: 'Palette',
     keywords: ['css', 'formatter', 'beautify', 'format css', 'css prettifier'],
+    tags: ['css', 'formatter', 'beautify', 'web', 'developer'],
     faq: [
       {
         question: 'Why format CSS code?',
@@ -644,6 +803,7 @@ export const tools: Tool[] = [
     slug: 'sql-formatter',
     icon: 'Database',
     keywords: ['sql', 'formatter', 'beautify', 'format sql', 'sql prettifier'],
+    tags: ['developer', 'sql', 'formatter', 'beautify', 'format', 'prettifier'],
     faq: [
       {
         question: 'Why format SQL queries?',
@@ -678,6 +838,7 @@ export const tools: Tool[] = [
     slug: 'ip-address-validator',
     icon: 'Globe',
     keywords: ['ip', 'ip address', 'validator', 'ipv4', 'ipv6'],
+    tags: ['developer', 'validator', 'ipv4', 'ipv6', 'address'],
     faq: [
       {
         question: 'What is an IP address?',
@@ -712,6 +873,7 @@ export const tools: Tool[] = [
     slug: 'cron-expression-parser',
     icon: 'Timer',
     keywords: ['cron', 'expression', 'parser', 'schedule', 'cron job'],
+    tags: ['developer', 'cron', 'expression', 'parser', 'schedule', 'job'],
     faq: [
       {
         question: 'What is a cron expression?',
@@ -746,6 +908,7 @@ export const tools: Tool[] = [
     slug: 'json-minify',
     icon: 'Minimize2',
     keywords: ['json', 'minify', 'compress json', 'reduce json size', 'json minifier'],
+    tags: ['json', 'minifier', 'compress', 'developer'],
     faq: [
       {
         question: 'What is JSON minification?',
@@ -780,6 +943,7 @@ export const tools: Tool[] = [
     slug: 'json-diff',
     icon: 'GitCompare',
     keywords: ['json', 'diff', 'compare json', 'json compare', 'json difference'],
+    tags: ['developer', 'json', 'diff', 'compare', 'difference'],
     faq: [
       {
         question: 'How does JSON diff work?',
@@ -814,6 +978,7 @@ export const tools: Tool[] = [
     slug: 'html-encode-decode',
     icon: 'Code',
     keywords: ['html', 'encode', 'decode', 'html entities', 'html special characters'],
+    tags: ['developer', 'html', 'encode', 'decode', 'entities', 'special', 'characters'],
     faq: [
       {
         question: 'What are HTML entities?',
@@ -848,6 +1013,7 @@ export const tools: Tool[] = [
     slug: 'query-string-parser',
     icon: 'Link',
     keywords: ['query string', 'url params', 'parse url', 'query params', 'url parser'],
+    tags: ['developer', 'query', 'string', 'url', 'params', 'parse', 'parser'],
     faq: [
       {
         question: 'What is a query string?',
@@ -882,6 +1048,7 @@ export const tools: Tool[] = [
     slug: 'url-parser',
     icon: 'ExternalLink',
     keywords: ['url', 'parser', 'parse url', 'url components', 'url breakdown'],
+    tags: ['developer', 'url', 'parser', 'parse', 'components', 'breakdown'],
     faq: [
       {
         question: 'What URL components can be extracted?',
@@ -916,6 +1083,7 @@ export const tools: Tool[] = [
     slug: 'http-status-codes',
     icon: 'Server',
     keywords: ['http', 'status code', 'http code', '404', '500', 'http response'],
+    tags: ['developer', 'http', '404', '500', 'status', 'code', 'response'],
     faq: [
       {
         question: 'What are HTTP status codes?',
@@ -950,6 +1118,7 @@ export const tools: Tool[] = [
     slug: 'user-agent-parser',
     icon: 'Monitor',
     keywords: ['user agent', 'ua parser', 'browser detection', 'device detection', 'user agent parser'],
+    tags: ['developer', 'user', 'agent', 'parser', 'detection', 'device'],
     faq: [
       {
         question: 'What is a User Agent string?',
@@ -984,6 +1153,7 @@ export const tools: Tool[] = [
     slug: 'binary-converter',
     icon: 'Binary',
     keywords: ['binary', 'converter', 'text to binary', 'binary to text', 'binary code'],
+    tags: ['developer', 'binary', 'converter', 'code'],
     faq: [
       {
         question: 'What is binary representation?',
@@ -1018,6 +1188,7 @@ export const tools: Tool[] = [
     slug: 'hex-converter',
     icon: 'Hash',
     keywords: ['hex', 'hexadecimal', 'converter', 'text to hex', 'hex to text'],
+    tags: ['developer', 'hex', 'hexadecimal', 'converter'],
     faq: [
       {
         question: 'What is hexadecimal representation?',
@@ -1052,6 +1223,7 @@ export const tools: Tool[] = [
     slug: 'bcrypt-hash-generator',
     icon: 'Lock',
     keywords: ['bcrypt', 'hash', 'password hash', 'bcrypt generator', 'salt'],
+    tags: ['developer', 'bcrypt', 'hash', 'salt', 'password', 'generator'],
     faq: [
       {
         question: 'What is bcrypt?',
@@ -1091,6 +1263,7 @@ export const tools: Tool[] = [
     slug: 'random-string-generator',
     icon: 'Text',
     keywords: ['random string', 'string generator', 'random text', 'generate string', 'random characters'],
+    tags: ['developer', 'random', 'string', 'generator', 'generate', 'characters'],
     faq: [
       {
         question: 'What is a random string generator?',
@@ -1129,6 +1302,7 @@ export const tools: Tool[] = [
     slug: 'guid-generator',
     icon: 'Fingerprint',
     keywords: ['guid', 'generator', 'globally unique identifier', 'windows guid', 'uuid'],
+    tags: ['developer', 'guid', 'generator', 'uuid', 'globally', 'unique', 'identifier'],
     faq: [
       {
         question: 'What is a GUID?',
@@ -1166,6 +1340,7 @@ export const tools: Tool[] = [
     slug: 'uuid-bulk-generator',
     icon: 'List',
     keywords: ['uuid', 'bulk', 'generator', 'multiple uuid', 'batch uuid', 'uuid list'],
+    tags: ['developer', 'uuid', 'bulk', 'generator', 'multiple', 'batch', 'list'],
     faq: [
       {
         question: 'Why use bulk UUID generation?',
@@ -1204,6 +1379,7 @@ export const tools: Tool[] = [
     slug: 'jwt-encoder',
     icon: 'Shield',
     keywords: ['jwt', 'encoder', 'json web token', 'token generator', 'authentication'],
+    tags: ['developer', 'jwt', 'encoder', 'authentication', 'json', 'token', 'generator'],
     faq: [
       {
         question: 'What is JWT encoding?',
@@ -1238,6 +1414,7 @@ export const tools: Tool[] = [
     slug: 'curl-to-fetch',
     icon: 'Terminal',
     keywords: ['curl', 'fetch', 'converter', 'javascript', 'api', 'http request'],
+    tags: ['developer', 'curl', 'fetch', 'converter', 'javascript', 'api', 'http'],
     faq: [
       {
         question: 'Why convert CURL to fetch?',
@@ -1274,6 +1451,7 @@ export const tools: Tool[] = [
     slug: 'word-counter',
     icon: 'Hash',
     keywords: ['word counter', 'character count', 'word count', 'text counter'],
+    tags: ['text', 'word', 'counter', 'character', 'count'],
     faq: [
       {
         question: 'What does the word counter measure?',
@@ -1308,6 +1486,7 @@ export const tools: Tool[] = [
     slug: 'character-counter',
     icon: 'Type',
     keywords: ['character counter', 'char count', 'letter count', 'text statistics'],
+    tags: ['text', 'character', 'counter', 'char', 'count', 'letter', 'statistics'],
     faq: [
       {
         question: 'What is the difference between character count with and without spaces?',
@@ -1342,6 +1521,7 @@ export const tools: Tool[] = [
     slug: 'text-case-converter',
     icon: 'CaseSensitive',
     keywords: ['case converter', 'uppercase', 'lowercase', 'title case', 'text transform'],
+    tags: ['text', 'uppercase', 'lowercase', 'case', 'converter', 'title', 'transform'],
     faq: [
       {
         question: 'What case types are available?',
@@ -1376,6 +1556,7 @@ export const tools: Tool[] = [
     slug: 'slug-generator',
     icon: 'Link',
     keywords: ['slug generator', 'url slug', 'seo slug', 'permalink', 'url friendly'],
+    tags: ['text', 'permalink', 'slug', 'generator', 'url', 'seo', 'friendly'],
     faq: [
       {
         question: 'What is a URL slug?',
@@ -1415,6 +1596,7 @@ export const tools: Tool[] = [
     slug: 'remove-duplicate-lines',
     icon: 'ListX',
     keywords: ['remove duplicates', 'unique lines', 'dedupe', 'duplicate remover'],
+    tags: ['text', 'dedupe', 'remove', 'duplicates', 'unique', 'lines', 'duplicate'],
     faq: [
       {
         question: 'How does duplicate line removal work?',
@@ -1449,6 +1631,7 @@ export const tools: Tool[] = [
     slug: 'sort-lines-alphabetically',
     icon: 'ListOrdered',
     keywords: ['sort lines', 'alphabetical sort', 'sort text', 'order lines'],
+    tags: ['text', 'sort', 'lines', 'alphabetical', 'order'],
     faq: [
       {
         question: 'How does alphabetical sorting work?',
@@ -1483,6 +1666,7 @@ export const tools: Tool[] = [
     slug: 'reverse-text',
     icon: 'Reverse',
     keywords: ['reverse text', 'flip text', 'backwards text', 'text reverser'],
+    tags: ['text', 'reverse', 'flip', 'backwards', 'reverser'],
     faq: [
       {
         question: 'What does reversing text do?',
@@ -1517,6 +1701,7 @@ export const tools: Tool[] = [
     slug: 'remove-line-breaks',
     icon: 'Minus',
     keywords: ['remove line breaks', 'join lines', 'single line', 'remove newlines'],
+    tags: ['text', 'remove', 'line', 'breaks', 'join', 'lines', 'single'],
     faq: [
       {
         question: 'What are line breaks?',
@@ -1551,6 +1736,7 @@ export const tools: Tool[] = [
     slug: 'lorem-ipsum',
     icon: 'AlignLeft',
     keywords: ['lorem ipsum', 'placeholder text', 'dummy text', 'lipsum'],
+    tags: ['text', 'lipsum', 'lorem', 'ipsum', 'placeholder', 'dummy'],
     faq: [
       {
         question: 'What is Lorem Ipsum?',
@@ -1585,6 +1771,7 @@ export const tools: Tool[] = [
     slug: 'random-text-generator',
     icon: 'Text',
     keywords: ['random text', 'text generator', 'dummy content', 'test text'],
+    tags: ['text', 'random', 'generator', 'dummy', 'content', 'test'],
     faq: [
       {
         question: 'What is random text used for?',
@@ -1623,6 +1810,7 @@ export const tools: Tool[] = [
     slug: 'text-difference-checker',
     icon: 'Diff',
     keywords: ['text diff', 'compare text', 'difference checker', 'text compare'],
+    tags: ['text', 'diff', 'compare', 'difference', 'checker'],
     faq: [
       {
         question: 'How does text comparison work?',
@@ -1657,6 +1845,7 @@ export const tools: Tool[] = [
     slug: 'remove-html-tags',
     icon: 'CodeX',
     keywords: ['remove html', 'strip tags', 'html remover', 'plain text'],
+    tags: ['text', 'remove', 'html', 'strip', 'tags', 'remover', 'plain'],
     faq: [
       {
         question: 'What are HTML tags?',
@@ -1691,6 +1880,7 @@ export const tools: Tool[] = [
     slug: 'find-and-replace',
     icon: 'Replace',
     keywords: ['find replace', 'search replace', 'text replace', 'replace all'],
+    tags: ['text', 'find', 'replace', 'search', 'all'],
     faq: [
       {
         question: 'How does find and replace work?',
@@ -1725,6 +1915,7 @@ export const tools: Tool[] = [
     slug: 'text-to-list',
     icon: 'List',
     keywords: ['text to list', 'convert to list', 'list maker', 'bullet points'],
+    tags: ['text', 'list', 'convert', 'maker', 'bullet', 'points'],
     faq: [
       {
         question: 'How does text to list conversion work?',
@@ -1759,6 +1950,7 @@ export const tools: Tool[] = [
     slug: 'list-to-text',
     icon: 'FileText',
     keywords: ['list to text', 'convert list', 'join list', 'list to paragraph'],
+    tags: ['text', 'list', 'convert', 'join', 'paragraph'],
     faq: [
       {
         question: 'What types of lists can I convert?',
@@ -1793,6 +1985,7 @@ export const tools: Tool[] = [
     slug: 'random-name-generator',
     icon: 'User',
     keywords: ['name generator', 'random names', 'fake names', 'name picker'],
+    tags: ['text', 'name', 'generator', 'random', 'names', 'fake', 'picker'],
     faq: [
       {
         question: 'What can I use random names for?',
@@ -1831,6 +2024,7 @@ export const tools: Tool[] = [
     slug: 'remove-extra-spaces',
     icon: 'Space',
     keywords: ['remove spaces', 'extra spaces', 'whitespace remover', 'clean spaces'],
+    tags: ['text', 'remove', 'spaces', 'extra', 'whitespace', 'remover', 'clean'],
     faq: [
       {
         question: 'What types of whitespace does this tool remove?',
@@ -1865,6 +2059,7 @@ export const tools: Tool[] = [
     slug: 'capitalize-sentences',
     icon: 'CaseUpper',
     keywords: ['capitalize sentences', 'sentence case', 'fix capitalization', 'capitalize first letter'],
+    tags: ['text', 'capitalize', 'sentences', 'sentence', 'case', 'fix', 'capitalization'],
     faq: [
       {
         question: 'How does sentence capitalization work?',
@@ -1899,6 +2094,7 @@ export const tools: Tool[] = [
     slug: 'text-cleaner',
     icon: 'Eraser',
     keywords: ['text cleaner', 'clean text', 'format text', 'text sanitizer'],
+    tags: ['text', 'cleaner', 'clean', 'format', 'sanitizer'],
     faq: [
       {
         question: 'What does the Text Cleaner tool do?',
@@ -1933,6 +2129,7 @@ export const tools: Tool[] = [
     slug: 'rot13-encoder',
     icon: 'Lock',
     keywords: ['rot13', 'encoder', 'cipher', 'encryption', 'caesar cipher'],
+    tags: ['text', 'rot13', 'encoder', 'cipher', 'encryption', 'caesar'],
     faq: [
       {
         question: 'What is ROT13?',
@@ -1967,6 +2164,7 @@ export const tools: Tool[] = [
     slug: 'rot13-decoder',
     icon: 'Unlock',
     keywords: ['rot13', 'decoder', 'cipher', 'decryption', 'caesar cipher'],
+    tags: ['text', 'rot13', 'decoder', 'cipher', 'decryption', 'caesar'],
     faq: [
       {
         question: 'How does ROT13 decoding work?',
@@ -2001,6 +2199,7 @@ export const tools: Tool[] = [
     slug: 'morse-code-translator',
     icon: 'Radio',
     keywords: ['morse code', 'translator', 'morse', 'dot dash', 'telegraph'],
+    tags: ['text', 'translator', 'morse', 'telegraph', 'code', 'dot', 'dash'],
     faq: [
       {
         question: 'What is Morse code?',
@@ -2035,6 +2234,7 @@ export const tools: Tool[] = [
     slug: 'ascii-converter',
     icon: 'Binary',
     keywords: ['ascii', 'converter', 'ascii code', 'character code', 'text to ascii'],
+    tags: ['text', 'ascii', 'converter', 'code', 'character'],
     faq: [
       {
         question: 'What is ASCII?',
@@ -2071,6 +2271,7 @@ export const tools: Tool[] = [
     slug: 'image-resize',
     icon: 'Scaling',
     keywords: ['image resize', 'resize photo', 'picture resizer', 'image size'],
+    tags: ['image', 'resize', 'photo', 'picture', 'resizer', 'size'],
     faq: [
       {
         question: 'How do I resize an image without losing quality?',
@@ -2101,6 +2302,7 @@ export const tools: Tool[] = [
     slug: 'image-to-base64',
     icon: 'Binary',
     keywords: ['image to base64', 'base64 image', 'encode image', 'image encoder'],
+    tags: ['image', 'base64', 'encode', 'encoder'],
     faq: [
       {
         question: 'What is Base64 encoding for images?',
@@ -2127,6 +2329,7 @@ export const tools: Tool[] = [
     slug: 'base64-to-image',
     icon: 'Image',
     keywords: ['base64 to image', 'decode image', 'base64 decoder', 'image decoder'],
+    tags: ['image', 'base64', 'decode', 'decoder'],
     faq: [
       {
         question: 'How do I convert a Base64 string to an image?',
@@ -2149,6 +2352,7 @@ export const tools: Tool[] = [
     slug: 'image-to-ico',
     icon: 'FileImage',
     keywords: ['image to ico', 'ico converter', 'favicon generator', 'icon maker'],
+    tags: ['image', 'ico', 'converter', 'favicon', 'generator', 'icon', 'maker'],
     faq: [
       {
         question: 'What is an ICO file?',
@@ -2175,6 +2379,7 @@ export const tools: Tool[] = [
     slug: 'webp-to-png',
     icon: 'ImageDown',
     keywords: ['webp to png', 'convert webp', 'webp converter', 'image converter'],
+    tags: ['image', 'webp', 'png', 'convert', 'converter'],
     faq: [
       {
         question: 'Why should I convert WebP to PNG?',
@@ -2201,6 +2406,7 @@ export const tools: Tool[] = [
     slug: 'png-to-webp',
     icon: 'ImageUp',
     keywords: ['png to webp', 'convert png', 'webp converter', 'image optimization'],
+    tags: ['image', 'png', 'webp', 'convert', 'converter', 'optimization'],
     faq: [
       {
         question: 'Why convert PNG to WebP?',
@@ -2227,6 +2433,7 @@ export const tools: Tool[] = [
     slug: 'jpg-to-png',
     icon: 'ImageOff',
     keywords: ['jpg to png', 'jpeg to png', 'convert jpg', 'image converter'],
+    tags: ['image', 'jpg', 'png', 'jpeg', 'convert', 'converter'],
     faq: [
       {
         question: 'When should I convert JPG to PNG?',
@@ -2249,6 +2456,7 @@ export const tools: Tool[] = [
     slug: 'png-to-jpg',
     icon: 'ImagePlus',
     keywords: ['png to jpg', 'convert png', 'jpg converter', 'image converter'],
+    tags: ['image', 'png', 'jpg', 'convert', 'converter'],
     faq: [
       {
         question: 'Why convert PNG to JPG?',
@@ -2271,6 +2479,7 @@ export const tools: Tool[] = [
     slug: 'resize-image-percentage',
     icon: 'Percent',
     keywords: ['resize percentage', 'scale image', 'image percentage', 'resize by percent'],
+    tags: ['image', 'resize', 'percentage', 'scale', 'percent'],
     faq: [
       {
         question: 'How do I resize an image by percentage?',
@@ -2297,6 +2506,7 @@ export const tools: Tool[] = [
     slug: 'rotate-image',
     icon: 'RotateCw',
     keywords: ['rotate image', 'rotate photo', 'image rotation', 'flip image'],
+    tags: ['image', 'rotate', 'photo', 'rotation', 'flip'],
     faq: [
       {
         question: 'How do I rotate an image?',
@@ -2323,6 +2533,7 @@ export const tools: Tool[] = [
     slug: 'flip-image-horizontal',
     icon: 'FlipHorizontal',
     keywords: ['flip horizontal', 'mirror image', 'horizontal flip', 'flip photo'],
+    tags: ['image', 'flip', 'horizontal', 'mirror', 'photo'],
     faq: [
       {
         question: 'What does flipping an image horizontally do?',
@@ -2345,6 +2556,7 @@ export const tools: Tool[] = [
     slug: 'flip-image-vertical',
     icon: 'FlipVertical',
     keywords: ['flip vertical', 'vertical flip', 'flip photo', 'mirror vertical'],
+    tags: ['image', 'flip', 'vertical', 'photo', 'mirror'],
     faq: [
       {
         question: 'What does flipping an image vertically do?',
@@ -2367,6 +2579,7 @@ export const tools: Tool[] = [
     slug: 'blur-image',
     icon: 'EyeOff',
     keywords: ['blur image', 'image blur', 'blur photo', 'blur effect'],
+    tags: ['image', 'blur', 'photo', 'effect'],
     faq: [
       {
         question: 'Why would I blur an image?',
@@ -2393,6 +2606,7 @@ export const tools: Tool[] = [
     slug: 'pixelate-image',
     icon: 'Grid3x3',
     keywords: ['pixelate image', 'pixel effect', 'mosaic effect', 'pixelate photo'],
+    tags: ['image', 'pixelate', 'pixel', 'effect', 'mosaic', 'photo'],
     faq: [
       {
         question: 'What is image pixelation?',
@@ -2419,6 +2633,7 @@ export const tools: Tool[] = [
     slug: 'grayscale-image',
     icon: 'CircleHalf',
     keywords: ['grayscale', 'black and white', 'bw image', 'monochrome'],
+    tags: ['image', 'grayscale', 'monochrome', 'black', 'white'],
     faq: [
       {
         question: 'What is a grayscale image?',
@@ -2445,6 +2660,7 @@ export const tools: Tool[] = [
     slug: 'adjust-brightness',
     icon: 'Sun',
     keywords: ['brightness', 'adjust brightness', 'image brightness', 'photo brightness'],
+    tags: ['image', 'brightness', 'adjust', 'photo'],
     faq: [
       {
         question: 'How do I adjust image brightness?',
@@ -2471,6 +2687,7 @@ export const tools: Tool[] = [
     slug: 'image-color-picker',
     icon: 'Pipette',
     keywords: ['color picker', 'image color', 'pick color', 'extract color'],
+    tags: ['image', 'color', 'picker', 'pick', 'extract'],
     faq: [
       {
         question: 'How do I pick a color from an image?',
@@ -2497,6 +2714,7 @@ export const tools: Tool[] = [
     slug: 'extract-colors',
     icon: 'Palette',
     keywords: ['extract colors', 'color palette', 'dominant colors', 'image colors'],
+    tags: ['image', 'extract', 'colors', 'color', 'palette', 'dominant'],
     faq: [
       {
         question: 'How does color extraction work?',
@@ -2523,6 +2741,7 @@ export const tools: Tool[] = [
     slug: 'image-border',
     icon: 'Frame',
     keywords: ['image border', 'add border', 'photo border', 'picture frame'],
+    tags: ['image', 'border', 'add', 'photo', 'picture', 'frame'],
     faq: [
       {
         question: 'How do I add a border to my image?',
@@ -2549,6 +2768,7 @@ export const tools: Tool[] = [
     slug: 'favicon-generator',
     icon: 'Star',
     keywords: ['favicon', 'favicon generator', 'website icon', 'browser icon'],
+    tags: ['image', 'favicon', 'generator', 'website', 'icon'],
     faq: [
       {
         question: 'What sizes do I need for a favicon?',
@@ -2575,6 +2795,7 @@ export const tools: Tool[] = [
     slug: 'image-compressor',
     icon: 'FileDown',
     keywords: ['image compressor', 'compress image', 'reduce image size', 'image optimization'],
+    tags: ['image', 'compressor', 'compress', 'reduce', 'size', 'optimization'],
     faq: [
       {
         question: 'How does image compression work?',
@@ -2593,6 +2814,7 @@ export const tools: Tool[] = [
     slug: 'crop-image',
     icon: 'Crop',
     keywords: ['crop image', 'image crop', 'photo crop', 'picture crop', 'crop tool'],
+    tags: ['image', 'crop', 'photo', 'picture'],
     faq: [
       {
         question: 'How do I crop an image?',
@@ -2611,6 +2833,7 @@ export const tools: Tool[] = [
     slug: 'gif-maker',
     icon: 'Film',
     keywords: ['gif maker', 'create gif', 'animated gif', 'gif creator', 'gif animator'],
+    tags: ['image', 'gif', 'maker', 'create', 'animated', 'creator', 'animator'],
     faq: [
       {
         question: 'How do I create a GIF from images?',
@@ -2629,6 +2852,7 @@ export const tools: Tool[] = [
     slug: 'png-compressor',
     icon: 'FileDown',
     keywords: ['png compressor', 'compress png', 'png optimization', 'reduce png size'],
+    tags: ['image', 'png', 'compressor', 'compress', 'optimization', 'reduce', 'size'],
     faq: [
       {
         question: 'How does PNG compression work?',
@@ -2647,6 +2871,7 @@ export const tools: Tool[] = [
     slug: 'jpeg-compressor',
     icon: 'FileDown',
     keywords: ['jpeg compressor', 'compress jpeg', 'jpg compression', 'reduce jpeg size'],
+    tags: ['image', 'jpeg', 'compressor', 'compress', 'jpg', 'compression', 'reduce'],
     faq: [
       {
         question: 'What quality should I use for JPEG compression?',
@@ -2665,6 +2890,7 @@ export const tools: Tool[] = [
     slug: 'gif-compressor',
     icon: 'FileDown',
     keywords: ['gif compressor', 'compress gif', 'gif optimization', 'reduce gif size'],
+    tags: ['image', 'gif', 'compressor', 'compress', 'optimization', 'reduce', 'size'],
     faq: [
       {
         question: 'How can I reduce GIF file size?',
@@ -2683,6 +2909,7 @@ export const tools: Tool[] = [
     slug: 'svg-to-png',
     icon: 'FileImage',
     keywords: ['svg to png', 'svg converter', 'vector to raster', 'convert svg'],
+    tags: ['image', 'svg', 'png', 'converter', 'vector', 'raster', 'convert'],
     faq: [
       {
         question: 'Why convert SVG to PNG?',
@@ -2703,6 +2930,7 @@ export const tools: Tool[] = [
     slug: 'color-picker',
     icon: 'Pipette',
     keywords: ['color picker', 'hex color', 'rgb color', 'color code'],
+    tags: ['color', 'picker', 'hex', 'rgb', 'code'],
     faq: [
       {
         question: 'What is a color picker?',
@@ -2737,6 +2965,7 @@ export const tools: Tool[] = [
     slug: 'hex-to-rgb',
     icon: 'Palette',
     keywords: ['hex to rgb', 'color converter', 'hex color', 'rgb color'],
+    tags: ['color', 'hex', 'rgb', 'converter'],
     faq: [
       {
         question: 'How do I convert HEX to RGB manually?',
@@ -2771,6 +3000,7 @@ export const tools: Tool[] = [
     slug: 'rgb-to-hex',
     icon: 'Palette',
     keywords: ['rgb to hex', 'color converter', 'rgb color', 'hex color'],
+    tags: ['color', 'rgb', 'hex', 'converter'],
     faq: [
       {
         question: 'How do I convert RGB to HEX manually?',
@@ -2805,6 +3035,7 @@ export const tools: Tool[] = [
     slug: 'color-palette-generator',
     icon: 'SwatchBook',
     keywords: ['color palette', 'palette generator', 'color scheme', 'color combination'],
+    tags: ['color', 'palette', 'generator', 'scheme', 'combination'],
     faq: [
       {
         question: 'What types of color palettes can I generate?',
@@ -2843,6 +3074,7 @@ export const tools: Tool[] = [
     slug: 'gradient-generator',
     icon: 'Blend',
     keywords: ['gradient generator', 'css gradient', 'linear gradient', 'radial gradient'],
+    tags: ['color', 'gradient', 'generator', 'css', 'linear', 'radial'],
     faq: [
       {
         question: 'What is the difference between linear and radial gradients?',
@@ -2881,6 +3113,7 @@ export const tools: Tool[] = [
     slug: 'color-contrast-checker',
     icon: 'Contrast',
     keywords: ['contrast checker', 'wcag', 'accessibility', 'color contrast'],
+    tags: ['color', 'wcag', 'accessibility', 'contrast', 'checker'],
     faq: [
       {
         question: 'What is WCAG color contrast?',
@@ -2915,6 +3148,7 @@ export const tools: Tool[] = [
     slug: 'css-gradient-generator',
     icon: 'Blend',
     keywords: ['css gradient', 'gradient css', 'gradient code', 'css generator'],
+    tags: ['color', 'css', 'gradient', 'code', 'generator'],
     faq: [
       {
         question: 'What types of gradients can I create?',
@@ -2941,6 +3175,7 @@ export const tools: Tool[] = [
     slug: 'random-color-generator',
     icon: 'Shuffle',
     keywords: ['random color', 'color generator', 'random hex', 'random rgb'],
+    tags: ['color', 'random', 'generator', 'hex', 'rgb'],
     relatedTools: ['color-palette-generator', 'color-picker', 'hex-to-rgb'],
   },
   {
@@ -2953,6 +3188,7 @@ export const tools: Tool[] = [
     slug: 'tailwind-color-converter',
     icon: 'Wind',
     keywords: ['tailwind color', 'tailwind converter', 'tailwind css', 'color converter'],
+    tags: ['color', 'tailwind', 'converter', 'css'],
     relatedTools: ['color-converter', 'color-picker', 'css-formatter'],
   },
   {
@@ -2965,6 +3201,7 @@ export const tools: Tool[] = [
     slug: 'color-converter',
     icon: 'ArrowLeftRight',
     keywords: ['color converter', 'hex rgb hsl', 'color format', 'color transform'],
+    tags: ['color', 'converter', 'hex', 'rgb', 'hsl', 'format', 'transform'],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'rgba-to-hex'],
   },
   {
@@ -2977,6 +3214,7 @@ export const tools: Tool[] = [
     slug: 'rgb-color-picker',
     icon: 'Pipette',
     keywords: ['rgb color picker', 'rgb picker', 'red green blue', 'color selector'],
+    tags: ['color', 'rgb', 'picker', 'red', 'green', 'blue', 'selector'],
     faq: [
       {
         question: 'How do RGB colors work?',
@@ -2995,6 +3233,7 @@ export const tools: Tool[] = [
     slug: 'hex-color-picker',
     icon: 'Pipette',
     keywords: ['hex color picker', 'hex picker', 'hex code', 'color hex'],
+    tags: ['color', 'hex', 'picker', 'code'],
     faq: [
       {
         question: 'What is a HEX color code?',
@@ -3013,6 +3252,7 @@ export const tools: Tool[] = [
     slug: 'rgba-to-hex',
     icon: 'ArrowLeftRight',
     keywords: ['rgba to hex', 'rgba converter', 'alpha to hex', 'color converter'],
+    tags: ['color', 'rgba', 'hex', 'converter', 'alpha'],
     faq: [
       {
         question: 'How do I convert RGBA to HEX?',
@@ -3033,6 +3273,7 @@ export const tools: Tool[] = [
     slug: 'csv-to-json',
     icon: 'FileSpreadsheet',
     keywords: ['csv to json', 'csv converter', 'spreadsheet to json', 'csv parser'],
+    tags: ['converter', 'csv', 'json', 'spreadsheet', 'parser'],
     faq: [
       {
         question: 'What is CSV to JSON conversion?',
@@ -3067,6 +3308,7 @@ export const tools: Tool[] = [
     slug: 'json-to-csv',
     icon: 'FileSpreadsheet',
     keywords: ['json to csv', 'json converter', 'json to spreadsheet', 'export csv'],
+    tags: ['converter', 'json', 'csv', 'spreadsheet', 'export'],
     faq: [
       {
         question: 'How do I convert JSON to CSV?',
@@ -3101,6 +3343,7 @@ export const tools: Tool[] = [
     slug: 'markdown-to-html',
     icon: 'FileCode',
     keywords: ['markdown to html', 'md to html', 'markdown converter', 'md converter'],
+    tags: ['converter', 'markdown', 'html'],
     faq: [
       {
         question: 'What Markdown features are supported?',
@@ -3135,6 +3378,7 @@ export const tools: Tool[] = [
     slug: 'html-to-markdown',
     icon: 'FileCode',
     keywords: ['html to markdown', 'html converter', 'html to md', 'markdown generator'],
+    tags: ['converter', 'html', 'markdown', 'generator'],
     faq: [
       {
         question: 'How does HTML to Markdown conversion work?',
@@ -3169,6 +3413,7 @@ export const tools: Tool[] = [
     slug: 'qr-code-generator',
     icon: 'QrCode',
     keywords: ['qr code', 'qr generator', 'qr maker', 'barcode generator'],
+    tags: ['converter', 'code', 'generator', 'maker', 'barcode'],
     faq: [
       {
         question: 'What types of data can I encode in a QR code?',
@@ -3203,6 +3448,7 @@ export const tools: Tool[] = [
     slug: 'text-to-base64',
     icon: 'Binary',
     keywords: ['text to base64', 'base64 encoder', 'encode text', 'base64 converter'],
+    tags: ['converter', 'base64', 'encoder', 'encode'],
     faq: [
       {
         question: 'What is Base64 encoding?',
@@ -3237,6 +3483,7 @@ export const tools: Tool[] = [
     slug: 'base64-to-text',
     icon: 'FileText',
     keywords: ['base64 to text', 'base64 decoder', 'decode base64', 'base64 converter'],
+    tags: ['converter', 'base64', 'decoder', 'decode'],
     faq: [
       {
         question: 'How do I decode Base64 to text?',
@@ -3271,6 +3518,7 @@ export const tools: Tool[] = [
     slug: 'url-to-qr-code',
     icon: 'Link',
     keywords: ['url to qr', 'url qr code', 'website qr', 'link qr code'],
+    tags: ['converter', 'url', 'code', 'website', 'link'],
     faq: [
       {
         question: 'How do I create a QR code for a URL?',
@@ -3305,6 +3553,7 @@ export const tools: Tool[] = [
     slug: 'unix-time-to-date',
     icon: 'Clock',
     keywords: ['unix time', 'epoch converter', 'timestamp to date', 'unix timestamp'],
+    tags: ['converter', 'unix', 'time', 'epoch', 'timestamp', 'date'],
     faq: [
       {
         question: 'What is Unix time (epoch time)?',
@@ -3339,6 +3588,7 @@ export const tools: Tool[] = [
     slug: 'date-to-unix-time',
     icon: 'Clock',
     keywords: ['date to unix', 'date to timestamp', 'epoch time', 'unix converter'],
+    tags: ['converter', 'date', 'unix', 'timestamp', 'epoch', 'time'],
     faq: [
       {
         question: 'How do I convert a date to Unix timestamp?',
@@ -3373,6 +3623,7 @@ export const tools: Tool[] = [
     slug: 'time-converter',
     icon: 'Clock',
     keywords: ['time converter', 'convert time', 'hours to minutes', 'time units'],
+    tags: ['converter', 'time', 'convert', 'hours', 'minutes', 'units'],
     faq: [
       {
         question: 'What time units can I convert?',
@@ -3407,6 +3658,7 @@ export const tools: Tool[] = [
     slug: 'temperature-converter',
     icon: 'Thermometer',
     keywords: ['temperature converter', 'celsius to fahrenheit', 'fahrenheit to celsius', 'kelvin'],
+    tags: ['converter', 'kelvin', 'temperature', 'celsius', 'fahrenheit'],
     faq: [
       {
         question: 'How do I convert Celsius to Fahrenheit?',
@@ -3441,6 +3693,7 @@ export const tools: Tool[] = [
     slug: 'weight-converter',
     icon: 'Scale',
     keywords: ['weight converter', 'kg to lbs', 'pounds to kg', 'weight units', 'mass converter'],
+    tags: ['converter', 'weight', 'lbs', 'pounds', 'units', 'mass'],
     faq: [
       {
         question: 'What weight units can I convert?',
@@ -3475,6 +3728,7 @@ export const tools: Tool[] = [
     slug: 'length-converter',
     icon: 'Ruler',
     keywords: ['length converter', 'meters to feet', 'inches to cm', 'distance converter', 'km to miles'],
+    tags: ['converter', 'length', 'meters', 'feet', 'inches', 'distance', 'miles'],
     faq: [
       {
         question: 'What length units are supported?',
@@ -3509,6 +3763,7 @@ export const tools: Tool[] = [
     slug: 'markdown-to-pdf',
     icon: 'FileType',
     keywords: ['markdown to pdf', 'md to pdf', 'convert markdown', 'pdf from markdown'],
+    tags: ['converter', 'markdown', 'pdf', 'convert'],
     faq: [
       {
         question: 'How does Markdown to PDF conversion work?',
@@ -3527,6 +3782,7 @@ export const tools: Tool[] = [
     slug: 'json-to-xml',
     icon: 'FileCode',
     keywords: ['json to xml', 'convert json', 'json xml', 'json converter'],
+    tags: ['converter', 'json', 'xml', 'convert'],
     faq: [
       {
         question: 'How do I convert JSON to XML?',
@@ -3545,6 +3801,7 @@ export const tools: Tool[] = [
     slug: 'xml-to-json',
     icon: 'FileCode',
     keywords: ['xml to json', 'convert xml', 'xml json', 'xml converter'],
+    tags: ['converter', 'xml', 'json', 'convert'],
     faq: [
       {
         question: 'How do I convert XML to JSON?',
@@ -3565,6 +3822,7 @@ export const tools: Tool[] = [
     slug: 'random-number-generator',
     icon: 'Dice5',
     keywords: ['random number', 'number generator', 'random integer', 'rng'],
+    tags: ['utility', 'rng', 'random', 'number', 'generator', 'integer'],
     faq: [
       {
         question: 'How does this random number generator work?',
@@ -3591,6 +3849,7 @@ export const tools: Tool[] = [
     slug: 'dice-roll-simulator',
     icon: 'Dices',
     keywords: ['dice roll', 'dice simulator', 'roll dice', 'virtual dice'],
+    tags: ['utility', 'dice', 'roll', 'simulator', 'virtual'],
     relatedTools: ['coin-flip', 'random-number-generator', 'random-password-generator'],
   },
   {
@@ -3603,6 +3862,7 @@ export const tools: Tool[] = [
     slug: 'coin-flip',
     icon: 'Circle',
     keywords: ['coin flip', 'heads or tails', 'coin toss', 'flip coin'],
+    tags: ['utility', 'coin', 'flip', 'heads', 'tails', 'toss'],
     relatedTools: ['dice-roll-simulator', 'random-number-generator', 'random-password-generator'],
   },
   {
@@ -3615,6 +3875,7 @@ export const tools: Tool[] = [
     slug: 'countdown-timer',
     icon: 'Timer',
     keywords: ['countdown timer', 'timer', 'countdown', 'stopwatch'],
+    tags: ['utility', 'timer', 'countdown', 'stopwatch'],
     relatedTools: ['time-converter', 'cron-expression-parser', 'timestamp-converter'],
   },
   {
@@ -3627,6 +3888,7 @@ export const tools: Tool[] = [
     slug: 'barcode-generator',
     icon: 'Barcode',
     keywords: ['barcode generator', 'barcode maker', 'create barcode', 'barcode creator'],
+    tags: ['utility', 'barcode', 'generator', 'maker', 'create', 'creator'],
     relatedTools: ['qr-code-generator', 'url-to-qr-code', 'url-encode'],
   },
   {
@@ -3639,6 +3901,7 @@ export const tools: Tool[] = [
     slug: 'unit-converter',
     icon: 'Ruler',
     keywords: ['unit converter', 'convert units', 'measurement converter', 'unit conversion'],
+    tags: ['utility', 'unit', 'converter', 'convert', 'units', 'measurement', 'conversion'],
     relatedTools: ['temperature-converter', 'weight-converter', 'length-converter'],
   },
   {
@@ -3651,6 +3914,7 @@ export const tools: Tool[] = [
     slug: 'age-calculator',
     icon: 'Calendar',
     keywords: ['age calculator', 'calculate age', 'birthday calculator', 'age finder'],
+    tags: ['utility', 'age', 'calculator', 'calculate', 'birthday', 'finder'],
     relatedTools: ['bmi-calculator', 'percentage-calculator', 'date-to-unix-time'],
   },
   {
@@ -3663,6 +3927,7 @@ export const tools: Tool[] = [
     slug: 'bmi-calculator',
     icon: 'Scale',
     keywords: ['bmi calculator', 'body mass index', 'weight calculator', 'health calculator'],
+    tags: ['utility', 'bmi', 'calculator', 'body', 'mass', 'index', 'weight'],
     relatedTools: ['age-calculator', 'percentage-calculator', 'weight-converter'],
   },
   {
@@ -3675,6 +3940,7 @@ export const tools: Tool[] = [
     slug: 'percentage-calculator',
     icon: 'Percent',
     keywords: ['percentage calculator', 'calculate percent', 'percent calculator', 'percentage'],
+    tags: ['utility', 'percentage', 'calculator', 'calculate', 'percent'],
     relatedTools: ['bmi-calculator', 'age-calculator', 'unit-converter'],
   },
   {
@@ -3687,6 +3953,7 @@ export const tools: Tool[] = [
     slug: 'password-strength-checker',
     icon: 'Shield',
     keywords: ['password strength', 'password checker', 'secure password', 'password test'],
+    tags: ['utility', 'password', 'strength', 'checker', 'secure', 'test'],
     relatedTools: ['random-password-generator', 'secure-token-generator', 'bcrypt-hash-generator'],
   },
   {
@@ -3699,6 +3966,7 @@ export const tools: Tool[] = [
     slug: 'secure-token-generator',
     icon: 'Key',
     keywords: ['secure token', 'token generator', 'api key', 'session token', 'csrf token'],
+    tags: ['utility', 'secure', 'token', 'generator', 'api', 'key', 'session'],
     faq: [
       {
         question: 'What makes a token secure?',
@@ -3725,6 +3993,7 @@ export const tools: Tool[] = [
     slug: 'nano-id-generator',
     icon: 'Fingerprint',
     keywords: ['nano id', 'nanoid', 'unique id', 'short id', 'url friendly id'],
+    tags: ['utility', 'nanoid', 'nano', 'unique', 'short', 'url', 'friendly'],
     faq: [
       {
         question: 'What is Nano ID?',
@@ -3751,6 +4020,7 @@ export const tools: Tool[] = [
     slug: 'slug-generator-advanced',
     icon: 'Link',
     keywords: ['slug generator', 'url slug', 'seo slug', 'permalink', 'advanced slug'],
+    tags: ['utility', 'permalink', 'slug', 'generator', 'url', 'seo', 'advanced'],
     faq: [
       {
         question: 'What makes this slug generator advanced?',
@@ -3781,6 +4051,7 @@ export const tools: Tool[] = [
     slug: 'excel-to-csv',
     icon: 'FileSpreadsheet',
     keywords: ['excel to csv', 'xlsx to csv', 'convert excel', 'spreadsheet converter'],
+    tags: ['office', 'excel', 'csv', 'xlsx', 'convert', 'spreadsheet', 'converter'],
     faq: [
       {
         question: 'What is the difference between Excel and CSV format?',
@@ -3821,6 +4092,7 @@ export const tools: Tool[] = [
     slug: 'csv-to-excel',
     icon: 'FileSpreadsheet',
     keywords: ['csv to excel', 'csv to xlsx', 'convert csv', 'spreadsheet creator'],
+    tags: ['office', 'csv', 'excel', 'xlsx', 'convert', 'spreadsheet', 'creator'],
     relatedTools: ['excel-to-csv', 'excel-to-json', 'json-to-csv'],
     howToUse: [
       'Upload or paste your CSV data',
@@ -3839,6 +4111,7 @@ export const tools: Tool[] = [
     slug: 'excel-to-json',
     icon: 'FileCode',
     keywords: ['excel to json', 'xlsx to json', 'spreadsheet to json', 'convert excel'],
+    tags: ['office', 'excel', 'json', 'xlsx', 'spreadsheet', 'convert'],
     relatedTools: ['json-to-excel', 'excel-to-csv', 'csv-to-json'],
     howToUse: [
       'Upload your Excel file',
@@ -3857,6 +4130,7 @@ export const tools: Tool[] = [
     slug: 'json-to-excel',
     icon: 'FileCode',
     keywords: ['json to excel', 'json to xlsx', 'convert json', 'spreadsheet from json'],
+    tags: ['office', 'json', 'excel', 'xlsx', 'convert', 'spreadsheet'],
     relatedTools: ['excel-to-json', 'json-to-csv', 'csv-to-excel'],
     howToUse: [
       'Paste your JSON data or upload a file',
@@ -3875,6 +4149,7 @@ export const tools: Tool[] = [
     slug: 'excel-to-xml',
     icon: 'FileCode',
     keywords: ['excel to xml', 'xlsx to xml', 'spreadsheet to xml', 'convert excel'],
+    tags: ['office', 'excel', 'xml', 'xlsx', 'spreadsheet', 'convert'],
     relatedTools: ['xml-to-json', 'excel-to-json', 'json-to-xml'],
     howToUse: [
       'Upload your Excel file',
@@ -3893,6 +4168,7 @@ export const tools: Tool[] = [
     slug: 'excel-to-sql',
     icon: 'Database',
     keywords: ['excel to sql', 'xlsx to sql', 'spreadsheet to sql', 'sql generator'],
+    tags: ['office', 'excel', 'sql', 'xlsx', 'spreadsheet', 'generator'],
     relatedTools: ['sql-formatter', 'csv-to-json', 'excel-to-csv'],
     howToUse: [
       'Upload your Excel file',
@@ -3911,6 +4187,7 @@ export const tools: Tool[] = [
     slug: 'merge-excel',
     icon: 'Layers',
     keywords: ['merge excel', 'combine excel', 'join spreadsheets', 'excel merger'],
+    tags: ['office', 'merge', 'excel', 'combine', 'join', 'spreadsheets', 'merger'],
     relatedTools: ['excel-to-csv', 'excel-to-json', 'csv-to-excel'],
     howToUse: [
       'Upload multiple Excel files',
@@ -3931,6 +4208,7 @@ export const tools: Tool[] = [
     slug: 'word-to-pdf',
     icon: 'FileText',
     keywords: ['word to pdf', 'docx to pdf', 'convert word', 'document to pdf'],
+    tags: ['office', 'word', 'pdf', 'docx', 'convert', 'document'],
     relatedTools: ['pdf-to-word', 'word-to-txt', 'markdown-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -3949,6 +4227,7 @@ export const tools: Tool[] = [
     slug: 'pdf-to-word',
     icon: 'FileText',
     keywords: ['pdf to word', 'pdf to docx', 'convert pdf', 'pdf editor'],
+    tags: ['office', 'pdf', 'word', 'docx', 'convert', 'editor'],
     relatedTools: ['word-to-pdf', 'extract-text-pdf', 'pdf-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -3967,6 +4246,7 @@ export const tools: Tool[] = [
     slug: 'word-to-txt',
     icon: 'FileText',
     keywords: ['word to txt', 'docx to txt', 'extract text word', 'word text'],
+    tags: ['office', 'word', 'txt', 'docx', 'extract'],
     relatedTools: ['word-to-pdf', 'extract-text-pdf', 'word-word-counter'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -3985,6 +4265,7 @@ export const tools: Tool[] = [
     slug: 'merge-word',
     icon: 'Layers',
     keywords: ['merge word', 'combine docx', 'join documents', 'word merger'],
+    tags: ['office', 'merge', 'word', 'combine', 'docx', 'join', 'documents'],
     relatedTools: ['word-to-pdf', 'split-word', 'extract-images-word'],
     howToUse: [
       'Upload multiple Word documents',
@@ -4003,6 +4284,7 @@ export const tools: Tool[] = [
     slug: 'split-word',
     icon: 'Scissors',
     keywords: ['split word', 'divide docx', 'split document', 'word splitter'],
+    tags: ['office', 'split', 'word', 'divide', 'docx', 'document', 'splitter'],
     relatedTools: ['merge-word', 'word-to-pdf', 'extract-text-pdf'],
     howToUse: [
       'Upload your Word document',
@@ -4021,6 +4303,7 @@ export const tools: Tool[] = [
     slug: 'word-word-counter',
     icon: 'FileText',
     keywords: ['word counter', 'docx word count', 'document counter', 'word document'],
+    tags: ['office', 'word', 'counter', 'docx', 'count', 'document'],
     relatedTools: ['word-counter', 'character-counter', 'word-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4039,6 +4322,7 @@ export const tools: Tool[] = [
     slug: 'extract-images-word',
     icon: 'Image',
     keywords: ['extract images', 'word images', 'docx images', 'document images'],
+    tags: ['office', 'extract', 'images', 'word', 'docx', 'document'],
     relatedTools: ['extract-images-pdf', 'extract-images-ppt', 'word-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4059,6 +4343,7 @@ export const tools: Tool[] = [
     slug: 'pdf-page-counter',
     icon: 'FileText',
     keywords: ['pdf page count', 'count pdf pages', 'pdf info', 'pdf pages'],
+    tags: ['office', 'pdf', 'page', 'count', 'pages', 'info'],
     relatedTools: ['merge-pdf', 'split-pdf', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4077,6 +4362,7 @@ export const tools: Tool[] = [
     slug: 'extract-text-pdf',
     icon: 'FileText',
     keywords: ['extract text pdf', 'pdf to text', 'copy pdf text', 'pdf text extractor'],
+    tags: ['office', 'extract', 'pdf', 'copy', 'extractor'],
     relatedTools: ['extract-images-pdf', 'pdf-to-word', 'pdf-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -4095,6 +4381,7 @@ export const tools: Tool[] = [
     slug: 'extract-images-pdf',
     icon: 'Image',
     keywords: ['extract images pdf', 'pdf images', 'pdf image extractor', 'extract from pdf'],
+    tags: ['office', 'extract', 'images', 'pdf', 'image', 'extractor'],
     relatedTools: ['extract-text-pdf', 'extract-images-word', 'pdf-to-ppt'],
     howToUse: [
       'Upload your PDF file',
@@ -4113,6 +4400,7 @@ export const tools: Tool[] = [
     slug: 'pdf-to-excel',
     icon: 'FileSpreadsheet',
     keywords: ['pdf to excel', 'pdf to xlsx', 'extract table pdf', 'pdf converter'],
+    tags: ['office', 'pdf', 'excel', 'xlsx', 'extract', 'table', 'converter'],
     relatedTools: ['pdf-to-csv', 'extract-text-pdf', 'csv-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -4131,6 +4419,7 @@ export const tools: Tool[] = [
     slug: 'pdf-to-csv',
     icon: 'FileSpreadsheet',
     keywords: ['pdf to csv', 'extract table pdf', 'pdf table', 'pdf converter'],
+    tags: ['office', 'pdf', 'csv', 'extract', 'table', 'converter'],
     relatedTools: ['csv-to-json', 'pdf-to-excel', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4149,6 +4438,7 @@ export const tools: Tool[] = [
     slug: 'pdf-to-ppt',
     icon: 'Presentation',
     keywords: ['pdf to ppt', 'pdf to powerpoint', 'convert pdf', 'pdf slides'],
+    tags: ['office', 'pdf', 'ppt', 'powerpoint', 'convert', 'slides'],
     relatedTools: ['ppt-to-pdf', 'extract-text-pdf', 'extract-images-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4167,6 +4457,7 @@ export const tools: Tool[] = [
     slug: 'merge-pdf',
     icon: 'Layers',
     keywords: ['merge pdf', 'combine pdf', 'join pdf', 'pdf merger'],
+    tags: ['office', 'merge', 'pdf', 'combine', 'join', 'merger'],
     relatedTools: ['split-pdf', 'pdf-page-counter', 'markdown-to-pdf'],
     howToUse: [
       'Upload multiple PDF files',
@@ -4185,6 +4476,7 @@ export const tools: Tool[] = [
     slug: 'split-pdf',
     icon: 'Scissors',
     keywords: ['split pdf', 'divide pdf', 'extract pages pdf', 'pdf splitter'],
+    tags: ['office', 'split', 'pdf', 'divide', 'extract', 'pages', 'splitter'],
     relatedTools: ['merge-pdf', 'pdf-page-counter', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4205,6 +4497,7 @@ export const tools: Tool[] = [
     slug: 'ppt-slide-counter',
     icon: 'Presentation',
     keywords: ['ppt slide count', 'powerpoint slides', 'count slides', 'pptx info'],
+    tags: ['office', 'ppt', 'slide', 'count', 'powerpoint', 'slides', 'pptx'],
     relatedTools: ['merge-ppt', 'split-ppt', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4223,6 +4516,7 @@ export const tools: Tool[] = [
     slug: 'extract-text-ppt',
     icon: 'FileText',
     keywords: ['extract text ppt', 'powerpoint text', 'ppt text', 'pptx text extractor'],
+    tags: ['office', 'extract', 'ppt', 'powerpoint', 'pptx', 'extractor'],
     relatedTools: ['extract-images-ppt', 'ppt-to-images', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4241,6 +4535,7 @@ export const tools: Tool[] = [
     slug: 'extract-images-ppt',
     icon: 'Image',
     keywords: ['extract images ppt', 'powerpoint images', 'ppt images', 'pptx image extractor'],
+    tags: ['office', 'extract', 'images', 'ppt', 'powerpoint', 'pptx', 'image'],
     relatedTools: ['extract-text-ppt', 'ppt-to-images', 'extract-images-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4259,6 +4554,7 @@ export const tools: Tool[] = [
     slug: 'ppt-to-images',
     icon: 'Image',
     keywords: ['ppt to images', 'powerpoint to images', 'slides to png', 'ppt converter'],
+    tags: ['office', 'ppt', 'images', 'powerpoint', 'slides', 'png', 'converter'],
     relatedTools: ['video-to-images', 'extract-images-ppt', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4277,6 +4573,7 @@ export const tools: Tool[] = [
     slug: 'ppt-to-pdf',
     icon: 'FileText',
     keywords: ['ppt to pdf', 'powerpoint to pdf', 'convert ppt', 'pptx to pdf'],
+    tags: ['office', 'ppt', 'pdf', 'powerpoint', 'convert', 'pptx'],
     relatedTools: ['pdf-to-ppt', 'ppt-slide-counter', 'merge-ppt'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4295,6 +4592,7 @@ export const tools: Tool[] = [
     slug: 'merge-ppt',
     icon: 'Layers',
     keywords: ['merge ppt', 'combine powerpoint', 'join ppt', 'ppt merger'],
+    tags: ['office', 'merge', 'ppt', 'combine', 'powerpoint', 'join', 'merger'],
     relatedTools: ['split-ppt', 'ppt-slide-counter', 'ppt-to-pdf'],
     howToUse: [
       'Upload multiple PowerPoint files',
@@ -4313,6 +4611,7 @@ export const tools: Tool[] = [
     slug: 'split-ppt',
     icon: 'Scissors',
     keywords: ['split ppt', 'divide powerpoint', 'extract slides', 'ppt splitter'],
+    tags: ['office', 'split', 'ppt', 'divide', 'powerpoint', 'extract', 'slides'],
     relatedTools: ['merge-ppt', 'ppt-slide-counter', 'ppt-to-images'],
     howToUse: [
       'Upload your PowerPoint file',
@@ -4332,6 +4631,7 @@ export const tools: Tool[] = [
     slug: 'video-to-gif',
     icon: 'Film',
     keywords: ['video to gif', 'convert to gif', 'mp4 to gif', 'animated gif', 'gif maker', 'video gif converter'],
+    tags: ['video', 'gif', 'convert', 'mp4', 'animated', 'maker', 'converter'],
     faq: [
       {
         question: 'How do I convert a video to GIF?',
@@ -4372,6 +4672,7 @@ export const tools: Tool[] = [
     slug: 'compress-video',
     icon: 'Minimize2',
     keywords: ['compress video', 'reduce video size', 'video compressor', 'shrink video', 'video optimization'],
+    tags: ['video', 'compress', 'reduce', 'size', 'compressor', 'shrink', 'optimization'],
     faq: [
       {
         question: 'Will compressing the video affect quality?',
@@ -4412,6 +4713,7 @@ export const tools: Tool[] = [
     slug: 'mp4-to-mp3',
     icon: 'Music',
     keywords: ['mp4 to mp3', 'extract audio', 'video to mp3', 'audio converter', 'mp3 extractor'],
+    tags: ['video', 'mp4', 'mp3', 'extract', 'audio', 'converter', 'extractor'],
     faq: [
       {
         question: 'Is the audio quality preserved?',
@@ -4452,6 +4754,7 @@ export const tools: Tool[] = [
     slug: 'trim-video',
     icon: 'Scissors',
     keywords: ['trim video', 'cut video', 'clip video', 'video cutter', 'trimmer'],
+    tags: ['video', 'trimmer', 'trim', 'cut', 'clip', 'cutter'],
     faq: [
       {
         question: 'Does trimming affect video quality?',
@@ -4492,6 +4795,7 @@ export const tools: Tool[] = [
     slug: 'crop-video',
     icon: 'Crop',
     keywords: ['crop video', 'video cropping', 'aspect ratio', 'video dimensions', 'crop tool'],
+    tags: ['video', 'crop', 'cropping', 'aspect', 'ratio', 'dimensions'],
     faq: [
       {
         question: 'Can I set custom crop dimensions?',
@@ -4532,6 +4836,7 @@ export const tools: Tool[] = [
     slug: 'resize-video',
     icon: 'Maximize2',
     keywords: ['resize video', 'video resolution', 'scale video', 'change video size', 'video scaler'],
+    tags: ['video', 'resize', 'resolution', 'scale', 'change', 'size', 'scaler'],
     faq: [
       {
         question: 'Will resizing affect video quality?',
@@ -4572,6 +4877,7 @@ export const tools: Tool[] = [
     slug: 'merge-videos',
     icon: 'Layers',
     keywords: ['merge videos', 'combine videos', 'join videos', 'concatenate videos', 'video joiner'],
+    tags: ['video', 'merge', 'videos', 'combine', 'join', 'concatenate', 'joiner'],
     faq: [
       {
         question: 'Can I merge videos of different formats?',
@@ -4612,6 +4918,7 @@ export const tools: Tool[] = [
     slug: 'rotate-video',
     icon: 'RotateCw',
     keywords: ['rotate video', 'flip video', 'video rotation', 'turn video', 'rotate mp4'],
+    tags: ['video', 'rotate', 'flip', 'rotation', 'turn', 'mp4'],
     faq: [
       {
         question: 'Will rotation affect video quality?',
@@ -4652,6 +4959,7 @@ export const tools: Tool[] = [
     slug: 'change-video-speed',
     icon: 'Gauge',
     keywords: ['video speed', 'slow motion', 'time lapse', 'speed up video', 'slow down video'],
+    tags: ['video', 'speed', 'slow', 'motion', 'time', 'lapse', 'down'],
     faq: [
       {
         question: 'What speed range is supported?',
@@ -4676,6 +4984,7 @@ export const tools: Tool[] = [
     slug: 'extract-audio',
     icon: 'Volume2',
     keywords: ['extract audio', 'video to audio', 'audio extractor', 'rip audio', 'video audio'],
+    tags: ['video', 'extract', 'audio', 'extractor', 'rip'],
     faq: [
       {
         question: 'What audio formats can I extract?',
@@ -4700,6 +5009,7 @@ export const tools: Tool[] = [
     slug: 'mute-video',
     icon: 'VolumeX',
     keywords: ['mute video', 'remove audio', 'silent video', 'strip audio', 'video without sound'],
+    tags: ['video', 'mute', 'remove', 'audio', 'silent', 'strip', 'without'],
     faq: [
       {
         question: 'Is the video quality affected?',
@@ -4724,6 +5034,7 @@ export const tools: Tool[] = [
     slug: 'video-to-images',
     icon: 'Image',
     keywords: ['video to images', 'extract frames', 'video frames', 'video screenshots', 'frame capture'],
+    tags: ['video', 'images', 'extract', 'frames', 'screenshots', 'frame', 'capture'],
     faq: [
       {
         question: 'How many frames can I extract?',
@@ -4748,6 +5059,7 @@ export const tools: Tool[] = [
     slug: 'reverse-video',
     icon: 'Rewind',
     keywords: ['reverse video', 'backwards video', 'video reverse', 'rewind video', 'reverse effect'],
+    tags: ['video', 'reverse', 'backwards', 'rewind', 'effect'],
     faq: [
       {
         question: 'Will reversing affect audio too?',
@@ -4772,6 +5084,7 @@ export const tools: Tool[] = [
     slug: 'loop-video',
     icon: 'Repeat',
     keywords: ['loop video', 'repeat video', 'video loop', 'endless video', 'boomerang'],
+    tags: ['video', 'boomerang', 'loop', 'repeat', 'endless'],
     faq: [
       {
         question: 'How many times can I loop a video?',
@@ -4796,6 +5109,7 @@ export const tools: Tool[] = [
     slug: 'video-thumbnail',
     icon: 'Image',
     keywords: ['video thumbnail', 'thumbnail extractor', 'video preview', 'video snapshot', 'poster image'],
+    tags: ['video', 'thumbnail', 'extractor', 'preview', 'snapshot', 'poster', 'image'],
     faq: [
       {
         question: 'Can I choose which frame to use as thumbnail?',
@@ -4820,6 +5134,7 @@ export const tools: Tool[] = [
     slug: 'split-video',
     icon: 'Split',
     keywords: ['split video', 'divide video', 'video splitter', 'cut video parts', 'segment video'],
+    tags: ['video', 'split', 'divide', 'splitter', 'cut', 'parts', 'segment'],
     faq: [
       {
         question: 'Can I split at multiple points?',
@@ -4844,6 +5159,7 @@ export const tools: Tool[] = [
     slug: 'add-text-to-video',
     icon: 'Type',
     keywords: ['add text to video', 'video text', 'video captions', 'text overlay', 'video watermark'],
+    tags: ['video', 'add', 'captions', 'overlay', 'watermark'],
     faq: [
       {
         question: 'Can I customize the text appearance?',
@@ -4868,6 +5184,7 @@ export const tools: Tool[] = [
     slug: 'add-watermark-to-video',
     icon: 'Stamp',
     keywords: ['watermark video', 'video watermark', 'logo overlay', 'brand video', 'protect video'],
+    tags: ['video', 'watermark', 'logo', 'overlay', 'brand', 'protect'],
     faq: [
       {
         question: 'What image formats work for watermarks?',
@@ -4892,6 +5209,7 @@ export const tools: Tool[] = [
     slug: 'convert-video',
     icon: 'RefreshCw',
     keywords: ['convert video', 'video converter', 'format converter', 'mp4 converter', 'video format'],
+    tags: ['video', 'convert', 'converter', 'format', 'mp4'],
     faq: [
       {
         question: 'What formats are supported?',
@@ -4916,6 +5234,7 @@ export const tools: Tool[] = [
     slug: 'video-frame-extractor',
     icon: 'Film',
     keywords: ['extract frames', 'video frames', 'frame grabber', 'specific frames', 'frame extractor'],
+    tags: ['video', 'extract', 'frames', 'frame', 'grabber', 'specific', 'extractor'],
     faq: [
       {
         question: 'How do I know which frame number to extract?',
@@ -4940,6 +5259,7 @@ export const tools: Tool[] = [
     slug: 'video-screenshot',
     icon: 'Camera',
     keywords: ['video screenshot', 'capture frame', 'video capture', 'screenshot from video', 'video still'],
+    tags: ['video', 'screenshot', 'capture', 'frame', 'still'],
     faq: [
       {
         question: 'How do I capture a screenshot from a video?',
@@ -4968,13 +5288,78 @@ export function getToolsByCategory(category: string): Tool[] {
   return tools.filter(tool => tool.category === category);
 }
 
-export function getRelatedTools(toolId: string): Tool[] {
-  const tool = getToolById(toolId);
-  if (!tool?.relatedTools) return [];
+// Words too generic to be useful as topical tags.
+const TAG_STOPWORDS = new Set([
+  'free', 'online', 'tool', 'tools', 'web', 'browser', 'instant',
+  'fast', 'easy', 'simple', 'best', 'top', 'the', 'and', 'for',
+]);
 
-  return tool.relatedTools
-    .map(id => getToolById(id))
-    .filter((t): t is Tool => t !== undefined);
+/**
+ * Returns the effective tag set for a tool: explicit `tags` if provided,
+ * otherwise derived from keywords + category slug. Always lowercase, deduped,
+ * stopwords removed. Multi-word keywords are split so "format json" yields
+ * ["format", "json"].
+ */
+export function getEffectiveTags(tool: Tool): string[] {
+  if (tool.tags?.length) {
+    return Array.from(new Set(tool.tags.map((t) => t.toLowerCase())));
+  }
+  const derived = new Set<string>();
+  derived.add(tool.category);
+  for (const kw of tool.keywords) {
+    for (const part of kw.toLowerCase().split(/[\s/_-]+/)) {
+      if (part.length >= 3 && !TAG_STOPWORDS.has(part)) derived.add(part);
+    }
+  }
+  return [...derived];
+}
+
+/**
+ * Returns related tools, in priority order:
+ *  1. explicit `relatedTools` IDs (manual curation)
+ *  2. shared (effective) tags
+ *  3. same category
+ * Capped at `limit` (default 6). Excludes the tool itself and duplicates.
+ */
+export function getRelatedTools(toolId: string, limit: number = 6): Tool[] {
+  const tool = getToolById(toolId);
+  if (!tool) return [];
+
+  const picked: Tool[] = [];
+  const pickedIds = new Set<string>([tool.id]);
+
+  const push = (t?: Tool) => {
+    if (!t || pickedIds.has(t.id) || picked.length >= limit) return;
+    pickedIds.add(t.id);
+    picked.push(t);
+  };
+
+  for (const id of tool.relatedTools || []) push(getToolById(id));
+  if (picked.length >= limit) return picked;
+
+  const myTags = new Set(getEffectiveTags(tool));
+  // Explicit tags signal stronger relevance than keyword-derived ones.
+  const myExplicit = new Set((tool.tags || []).map((t) => t.toLowerCase()));
+
+  const scored = tools
+    .filter((t) => t.id !== tool.id && !pickedIds.has(t.id))
+    .map((t) => {
+      const theirTags = getEffectiveTags(t);
+      const theirExplicit = new Set((t.tags || []).map((x) => x.toLowerCase()));
+      let score = 0;
+      for (const tag of theirTags) {
+        if (!myTags.has(tag)) continue;
+        // Boost when BOTH sides curated the tag explicitly.
+        score += myExplicit.has(tag) && theirExplicit.has(tag) ? 3 : 1;
+      }
+      if (t.category === tool.category) score += 1;
+      return { t, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  for (const { t } of scored) push(t);
+  return picked;
 }
 
 export function searchTools(query: string): Tool[] {

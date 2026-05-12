@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { ToolError, ToolEmpty } from '@/components/tools/ToolFeedback';
 import { formatJSON, minifyJSON, validateJSON } from '@/lib/utils';
 
 export default function JsonFormatterClient() {
@@ -140,19 +141,27 @@ export default function JsonFormatterClient() {
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
+        <ToolError
+          message={error}
+          hint="Check for trailing commas, single quotes, or unquoted keys — those are the most common causes."
+        />
       )}
 
       {/* Output Section */}
-      {output && !error && (
+      {output && !error ? (
         <ToolResult
           value={output}
           label="Formatted JSON"
           language="json"
           theme="light"
         />
+      ) : (
+        !error && !input && (
+          <ToolEmpty
+            message="Formatted JSON will appear here."
+            hint='Paste JSON above or click "Load Sample JSON" to try it out.'
+          />
+        )
       )}
 
       {/* Stats */}

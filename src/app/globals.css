@@ -97,6 +97,29 @@ label:has(input[type="radio"]) {
   animation-name: slide-in-from-top-2;
 }
 
+/* Prevent iOS Safari from auto-zooming form fields when they have
+   font-size < 16px. Apply only on small screens so desktop typography
+   (which uses Tailwind's text-sm = 14px) is preserved. */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Tap-target floor for icon-only buttons on touch devices. Tailwind's p-2
+   icon buttons can fall below the 44×44 px Apple/WCAG recommendation. */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role='button'],
+  a.btn,
+  input[type='button'],
+  input[type='submit'] {
+    min-height: 40px;
+  }
+}
+
 /* Prose styles for SEO content */
 .prose {
   max-width: 65ch;

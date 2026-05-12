@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Privacy Policy - Love Web Tools',
   description: 'Privacy Policy for Love Web Tools. Learn how we protect your privacy and handle data.',
+  alternates: { canonical: '/privacy-policy' },
 };
 
 export default function PrivacyPolicyPage() {

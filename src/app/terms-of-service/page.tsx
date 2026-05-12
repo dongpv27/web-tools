@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Terms of Service - Love Web Tools',
   description: 'Terms of Service for Love Web Tools. Read our terms and conditions for using our free online tools.',
+  alternates: { canonical: '/terms-of-service' },
 };
 
 export default function TermsOfServicePage() {
