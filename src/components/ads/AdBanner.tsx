@@ -12,8 +12,10 @@ export const ADSENSE_SLOTS = {
   'mobile-anchor': '6234567890',
 } as const;
 
-// Toggle this to enable/disable ads globally
-const ADS_ENABLED = false;
+// Toggle this to enable/disable ads globally. Exported so MainLayout can
+// skip the banner wrappers (background strips, mobile in-content divider)
+// when ads are off, leaving no visual trace.
+export const ADS_ENABLED = false;
 
 // Toggle this to show placeholder ads when ADS_ENABLED is false
 const SHOW_PLACEHOLDERS = false;
@@ -112,28 +114,12 @@ export default function AdBanner({
     }
   }, [mounted]);
 
-  // CLS-safe: when ads are disabled and we are NOT showing placeholders we still
-  // reserve the slot height so toggling ads on later doesn't cause layout shift.
-  // Returning `null` would collapse the slot and shift everything below.
+  // When ads are off and no placeholder is requested, render nothing at all —
+  // no reserved slot, no empty box. (Previously we kept a height-reserved
+  // wrapper for CLS safety; when ads turn on later, expect a one-time shift
+  // on the affected pages.)
   if (!ADS_ENABLED && !SHOW_PLACEHOLDERS && !showPlaceholder) {
-    // Mobile anchor lives in a fixed overlay — no in-flow space to reserve.
-    if (slot === 'mobile-anchor') return null;
-    return (
-      <div className={className} aria-hidden="true">
-        {config.desktop.width > 0 && (
-          <div
-            className="hidden md:block mx-auto"
-            style={{ minHeight: config.desktop.height, width: config.desktop.width, maxWidth: '100%' }}
-          />
-        )}
-        {config.mobile.width > 0 && (
-          <div
-            className="md:hidden mx-auto"
-            style={{ minHeight: config.mobile.height, width: config.mobile.width, maxWidth: '100%' }}
-          />
-        )}
-      </div>
-    );
+    return null;
   }
 
   if (!ADS_ENABLED) {

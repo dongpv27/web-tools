@@ -1,6 +1,6 @@
 'use client';
 
-import AdBanner from '@/components/ads/AdBanner';
+import AdBanner, { ADS_ENABLED } from '@/components/ads/AdBanner';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -27,10 +27,15 @@ export default function MainLayout({
   showMobileAnchor = false,
   showPlaceholders = false,
 }: MainLayoutProps) {
+  // Ad wrappers (background strips, mobile in-content divider, sidebar gap)
+  // are skipped entirely when ads are off, so the page has no visual trace
+  // of where ads would go.
+  const adsVisible = ADS_ENABLED || showPlaceholders;
+
   return (
     <div className="min-h-screen">
       {/* Top Banner Ad */}
-      {showTopBanner && (
+      {showTopBanner && adsVisible && (
         <div className="bg-gray-50 border-b border-gray-100 py-3">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AdBanner
@@ -57,26 +62,30 @@ export default function MainLayout({
                 {/* Custom sidebar content */}
                 {sidebarContent}
 
-                {/* Sidebar Ad 1 */}
-                <AdBanner
-                  slot="sidebar-1"
-                  format="rectangle"
-                  showPlaceholder={showPlaceholders}
-                />
+                {adsVisible && (
+                  <>
+                    {/* Sidebar Ad 1 */}
+                    <AdBanner
+                      slot="sidebar-1"
+                      format="rectangle"
+                      showPlaceholder={showPlaceholders}
+                    />
 
-                {/* Sidebar Ad 2 */}
-                <AdBanner
-                  slot="sidebar-2"
-                  format="rectangle"
-                  showPlaceholder={showPlaceholders}
-                />
+                    {/* Sidebar Ad 2 */}
+                    <AdBanner
+                      slot="sidebar-2"
+                      format="rectangle"
+                      showPlaceholder={showPlaceholders}
+                    />
+                  </>
+                )}
               </div>
             </aside>
           )}
         </div>
 
         {/* Mobile/Tablet In-Content Ads - Below main content area */}
-        {showSidebar && (
+        {showSidebar && adsVisible && (
           <div className="lg:hidden mt-8 pt-6 border-t border-gray-200">
             <div className="flex justify-center">
               <AdBanner
@@ -90,7 +99,7 @@ export default function MainLayout({
       </div>
 
       {/* Bottom Banner Ad */}
-      {showBottomBanner && (
+      {showBottomBanner && adsVisible && (
         <div className="bg-gray-50 border-t border-gray-100 py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AdBanner
@@ -104,7 +113,7 @@ export default function MainLayout({
       )}
 
       {/* Mobile Anchor Ad - Fixed at bottom on mobile only */}
-      {showMobileAnchor && (
+      {showMobileAnchor && adsVisible && (
         <AdBanner
           slot="mobile-anchor"
           format="horizontal"
