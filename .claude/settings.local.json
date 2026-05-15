@@ -35,7 +35,9 @@
       "Bash(lsof:*)",
       "Bash(npx next:*)",
       "Bash(do sed:*)",
-      "Bash(tee /tmp/build.log)"
+      "Bash(tee /tmp/build.log)",
+      "Bash(awk '/category: .video.,/,/^  \\\\},/' d:/web-tools/src/lib/tools.ts)",
+      "Bash(awk ' *)"
     ]
   }
 }

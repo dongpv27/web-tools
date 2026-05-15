@@ -726,6 +726,10 @@ export const XmlToJsonClient = dynamic(
   () => import('@/components/tool-clients/XmlToJsonClient'),
   { ssr: false }
 );
+export const UrlToQrCodeClient = dynamic(
+  () => import('@/components/tool-clients/UrlToQrCodeClient'),
+  { ssr: false }
+);
 
 // New Misc Tools
 export const SecureTokenGeneratorClient = dynamic(
@@ -862,6 +866,7 @@ export const toolComponentMap: Record<string, ComponentType> = {
   'markdown-to-pdf': MarkdownToPdfClient,
   'json-to-xml': JsonToXmlClient,
   'xml-to-json': XmlToJsonClient,
+  'url-to-qr-code': UrlToQrCodeClient,
   // Misc Tools
   'random-number-generator': RandomNumberGeneratorClient,
   'dice-roll-simulator': DiceRollSimulatorClient,

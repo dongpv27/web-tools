@@ -2289,6 +2289,10 @@ export const tools: Tool[] = [
         question: 'Does resizing reduce image file size?',
         answer: 'Yes, reducing image dimensions typically reduces file size because there are fewer pixels to store. For example, halving both width and height reduces the pixel count by 75%, which can significantly reduce file size.',
       },
+      {
+        question: 'What is the recommended size for social media?',
+        answer: 'Common targets: Instagram square 1080×1080, Instagram Reels / TikTok 1080×1920, Facebook cover 820×312, Twitter post 1600×900, YouTube thumbnail 1280×720. Resize to these exact sizes to avoid platform-side recompression.',
+      },
     ],
     relatedTools: ['resize-image-percentage', 'crop-image', 'rotate-image'],
   },
@@ -2316,6 +2320,14 @@ export const tools: Tool[] = [
         question: 'Does Base64 encoding reduce image quality?',
         answer: 'No, Base64 encoding is lossless. The decoded image is identical to the original. The trade-off is increased file size (roughly 33% larger), not quality loss.',
       },
+      {
+        question: 'How do I use a Base64 image in HTML or CSS?',
+        answer: 'In HTML: `<img src="data:image/png;base64,...">`. In CSS: `background-image: url("data:image/png;base64,...")`. The tool gives you the full data URI ready to paste.',
+      },
+      {
+        question: 'Can I convert Base64 back to a regular image file?',
+        answer: 'Yes — use our Base64 to Image tool. Paste the Base64 string and it produces a downloadable PNG/JPG/etc. file.',
+      },
     ],
     relatedTools: ['base64-to-image', 'base64-encode', 'image-resize'],
   },
@@ -2338,6 +2350,18 @@ export const tools: Tool[] = [
       {
         question: 'What Base64 formats are supported?',
         answer: 'The tool supports all common Base64 image formats including data URIs with MIME type prefixes (data:image/png;base64,...) and raw Base64 strings for PNG, JPEG, GIF, WebP, and SVG images.',
+      },
+      {
+        question: 'My Base64 string fails to decode — why?',
+        answer: 'Common causes: extra whitespace or line breaks (paste it as a single line), missing padding "=" characters, or a "data:" prefix only partially copied. The tool tries to be forgiving but malformed strings cannot be fixed automatically.',
+      },
+      {
+        question: 'How do I know what image format the Base64 represents?',
+        answer: 'The first few bytes (after decoding) contain a signature: PNG starts with "iVBORw0KGgo", JPEG with "/9j/", GIF with "R0lGOD". Our tool detects this automatically.',
+      },
+      {
+        question: 'Can I edit the image after decoding?',
+        answer: 'Yes — download the decoded file and run it through any other image tool (resize, crop, compress, etc.). The output is a regular image file.',
       },
     ],
     relatedTools: ['image-to-base64', 'base64-decode', 'image-resize'],
@@ -2366,6 +2390,14 @@ export const tools: Tool[] = [
         question: 'Can I convert PNG to ICO?',
         answer: 'Yes, you can convert PNG, JPEG, or WebP images to ICO format. For best results, use a square PNG image with transparency. Upload your image, select the desired sizes, and download the ICO file.',
       },
+      {
+        question: 'Is ICO still used today?',
+        answer: 'Yes — ICO is still the standard format for Windows desktop icons and is widely supported as a fallback favicon format. Modern browsers also accept PNG favicons, but ICO is the safest cross-browser bet.',
+      },
+      {
+        question: 'Why does my ICO favicon look blurry?',
+        answer: 'The browser may be downscaling a single large size to 16×16, which looks soft. Include a hand-crafted 16×16 and 32×32 in the ICO so each browser size has a pixel-perfect rendition.',
+      },
     ],
     relatedTools: ['favicon-generator', 'image-resize', 'svg-to-png'],
   },
@@ -2392,6 +2424,14 @@ export const tools: Tool[] = [
       {
         question: 'Will the PNG file be larger than WebP?',
         answer: 'Yes, PNG files are typically larger than WebP files because WebP uses more efficient compression. If file size is a concern, consider keeping the WebP format or using our Image Compressor tool.',
+      },
+      {
+        question: 'Why do some browsers still not display my WebP?',
+        answer: 'WebP has 97%+ global support, but some legacy email clients, image viewers, or older Office versions still cannot read it. Converting to PNG guarantees universal compatibility.',
+      },
+      {
+        question: 'Is the conversion fast for large WebP files?',
+        answer: 'Conversion is near-instant for typical photos. Very large WebP (multi-MB) may take a couple of seconds in the browser. Output is always lossless PNG.',
       },
     ],
     relatedTools: ['png-to-webp', 'jpg-to-png', 'svg-to-png'],
@@ -2420,6 +2460,14 @@ export const tools: Tool[] = [
         question: 'Does WebP support transparency like PNG?',
         answer: 'Yes, WebP supports alpha channel transparency just like PNG. You can convert transparent PNG images to WebP without losing the transparent background.',
       },
+      {
+        question: 'Should I use lossy or lossless WebP?',
+        answer: 'Lossless WebP is 20–30% smaller than PNG with identical visual fidelity — ideal for logos and screenshots. Lossy WebP is 50–80% smaller and visually similar — ideal for photographic content.',
+      },
+      {
+        question: 'Will the WebP work everywhere?',
+        answer: 'In all modern browsers, yes (97%+ support). For legacy email clients or very old software, keep a PNG fallback alongside the WebP — most CMS platforms can serve format based on the request headers.',
+      },
     ],
     relatedTools: ['webp-to-png', 'png-to-jpg', 'image-compressor'],
   },
@@ -2443,6 +2491,18 @@ export const tools: Tool[] = [
         question: 'Does JPG to PNG conversion improve quality?',
         answer: 'Converting JPG to PNG preserves the current quality but does not restore data already lost to JPG compression. However, it prevents further quality loss during editing since PNG is lossless.',
       },
+      {
+        question: 'Why is the PNG bigger than the JPG?',
+        answer: 'PNG is lossless and stores every pixel exactly. For photo content, that is always larger than JPG. The trade-off is no future quality loss — important if you plan more edits.',
+      },
+      {
+        question: 'Does PNG output keep transparency?',
+        answer: 'JPG has no transparency to keep, so the resulting PNG is fully opaque. If you need to remove a solid background, do that step before converting (or after, in an image editor).',
+      },
+      {
+        question: 'Is the conversion done in my browser?',
+        answer: 'Yes. The image is decoded and re-encoded entirely client-side. Nothing is uploaded, and your file never leaves your device.',
+      },
     ],
     relatedTools: ['png-to-jpg', 'webp-to-png', 'jpeg-compressor'],
   },
@@ -2465,6 +2525,18 @@ export const tools: Tool[] = [
       {
         question: 'What happens to transparency when converting PNG to JPG?',
         answer: 'JPG does not support transparency. When you convert a transparent PNG to JPG, the transparent areas are filled with a background color (white by default). You can choose a custom background color in the tool.',
+      },
+      {
+        question: 'What JPG quality is used?',
+        answer: 'Default quality is 90 — high quality with substantial file-size savings vs PNG. If you need even smaller files, run the result through the JPEG Compressor with quality 70–80.',
+      },
+      {
+        question: 'How much smaller will the file be?',
+        answer: 'Photographic PNGs typically shrink 70–90% when converted to JPG at quality 90. Screenshots and graphics with sharp edges may shrink less and can show JPG artifacts — keep them as PNG.',
+      },
+      {
+        question: 'When should I NOT convert PNG to JPG?',
+        answer: 'Avoid converting logos, line art, screenshots, or any image with transparency or sharp edges — JPG introduces visible artifacts on those. Keep them as PNG or convert to WebP instead.',
       },
     ],
     relatedTools: ['jpg-to-png', 'png-to-webp', 'jpeg-compressor'],
@@ -2493,6 +2565,14 @@ export const tools: Tool[] = [
         question: 'Does percentage resizing maintain aspect ratio?',
         answer: 'Yes, percentage resizing always maintains the original aspect ratio. Both width and height are scaled by the same percentage, so the image will never be stretched or distorted.',
       },
+      {
+        question: 'Can I go above 100%?',
+        answer: 'Yes, but enlarging beyond 100% (e.g. 150%, 200%) interpolates new pixels, which softens detail. For best results when upscaling, use the original highest-resolution version of the image.',
+      },
+      {
+        question: 'When should I use percentage vs exact pixel resizing?',
+        answer: 'Use percentage when you have a batch of images of varying sizes and want them all scaled the same proportion. Use exact pixel dimensions when you need a specific output size (e.g. 1080 px wide for Instagram).',
+      },
     ],
     relatedTools: ['image-resize', 'crop-image'],
   },
@@ -2520,6 +2600,14 @@ export const tools: Tool[] = [
         question: 'What is the difference between rotating and flipping?',
         answer: 'Rotation turns the image around a center point (like turning a photo on a table). Flipping creates a mirror reflection along the horizontal or vertical axis. Use rotation to change orientation and flipping to create mirror images.',
       },
+      {
+        question: 'Will the canvas grow when I rotate by a non-90° angle?',
+        answer: 'Yes. When rotating by an arbitrary angle like 45°, the bounding box of the rotated image is larger than the original. The empty corners are filled with transparency (PNG) or a background color you choose.',
+      },
+      {
+        question: 'Why does my phone photo appear sideways?',
+        answer: 'Some cameras encode the upright orientation as metadata rather than rotating the pixels. After rotation here, the pixels themselves are correctly oriented, so the image displays right-side-up everywhere.',
+      },
     ],
     relatedTools: ['flip-image-horizontal', 'flip-image-vertical', 'image-resize'],
   },
@@ -2543,6 +2631,18 @@ export const tools: Tool[] = [
         question: 'Why would I flip an image horizontally?',
         answer: 'Common reasons include correcting selfies that appear mirrored, creating symmetrical designs, fixing incorrectly scanned documents, or achieving a specific artistic effect.',
       },
+      {
+        question: 'Will flipping change image quality?',
+        answer: 'No. Horizontal flip just rearranges existing pixels — no resampling or re-encoding loss. The output is bit-for-bit equivalent in quality to the input.',
+      },
+      {
+        question: 'What image formats are supported?',
+        answer: 'PNG, JPG, WebP, GIF, BMP, and most other common formats. The output uses PNG by default to keep transparency intact, but you can save as JPG if you prefer smaller files.',
+      },
+      {
+        question: 'Is the flip the same as a 180° rotation?',
+        answer: 'No. A horizontal flip mirrors left↔right (text becomes backwards). A 180° rotation flips both horizontally AND vertically (text is upside-down and backwards). Use Flip Vertical and Rotate Image for those other effects.',
+      },
     ],
     relatedTools: ['flip-image-vertical', 'rotate-image', 'crop-image'],
   },
@@ -2565,6 +2665,18 @@ export const tools: Tool[] = [
       {
         question: 'When should I flip an image vertically?',
         answer: 'Vertical flipping is useful for creating reflection effects, correcting upside-down images from scanners or cameras, or creating artistic compositions with mirrored elements.',
+      },
+      {
+        question: 'Does flipping reduce quality?',
+        answer: 'No. Vertical flip is a pixel-rearrangement operation with zero quality loss — the output retains the same resolution and detail as the input.',
+      },
+      {
+        question: 'How is vertical flip different from rotation?',
+        answer: 'Vertical flip mirrors top↔bottom; rotation turns the image around its center. A 180° rotation looks like a flip in both axes, but is not the same as one-axis flipping.',
+      },
+      {
+        question: 'What image formats can I flip?',
+        answer: 'PNG, JPG, WebP, GIF (first frame only for static output), and BMP. Output keeps the original color depth and transparency.',
       },
     ],
     relatedTools: ['flip-image-horizontal', 'rotate-image', 'crop-image'],
@@ -2593,6 +2705,14 @@ export const tools: Tool[] = [
         question: 'Can I adjust the blur intensity?',
         answer: 'Yes, use the slider to adjust blur amount from 0 (no blur) to 10 (heavy blur). The preview updates in real-time so you can see the effect before downloading.',
       },
+      {
+        question: 'Is blur reversible?',
+        answer: 'No. Blur is a destructive operation — pixel detail is permanently averaged together. Always keep an unblurred copy of the original if you may need it later.',
+      },
+      {
+        question: 'Why use blur instead of pixelation for privacy?',
+        answer: 'Strong pixelation can sometimes be reversed by AI tools. For sensitive content (faces, license plates, IDs), heavy blur or a solid-color block is more secure than mild pixelation.',
+      },
     ],
     relatedTools: ['pixelate-image', 'grayscale-image', 'adjust-brightness'],
   },
@@ -2619,6 +2739,14 @@ export const tools: Tool[] = [
       {
         question: 'How do I pixelate a face in a photo?',
         answer: 'Upload your photo, adjust the pixel size slider to control the level of obscurity, and download the result. For faces, a pixel size of 10-20 usually provides good privacy protection.',
+      },
+      {
+        question: 'Can pixelation be reversed?',
+        answer: 'Mild pixelation can sometimes be partially reversed by AI super-resolution models, especially on faces. For real privacy on sensitive material, use heavy pixelation (size 20+), strong blur, or a solid block.',
+      },
+      {
+        question: 'Will pixelation reduce file size?',
+        answer: 'Slightly — the simpler color palette compresses better, especially in PNG. The reduction is usually 10–30%, not dramatic.',
       },
     ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-border'],
@@ -2647,6 +2775,14 @@ export const tools: Tool[] = [
         question: 'Does converting to grayscale reduce file size?',
         answer: 'Yes, grayscale images are typically smaller than color images because they store one channel instead of three (RGB). The reduction can be significant for PNG files.',
       },
+      {
+        question: 'Is grayscale the same as black and white?',
+        answer: 'Grayscale includes all shades of gray (256 levels). True black and white (1-bit) uses only pure black and pure white. Grayscale preserves detail; B&W is a stark high-contrast effect.',
+      },
+      {
+        question: 'Can I bring color back after grayscale conversion?',
+        answer: 'No — once color information is discarded, it cannot be recovered. Always keep the original color image if you might want it back. AI tools can "colorize" grayscale photos but they invent colors rather than recover them.',
+      },
     ],
     relatedTools: ['blur-image', 'pixelate-image', 'adjust-brightness'],
   },
@@ -2673,6 +2809,14 @@ export const tools: Tool[] = [
       {
         question: 'What is the difference between brightness and contrast?',
         answer: 'Brightness uniformly increases or decreases all light values in the image. Contrast adjusts the difference between the lightest and darkest areas. Increasing brightness makes everything lighter, while increasing contrast makes lights lighter and darks darker.',
+      },
+      {
+        question: 'Will adjusting brightness lose image detail?',
+        answer: 'Extreme values clip data: very high brightness blows out highlights to pure white, very low crushes shadows to black. Once clipped, that detail cannot be recovered. Moderate adjustments preserve most detail.',
+      },
+      {
+        question: 'Does brightness adjustment work on all formats?',
+        answer: 'Yes — PNG, JPG, WebP, GIF, BMP all supported. The output keeps the same format as the input (except GIFs become single-frame PNG/JPG).',
       },
     ],
     relatedTools: ['grayscale-image', 'blur-image', 'image-border'],
@@ -2701,6 +2845,14 @@ export const tools: Tool[] = [
         question: 'Can I pick multiple colors from one image?',
         answer: 'Yes, click on different parts of the image to pick colors. Use the "Add to Palette" button to save each picked color. All saved colors are displayed in a palette list with their HEX and RGB values.',
       },
+      {
+        question: 'How accurate is the color reading?',
+        answer: 'The tool reads the exact pixel value at the point you clicked — pixel-perfect. If the displayed color does not match what you see, it may be due to JPEG compression introducing noise around edges. Click on a flat-color area for a clean reading.',
+      },
+      {
+        question: 'How is this different from Extract Colors?',
+        answer: 'This tool reads the exact color you click on. Extract Colors automatically finds the most common (dominant) colors across the whole image and gives you a palette. Use this for spot picking, that one for an overall palette.',
+      },
     ],
     relatedTools: ['color-picker', 'extract-colors', 'image-border'],
   },
@@ -2727,6 +2879,14 @@ export const tools: Tool[] = [
       {
         question: 'Can I export the extracted colors?',
         answer: 'Yes, you can export the color palette as CSS variables or JSON format using the export buttons. This makes it easy to use the colors in your web development or design projects.',
+      },
+      {
+        question: 'Why does the palette include similar shades?',
+        answer: 'Real photos contain many slight variations of the same color (lighting, shadows). The algorithm groups them but very subtle differences may still show as separate entries. Lower the requested count for a more distinct palette.',
+      },
+      {
+        question: 'Does this work on photos vs flat illustrations?',
+        answer: 'Both, but flat illustrations and logos give cleaner palettes since they contain fewer color clusters. Photos return more nuanced palettes that capture lighting and gradient tones.',
       },
     ],
     relatedTools: ['color-palette-generator', 'image-color-picker', 'color-picker'],
@@ -2755,6 +2915,14 @@ export const tools: Tool[] = [
         question: 'Will adding a border increase the image dimensions?',
         answer: 'Yes, the border adds to the overall image dimensions. For example, adding a 10px border to a 800x600 image results in an 820x620 image. The original image content is not cropped or scaled.',
       },
+      {
+        question: 'What border width works best for social media?',
+        answer: 'For Instagram squares, a 20–40 px white border looks clean. For polaroid-style framing, use a thicker bottom border. The preview lets you experiment without committing.',
+      },
+      {
+        question: 'Can I add a border without changing the image dimensions?',
+        answer: 'For an inset border that does not enlarge the canvas, use the Crop Image tool to trim the image first, then add the border. The total dimensions then match the original.',
+      },
     ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-color-picker'],
   },
@@ -2782,6 +2950,14 @@ export const tools: Tool[] = [
         question: 'How do I add a favicon to my website?',
         answer: 'Generate your favicons, download them, and place them in your website root directory. Copy the provided HTML snippet into the <head> section of your pages. The tool generates the correct code for you.',
       },
+      {
+        question: 'Why is my favicon not updating in the browser?',
+        answer: 'Browsers aggressively cache favicons. Force a refresh with Ctrl+F5, or append a query string to the favicon URL (e.g. `favicon.ico?v=2`) to bypass the cache. Mobile browsers can take longer to update.',
+      },
+      {
+        question: 'Do I still need favicon.ico in 2026?',
+        answer: 'Modern browsers accept PNG and SVG favicons, but `favicon.ico` at the site root is still the universal fallback. The tool generates both so you are covered everywhere.',
+      },
     ],
     relatedTools: ['image-to-ico', 'image-resize', 'svg-to-png'],
   },
@@ -2800,6 +2976,22 @@ export const tools: Tool[] = [
       {
         question: 'How does image compression work?',
         answer: 'Image compression reduces file size by removing redundant data and optimizing encoding. Lossy compression sacrifices some quality for smaller size, while lossless compression preserves all data.',
+      },
+      {
+        question: 'Which image formats can I compress?',
+        answer: 'JPEG, PNG, WebP, GIF, and BMP. The tool automatically applies the best compression strategy for the detected format. For finer control, use the format-specific compressors (JPEG / PNG / GIF).',
+      },
+      {
+        question: 'How much can I reduce file size?',
+        answer: 'Typical reductions: JPEG photos 30–70%, PNG illustrations 20–50%, screenshots up to 80%. WebP usually produces the smallest output. Larger / more complex images often see bigger savings.',
+      },
+      {
+        question: 'Will my image look the same after compression?',
+        answer: 'At sensible quality settings, differences are imperceptible to the naked eye. At very aggressive settings you may see banding, blockiness, or color shift — preview before downloading.',
+      },
+      {
+        question: 'Are my images uploaded anywhere?',
+        answer: 'No. All compression runs in your browser. Your photos and the compressed output never leave your device — completely private.',
       },
     ],
     relatedTools: ['png-compressor', 'jpeg-compressor', 'gif-compressor', 'resize-image-percentage'],
@@ -2820,6 +3012,22 @@ export const tools: Tool[] = [
         question: 'How do I crop an image?',
         answer: 'Upload your image, select the area you want to keep by dragging the crop handles, and download the cropped result. You can also set specific dimensions or aspect ratios.',
       },
+      {
+        question: 'What aspect ratios are available?',
+        answer: 'Common presets include free crop, 1:1 (square for Instagram), 4:3 (standard photos), 16:9 (widescreen / YouTube thumbnails), and 9:16 (vertical for TikTok/Reels). You can also enter any custom ratio.',
+      },
+      {
+        question: 'Will cropping reduce image quality?',
+        answer: 'No. Cropping removes pixels outside the selection but the remaining pixels are kept at full original resolution. There is no re-encoding loss.',
+      },
+      {
+        question: 'What is the difference between crop and resize?',
+        answer: 'Cropping removes parts of the image so the subject takes up more frame. Resizing scales the entire image to new dimensions, keeping every part visible. Use crop to reframe, resize to change pixel dimensions.',
+      },
+      {
+        question: 'Is my image uploaded to a server?',
+        answer: 'No. The entire crop happens in your browser using HTML canvas — nothing is sent over the network. Your original file never leaves your device.',
+      },
     ],
     relatedTools: ['image-resize', 'rotate-image', 'blur-image'],
   },
@@ -2838,6 +3046,22 @@ export const tools: Tool[] = [
       {
         question: 'How do I create a GIF from images?',
         answer: 'Upload multiple images, set the delay between frames, and the tool will combine them into an animated GIF. You can also adjust the size and quality of the output.',
+      },
+      {
+        question: 'How many images can I add to one GIF?',
+        answer: 'You can combine dozens of frames — but keep in mind that each frame is stored individually so GIF size grows linearly. For very long animations, MP4 is usually a better choice.',
+      },
+      {
+        question: 'What image formats can I upload?',
+        answer: 'PNG, JPG, WebP, and BMP are all supported. PNG with transparency is preserved on the first frame; later GIF frames flatten transparency to a background color.',
+      },
+      {
+        question: 'How do I control the animation speed?',
+        answer: 'Adjust the delay (in milliseconds) between frames. Common values: 100ms gives ~10 fps (smooth), 200ms gives 5 fps (cartoon-like), 500ms gives slow-paced slideshows.',
+      },
+      {
+        question: 'Why is my GIF file so large?',
+        answer: 'GIFs store each frame as a full image, so dimensions × frame count drives size. Reduce by lowering dimensions, dropping frame count, or running the result through our GIF Compressor.',
       },
     ],
     relatedTools: ['video-to-gif', 'gif-compressor', 'image-resize'],
@@ -2858,6 +3082,22 @@ export const tools: Tool[] = [
         question: 'How does PNG compression work?',
         answer: 'PNG compression uses lossless algorithms to reduce file size without quality loss. It optimizes the image data encoding and removes metadata to create smaller files.',
       },
+      {
+        question: 'How much can a PNG be compressed?',
+        answer: 'Typical savings are 15–50%. Screenshots and simple graphics (few colors, flat areas) compress the most. Photos compressed as PNG see little reduction — convert them to JPEG or WebP for bigger savings.',
+      },
+      {
+        question: 'Does PNG compression lose quality?',
+        answer: 'No. PNG compression is fully lossless, so the decoded image is bit-for-bit identical to the input. The only thing removed is unnecessary metadata and redundant encoding.',
+      },
+      {
+        question: 'Should I convert PNG to WebP for smaller files?',
+        answer: 'If browser support for WebP is acceptable for your use case, yes — WebP typically beats PNG by 25–35% at the same visual quality. Our PNG to WebP tool handles the conversion.',
+      },
+      {
+        question: 'Will transparency be preserved?',
+        answer: 'Yes. PNG compression keeps the alpha channel fully intact. Transparent and semi-transparent areas in the original look identical after compression.',
+      },
     ],
     relatedTools: ['image-compressor', 'jpeg-compressor', 'png-to-webp'],
   },
@@ -2876,6 +3116,22 @@ export const tools: Tool[] = [
       {
         question: 'What quality should I use for JPEG compression?',
         answer: 'For web use, 70-80% quality usually provides a good balance between file size and visual quality. Higher quality preserves more detail but results in larger files.',
+      },
+      {
+        question: 'Is JPEG compression lossy?',
+        answer: 'Yes. JPEG is a lossy format — each save discards some image data. Re-saving a JPEG repeatedly compounds the loss, so always compress from the original source, not a previously compressed copy.',
+      },
+      {
+        question: 'When should I use JPEG vs PNG?',
+        answer: 'JPEG is best for photographs and complex natural images where small artifacts are invisible. PNG is best for graphics, logos, screenshots, and any image needing transparency.',
+      },
+      {
+        question: 'Why does my compressed image look blocky?',
+        answer: 'JPEG compression artifacts appear as 8×8 pixel blocks, especially at low quality. Increase the quality slider, or for graphics-heavy images convert to PNG before compressing.',
+      },
+      {
+        question: 'How small can the file get?',
+        answer: 'Typical photos shrink to 20–40% of their original size at quality 75. Going below quality 50 will halve again but introduces visible artifacts.',
       },
     ],
     relatedTools: ['image-compressor', 'png-compressor', 'jpg-to-png'],
@@ -2896,6 +3152,22 @@ export const tools: Tool[] = [
         question: 'How can I reduce GIF file size?',
         answer: 'GIF compression reduces colors, optimizes frame data, and removes redundant pixels. You can also reduce dimensions or frame rate for smaller files.',
       },
+      {
+        question: 'Why are GIFs so large?',
+        answer: 'GIF stores each frame as a full image with a 256-color palette. A short clip can easily hit several megabytes. For longer animations, MP4/WebM are dramatically smaller at the same quality.',
+      },
+      {
+        question: 'Does compressing a GIF reduce quality?',
+        answer: 'Most compression techniques are visible only on close inspection (slight color banding, dithering changes). Heavy compression — large pixel blocks, very few colors — will look noticeably degraded.',
+      },
+      {
+        question: 'Will my animation still play after compression?',
+        answer: 'Yes. The frame timing, loop count, and animation order are preserved. Only the per-frame pixel data and color palette are optimized.',
+      },
+      {
+        question: 'Is there a maximum GIF size I can compress?',
+        answer: 'The tool handles GIFs up to typical browser memory limits — usually tens of megabytes. Very large GIFs may take longer; for those, consider converting to MP4 instead.',
+      },
     ],
     relatedTools: ['image-compressor', 'gif-maker', 'video-to-gif'],
   },
@@ -2914,6 +3186,22 @@ export const tools: Tool[] = [
       {
         question: 'Why convert SVG to PNG?',
         answer: 'PNG is more widely supported than SVG and works in all contexts where images are needed. Converting SVG to PNG also "freezes" the design at a specific resolution.',
+      },
+      {
+        question: 'What output resolution should I use?',
+        answer: 'Pick the largest size you might display the image at. SVG is resolution-independent; once rasterized to PNG you can scale down without quality loss but scaling up will blur.',
+      },
+      {
+        question: 'Will my SVG keep transparency in PNG?',
+        answer: 'Yes. PNG supports an alpha channel, so transparent areas of the SVG remain transparent in the output. Pick "transparent background" if you do not want a solid color fill.',
+      },
+      {
+        question: 'Will text in my SVG render correctly?',
+        answer: 'Text renders correctly as long as the referenced fonts are available to the browser. Convert text to outlines/paths in your design tool first if you need pixel-identical results on every machine.',
+      },
+      {
+        question: 'How is this different from screenshotting an SVG?',
+        answer: 'Direct conversion uses the original vector data so the output is pixel-perfect at any chosen resolution. Screenshots are limited to the current display size and may include browser anti-aliasing artifacts.',
       },
     ],
     relatedTools: ['webp-to-png', 'image-resize', 'image-to-ico'],
@@ -3158,6 +3446,22 @@ export const tools: Tool[] = [
         question: 'What are color stops?',
         answer: 'Color stops define the colors in your gradient and their positions. You can add multiple color stops to create complex gradients with smooth transitions between multiple colors.',
       },
+      {
+        question: 'How do I control the gradient direction?',
+        answer: 'For linear gradients, use the angle slider (0° points up, 90° points right, 180° points down). For conic gradients, angle is the starting point of the color wheel. Radial gradients always emanate from the center.',
+      },
+      {
+        question: 'Can I use the gradient as a CSS background-image?',
+        answer: 'Yes — the output uses `background:` shorthand which works in any CSS context. You can also paste just the gradient function into `background-image`, `border-image-source`, or any other property that accepts an image.',
+      },
+      {
+        question: 'Why does my gradient look banded?',
+        answer: 'Hard color transitions between similar tones can produce visible banding. Add intermediate color stops, use colors with more contrast, or apply a subtle noise overlay on top of the gradient to mask it.',
+      },
+      {
+        question: 'Are CSS gradients well supported?',
+        answer: 'Linear and radial gradients have full support in every modern browser. Conic gradients have 95%+ support but require a fallback for very old browsers. Add a solid `background-color` first as a graceful fallback.',
+      },
     ],
     exampleOutput: {
       output: 'background: linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);',
@@ -3176,6 +3480,28 @@ export const tools: Tool[] = [
     icon: 'Shuffle',
     keywords: ['random color', 'color generator', 'random hex', 'random rgb'],
     tags: ['color', 'random', 'generator', 'hex', 'rgb'],
+    faq: [
+      {
+        question: 'How does the random color generator work?',
+        answer: 'Each click produces a fresh color by picking random values for red, green, and blue (0–255 each). The tool then converts that color to HEX, RGB, and HSL formats so you can copy whichever you need.',
+      },
+      {
+        question: 'Why would I use random colors?',
+        answer: 'Random colors are great for design inspiration, breaking creative blocks, generating placeholder data, populating chart legends, prototyping themes, and choosing unbiased starting palettes.',
+      },
+      {
+        question: 'Can I limit the range of random colors?',
+        answer: 'Pick a base color first and use our Color Palette Generator instead — it creates harmonious variations (complementary, analogous, monochromatic) around your starting color rather than fully random ones.',
+      },
+      {
+        question: 'Are the colors truly random?',
+        answer: 'They use the browser\'s built-in pseudo-random generator, which is statistically random enough for design work. They are not cryptographically random — do not use them as keys or passwords.',
+      },
+      {
+        question: 'Can I save random colors I like?',
+        answer: 'Yes — copy the HEX/RGB code as soon as you find a color you like. You can also screenshot the preview or paste the value into the Color Palette Generator to build out a full scheme.',
+      },
+    ],
     relatedTools: ['color-palette-generator', 'color-picker', 'hex-to-rgb'],
   },
   {
@@ -3189,6 +3515,28 @@ export const tools: Tool[] = [
     icon: 'Wind',
     keywords: ['tailwind color', 'tailwind converter', 'tailwind css', 'color converter'],
     tags: ['color', 'tailwind', 'converter', 'css'],
+    faq: [
+      {
+        question: 'How does the Tailwind color converter work?',
+        answer: 'Enter any HEX, RGB, or HSL color and the tool finds the nearest match in Tailwind\'s default palette (e.g. `blue-500`, `gray-700`). It also shows the exact HEX of that Tailwind class so you can verify the match.',
+      },
+      {
+        question: 'Which Tailwind palette is used?',
+        answer: 'The latest default Tailwind CSS palette (v3+) with all 220+ color shades — slate, gray, zinc, neutral, stone, red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose.',
+      },
+      {
+        question: 'Why does my brand color not match exactly?',
+        answer: 'Tailwind\'s default palette is curated — your brand color may not have an exact match. The converter shows the closest shade, and you can either accept the slight shift or define a custom color in your `tailwind.config.js`.',
+      },
+      {
+        question: 'How do I add a custom color to Tailwind?',
+        answer: 'In `tailwind.config.js`, extend `theme.colors` with your own name and value, e.g. `brand: { 500: "#1a2b3c" }`. After rebuilding, use it as `bg-brand-500`, `text-brand-500`, etc.',
+      },
+      {
+        question: 'Does this work with arbitrary values?',
+        answer: 'For one-off colors you can always use Tailwind\'s arbitrary value syntax like `bg-[#1a2b3c]`. The converter is more useful when you want to match the closest palette token for consistency across your design system.',
+      },
+    ],
     relatedTools: ['color-converter', 'color-picker', 'css-formatter'],
   },
   {
@@ -3202,6 +3550,28 @@ export const tools: Tool[] = [
     icon: 'ArrowLeftRight',
     keywords: ['color converter', 'hex rgb hsl', 'color format', 'color transform'],
     tags: ['color', 'converter', 'hex', 'rgb', 'hsl', 'format', 'transform'],
+    faq: [
+      {
+        question: 'Which color formats are supported?',
+        answer: 'HEX (#RRGGBB or #RGB), RGB / RGBA (rgb(255, 0, 0) / rgba(255, 0, 0, 0.5)), HSL / HSLA (hsl(0, 100%, 50%)), and CMYK percentages. Paste any of these and get all the others.',
+      },
+      {
+        question: 'What is the difference between HEX, RGB, and HSL?',
+        answer: 'HEX is a compact hexadecimal representation used in CSS. RGB describes color by red/green/blue intensity (0–255). HSL is intuitive for tweaking: Hue (0–360°), Saturation, Lightness. They all describe the same colors, just different math.',
+      },
+      {
+        question: 'Why convert between color formats?',
+        answer: 'Different tools and codebases use different formats: web design favors HEX, programmatic color tweaking favors HSL, image processing libraries use RGB. Converters let you copy a value once and paste it anywhere.',
+      },
+      {
+        question: 'Are the conversions exact?',
+        answer: 'HEX↔RGB is mathematically exact. HSL conversions involve floating-point math so values may round slightly, but the displayed color remains visually identical. CMYK is approximated for display use since it depends on print profiles.',
+      },
+      {
+        question: 'How do I handle transparency/alpha?',
+        answer: 'Use the RGBA or HSLA fields with an alpha value 0–1 (0 = fully transparent, 1 = opaque). The HEX8 format (#RRGGBBAA) also carries alpha — our RGBA to HEX tool handles that conversion specifically.',
+      },
+    ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'rgba-to-hex'],
   },
   {
@@ -3219,6 +3589,22 @@ export const tools: Tool[] = [
       {
         question: 'How do RGB colors work?',
         answer: 'RGB (Red, Green, Blue) is an additive color model where colors are created by combining different intensities of red, green, and blue light. Each value ranges from 0-255.',
+      },
+      {
+        question: 'How do I write RGB in CSS?',
+        answer: 'Use `rgb(R, G, B)` or `rgba(R, G, B, A)` for transparency, e.g. `rgb(255, 87, 51)` or `rgba(255, 87, 51, 0.8)`. Modern CSS also accepts space-separated values: `rgb(255 87 51 / 80%)`.',
+      },
+      {
+        question: 'What is the difference between RGB and RGBA?',
+        answer: 'RGBA adds an alpha (A) channel that controls transparency from 0 (fully transparent) to 1 (fully opaque). Use RGB when you don\'t need transparency; RGBA when you do.',
+      },
+      {
+        question: 'Why does RGB go from 0 to 255?',
+        answer: 'Each channel is stored in 8 bits, giving 2^8 = 256 possible values (0–255). Combined across 3 channels, that\'s 16,777,216 distinct colors — more than the human eye can reliably distinguish.',
+      },
+      {
+        question: 'When should I use RGB vs HEX?',
+        answer: 'HEX is more compact and common in static stylesheets. RGB is easier to manipulate programmatically (e.g. mixing colors, calculating brightness). They represent the same colors — pick whichever your workflow prefers.',
       },
     ],
     relatedTools: ['hex-color-picker', 'color-picker', 'rgb-to-hex'],
@@ -3239,6 +3625,22 @@ export const tools: Tool[] = [
         question: 'What is a HEX color code?',
         answer: 'A HEX color code is a 6-character hexadecimal representation of an RGB color. It starts with # followed by two characters each for red, green, and blue values (e.g., #FF5733).',
       },
+      {
+        question: 'What does the 3-digit HEX shorthand mean?',
+        answer: 'Codes like #F53 are shorthand: each digit is doubled to form 6 characters (#FF5533). It can only express colors where each pair has identical digits, so #F50 cannot represent #FB5022.',
+      },
+      {
+        question: 'What is HEX8 / HEX with alpha?',
+        answer: 'An 8-character HEX adds two more digits at the end for the alpha (transparency) channel, e.g. #FF5733CC. CC ≈ 80% opacity. Modern browsers fully support this format.',
+      },
+      {
+        question: 'How do I use HEX colors in CSS?',
+        answer: 'Drop the code into any color property: `color: #FF5733;`, `background: #f53;`, `border: 1px solid #FF5733CC;`. The browser converts it to RGB internally.',
+      },
+      {
+        question: 'What are the most popular HEX colors?',
+        answer: 'Common UI choices: #000000 (black), #FFFFFF (white), #3B82F6 (blue-500 Tailwind), #EF4444 (red-500), #10B981 (green-500). Pick from a curated palette for cohesive design.',
+      },
     ],
     relatedTools: ['rgb-color-picker', 'color-picker', 'hex-to-rgb'],
   },
@@ -3257,6 +3659,22 @@ export const tools: Tool[] = [
       {
         question: 'How do I convert RGBA to HEX?',
         answer: 'Enter your RGBA values (red, green, blue, alpha) and the tool will convert them to HEX format. Note that HEX8 format is used when alpha is not 100%.',
+      },
+      {
+        question: 'What is HEX8 format?',
+        answer: 'HEX8 is an 8-character hexadecimal code that includes alpha (transparency): #RRGGBBAA. For example, #FF573380 represents the color #FF5733 at ~50% opacity. Modern browsers fully support it.',
+      },
+      {
+        question: 'My alpha value is 1 — why does the output look like normal HEX6?',
+        answer: 'When alpha = 1 (fully opaque), the alpha byte is FF and HEX8 #RRGGBBFF is visually identical to HEX6 #RRGGBB. The tool drops the FF in that case for cleaner output.',
+      },
+      {
+        question: 'Can I flatten transparency to a solid color?',
+        answer: 'Yes — pick a background color (typically white) and the tool can composite the RGBA over it to produce a fully opaque HEX. Useful when targeting platforms that do not support alpha.',
+      },
+      {
+        question: 'Is alpha in HEX widely supported?',
+        answer: 'All modern browsers (Chrome, Firefox, Safari, Edge) support 8-digit HEX. For older browsers or non-web environments (some email clients, design tools), use `rgba(...)` instead for guaranteed support.',
       },
     ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'color-converter'],
@@ -3769,6 +4187,22 @@ export const tools: Tool[] = [
         question: 'How does Markdown to PDF conversion work?',
         answer: 'Upload your Markdown file, and the tool converts it to a formatted PDF document with proper styling and layout.',
       },
+      {
+        question: 'Which Markdown features are supported?',
+        answer: 'Standard CommonMark: headings, bold/italic, lists, links, images, blockquotes, code blocks, tables, and horizontal rules. GitHub-style extensions like task lists and strikethrough are also handled.',
+      },
+      {
+        question: 'Can I customize the PDF styling?',
+        answer: 'Default styles produce a clean documentation look (sans-serif headings, monospace code blocks, table borders). For custom branding, convert to HTML first with our Markdown to HTML tool, edit the CSS, then print to PDF.',
+      },
+      {
+        question: 'Will images embedded in my Markdown appear in the PDF?',
+        answer: 'Yes — both inline base64 images and external image URLs are rendered. For best results in offline contexts, embed images as base64 so the PDF is fully self-contained.',
+      },
+      {
+        question: 'Is the conversion done locally?',
+        answer: 'Yes. Markdown parsing and PDF rendering happen entirely in your browser. Your document content is never uploaded — completely private.',
+      },
     ],
     relatedTools: ['word-to-pdf', 'html-to-markdown', 'merge-pdf'],
   },
@@ -3788,6 +4222,22 @@ export const tools: Tool[] = [
         question: 'How do I convert JSON to XML?',
         answer: 'Paste your JSON data into the input field and click convert. The tool will generate a properly formatted XML document.',
       },
+      {
+        question: 'How are JSON arrays represented in XML?',
+        answer: 'Each array item becomes a repeated child element. For example, `{"items": [1, 2]}` becomes `<items>1</items><items>2</items>`. The tool wraps the top-level result in a `<root>` element when needed.',
+      },
+      {
+        question: 'What happens to JSON keys with special characters?',
+        answer: 'XML element names cannot start with a digit or contain spaces or slashes. The converter sanitizes such keys (e.g. replacing spaces with underscores) and warns about any forced renames.',
+      },
+      {
+        question: 'When should I convert JSON to XML?',
+        answer: 'Useful when integrating with legacy SOAP/XML APIs, generating configuration files for tools that only accept XML, transforming data for XSLT, or migrating between systems with different data format conventions.',
+      },
+      {
+        question: 'Can I round-trip back to JSON?',
+        answer: 'Yes — use our XML to JSON Converter for the reverse direction. Round-trip preserves structure but type information (numbers, booleans) may need to be re-asserted since XML treats everything as text.',
+      },
     ],
     relatedTools: ['xml-to-json', 'json-formatter', 'json-to-csv'],
   },
@@ -3806,6 +4256,22 @@ export const tools: Tool[] = [
       {
         question: 'How do I convert XML to JSON?',
         answer: 'Paste your XML document into the input field and click convert. The tool will generate equivalent JSON data.',
+      },
+      {
+        question: 'How are XML attributes handled in JSON?',
+        answer: 'Attributes are prefixed with "@" to distinguish them from child elements. So `<item id="1">value</item>` becomes `{"item": {"@id": "1", "#text": "value"}}`. This avoids collisions when an attribute and child element share a name.',
+      },
+      {
+        question: 'What about repeated XML elements?',
+        answer: 'Multiple sibling elements with the same tag are converted to a JSON array. A single occurrence stays a single object — pass a hint or use post-processing if you always need an array.',
+      },
+      {
+        question: 'Are all data types preserved?',
+        answer: 'XML treats everything as text, so numbers and booleans come out as strings in JSON. Use `JSON.parse(...)` after a regex replacement if you need real numeric/boolean types in the output.',
+      },
+      {
+        question: 'When would I convert XML to JSON?',
+        answer: 'Most modern APIs prefer JSON. Convert when consuming legacy SOAP responses, RSS/Atom feeds, or XML config files in a JavaScript codebase that expects JSON.',
       },
     ],
     relatedTools: ['json-to-xml', 'json-formatter', 'csv-to-json'],
@@ -3832,6 +4298,18 @@ export const tools: Tool[] = [
         question: 'What can I use random numbers for?',
         answer: 'Random numbers are useful for games, simulations, statistical sampling, cryptography, and any application requiring unpredictable values.',
       },
+      {
+        question: 'Are these numbers truly random?',
+        answer: 'They are generated by the browser\'s built-in pseudo-random function, which is statistically random enough for everyday use (games, simulations, sampling). For security-critical use cases like cryptography, use our Secure Token Generator instead.',
+      },
+      {
+        question: 'Can I generate integers AND decimals?',
+        answer: 'Yes. Toggle between integer and decimal mode. In decimal mode you can also set the number of decimal places (1–10) to control precision.',
+      },
+      {
+        question: 'What is the maximum range?',
+        answer: 'Practically, any integer the browser can represent — up to 2^53 - 1. For most use cases (lottery picks, IDs, simulation), a range of 1 to 1 million covers everything.',
+      },
     ],
     exampleOutput: {
       output: '42, 87, 15, 93, 28',
@@ -3850,6 +4328,28 @@ export const tools: Tool[] = [
     icon: 'Dices',
     keywords: ['dice roll', 'dice simulator', 'roll dice', 'virtual dice'],
     tags: ['utility', 'dice', 'roll', 'simulator', 'virtual'],
+    faq: [
+      {
+        question: 'How do I use the dice roll simulator?',
+        answer: 'Pick the number of dice and the type (d6, d20, d4, etc.), then click Roll. The result shows individual dice values plus the total. Roll again as many times as you want — each roll is independent.',
+      },
+      {
+        question: 'What types of dice are supported?',
+        answer: 'Standard tabletop sets: d4, d6 (classic cube), d8, d10, d12, d20 (icosahedron, used in D&D), and d100. Choose any combination for tabletop RPGs, board games, or probability demos.',
+      },
+      {
+        question: 'Is the dice roll really random?',
+        answer: 'Each face has equal probability, drawn from the browser\'s pseudo-random generator. Statistically fair for games and simulations — not cryptographically random.',
+      },
+      {
+        question: 'Can I roll multiple dice at once?',
+        answer: 'Yes. Set the dice count (1–20+) and roll them simultaneously. The result lists each die\'s value plus the sum, ideal for D&D-style 3d6 or 4d6-drop-lowest stat rolls.',
+      },
+      {
+        question: 'Why use a virtual dice instead of physical?',
+        answer: 'No physical dice handy, want larger pools than your set allows, need exotic dice types (d10, d100), or want to demonstrate probability distributions without bias from worn-out physical dice.',
+      },
+    ],
     relatedTools: ['coin-flip', 'random-number-generator', 'random-password-generator'],
   },
   {
@@ -3863,6 +4363,28 @@ export const tools: Tool[] = [
     icon: 'Circle',
     keywords: ['coin flip', 'heads or tails', 'coin toss', 'flip coin'],
     tags: ['utility', 'coin', 'flip', 'heads', 'tails', 'toss'],
+    faq: [
+      {
+        question: 'Is the coin flip really 50/50?',
+        answer: 'Yes. Each flip independently has 50% chance of heads and 50% chance of tails, generated by the browser\'s pseudo-random number generator. Over many flips the ratio approaches exactly 50/50.',
+      },
+      {
+        question: 'What can I use a coin flip for?',
+        answer: 'Settling decisions when two options are equally good, breaking ties, picking who goes first in a game, teaching basic probability, or simulating Bernoulli trials in statistics.',
+      },
+      {
+        question: 'Can I flip multiple coins at once?',
+        answer: 'Yes. Set the number of flips and the tool will simulate that many independent flips, showing the result of each plus a count of heads vs tails.',
+      },
+      {
+        question: 'Is this fairer than a real coin?',
+        answer: 'Real coins can be slightly biased due to weight distribution, the side they start on, or who is flipping. A digital flip is mathematically perfectly fair — closer to ideal 50/50 than any physical coin.',
+      },
+      {
+        question: 'How do I know it is not rigged?',
+        answer: 'The randomness comes from your browser\'s `Math.random()` (or `crypto.getRandomValues` for higher-quality randomness). Inspect the source in DevTools if you want to verify there is no bias.',
+      },
+    ],
     relatedTools: ['dice-roll-simulator', 'random-number-generator', 'random-password-generator'],
   },
   {
@@ -3876,6 +4398,28 @@ export const tools: Tool[] = [
     icon: 'Timer',
     keywords: ['countdown timer', 'timer', 'countdown', 'stopwatch'],
     tags: ['utility', 'timer', 'countdown', 'stopwatch'],
+    faq: [
+      {
+        question: 'How do I set a countdown timer?',
+        answer: 'Enter hours, minutes, and seconds, then click Start. The timer displays the remaining time and alerts you when it reaches zero.',
+      },
+      {
+        question: 'Will the timer keep running if I switch tabs?',
+        answer: 'Yes. The timer uses background-safe timing in your browser so it continues counting even in inactive tabs. Note that browser power-saving may slightly throttle update frequency.',
+      },
+      {
+        question: 'Does it alert me when time is up?',
+        answer: 'Yes — a visible notification appears, and (if you allow notifications) a system notification fires. You can also enable a sound chime.',
+      },
+      {
+        question: 'What is the maximum duration?',
+        answer: 'Up to 99 hours, 59 minutes, 59 seconds in a single timer. For longer durations, run multiple consecutive timers or use a date-based countdown.',
+      },
+      {
+        question: 'Will I lose my timer if I refresh the page?',
+        answer: 'Yes — the timer resets on refresh since it runs entirely in memory. For long-lived countdowns, use a separate desktop or phone timer app.',
+      },
+    ],
     relatedTools: ['time-converter', 'cron-expression-parser', 'timestamp-converter'],
   },
   {
@@ -3889,6 +4433,28 @@ export const tools: Tool[] = [
     icon: 'Barcode',
     keywords: ['barcode generator', 'barcode maker', 'create barcode', 'barcode creator'],
     tags: ['utility', 'barcode', 'generator', 'maker', 'create', 'creator'],
+    faq: [
+      {
+        question: 'How do I generate a barcode?',
+        answer: 'Type the data you want to encode (product number, SKU, ID, etc.), choose a barcode format, and the tool renders a scannable barcode. Download as PNG or SVG.',
+      },
+      {
+        question: 'Which barcode formats are supported?',
+        answer: 'Code 128 (most versatile, encodes any ASCII), Code 39 (alphanumeric, common in industry), EAN-13 / EAN-8 (retail products), UPC-A (US retail), and ITF-14 (shipping cartons).',
+      },
+      {
+        question: 'Which format should I use?',
+        answer: 'For retail products with UPC numbers, use EAN-13 or UPC-A. For internal inventory, asset tracking, or shipping labels, Code 128 is the most flexible choice and handles any text.',
+      },
+      {
+        question: 'How do I print barcodes for labels?',
+        answer: 'Download as SVG for sharp scaling at any size, or PNG at 300+ DPI for label-printer use. Make sure to leave clear white "quiet zones" on both sides of the barcode for reliable scanning.',
+      },
+      {
+        question: 'What is the difference between a barcode and QR code?',
+        answer: 'Barcodes are 1D and store limited text (usually IDs). QR codes are 2D and store hundreds of characters, URLs, contact info, etc. Use barcodes for inventory and retail; QR codes for marketing and digital payloads.',
+      },
+    ],
     relatedTools: ['qr-code-generator', 'url-to-qr-code', 'url-encode'],
   },
   {
@@ -3902,6 +4468,28 @@ export const tools: Tool[] = [
     icon: 'Ruler',
     keywords: ['unit converter', 'convert units', 'measurement converter', 'unit conversion'],
     tags: ['utility', 'unit', 'converter', 'convert', 'units', 'measurement', 'conversion'],
+    faq: [
+      {
+        question: 'What units can I convert?',
+        answer: 'Length (m, ft, in, mile, km, etc.), weight (kg, lb, oz, gram, ton), temperature (°C, °F, K), area, volume, speed, time, energy, pressure, and data storage (B, KB, MB, GB, TB).',
+      },
+      {
+        question: 'How accurate are the conversions?',
+        answer: 'Conversions use exact factors where they exist (e.g. 1 inch = 25.4 mm by definition) and high-precision constants for derived units. Display is typically 6 significant digits but you can round as needed.',
+      },
+      {
+        question: 'Does it handle both metric and imperial?',
+        answer: 'Yes — all common metric, US customary, and imperial units are supported. Convert in either direction between any two compatible units.',
+      },
+      {
+        question: 'Can I convert between unrelated units?',
+        answer: 'No — converting kg to meters has no meaning. The tool only allows conversions within compatible categories (length to length, mass to mass, etc.).',
+      },
+      {
+        question: 'Why use this instead of a search engine?',
+        answer: 'No round-trips to a server, instant, works offline, and doesn\'t log your queries. Great for bulk conversions or sensitive measurements you\'d rather not type into a public search.',
+      },
+    ],
     relatedTools: ['temperature-converter', 'weight-converter', 'length-converter'],
   },
   {
@@ -3915,6 +4503,28 @@ export const tools: Tool[] = [
     icon: 'Calendar',
     keywords: ['age calculator', 'calculate age', 'birthday calculator', 'age finder'],
     tags: ['utility', 'age', 'calculator', 'calculate', 'birthday', 'finder'],
+    faq: [
+      {
+        question: 'How is the age calculated?',
+        answer: 'The tool computes the difference between your birthdate and today (or a target date you choose), broken down into years, months, days, hours, and minutes.',
+      },
+      {
+        question: 'Can I calculate age on a future or past date?',
+        answer: 'Yes. Override the "today" field with any date to find out how old someone was on a specific date or how old they will be in the future. Useful for legal age questions or planning milestones.',
+      },
+      {
+        question: 'Does it handle leap years correctly?',
+        answer: 'Yes. The calculation accounts for leap years and the actual number of days in each month, so the result is accurate down to the day.',
+      },
+      {
+        question: 'Why is my age in days different from years × 365?',
+        answer: 'A year is on average 365.25 days (due to leap years). Multiplying years × 365 under-counts. The tool computes exact day count from real calendar dates, not an approximation.',
+      },
+      {
+        question: 'Is my birthdate stored?',
+        answer: 'No. All calculation happens locally in your browser and nothing is sent anywhere. Refresh the page to clear it.',
+      },
+    ],
     relatedTools: ['bmi-calculator', 'percentage-calculator', 'date-to-unix-time'],
   },
   {
@@ -3928,6 +4538,28 @@ export const tools: Tool[] = [
     icon: 'Scale',
     keywords: ['bmi calculator', 'body mass index', 'weight calculator', 'health calculator'],
     tags: ['utility', 'bmi', 'calculator', 'body', 'mass', 'index', 'weight'],
+    faq: [
+      {
+        question: 'What is BMI and how is it calculated?',
+        answer: 'BMI (Body Mass Index) = weight (kg) ÷ height² (m²). For imperial: 703 × weight (lb) ÷ height² (in²). The tool accepts both metric and imperial input.',
+      },
+      {
+        question: 'What do the BMI categories mean?',
+        answer: 'WHO classification: under 18.5 is underweight, 18.5–24.9 is normal, 25.0–29.9 is overweight, 30.0+ is obese (with sub-categories for class I, II, III). Different populations may use slightly different cutoffs.',
+      },
+      {
+        question: 'Is BMI an accurate health measure?',
+        answer: 'BMI is a quick screening tool, not a diagnosis. It does not distinguish muscle from fat, so very athletic people often score "overweight" despite being healthy. It also varies by age, ethnicity, and sex. Use it as one signal, not the only one.',
+      },
+      {
+        question: 'Does BMI work for children?',
+        answer: 'No. Children and teens (under 20) need age- and sex-specific BMI percentiles, not the adult thresholds. Use a pediatric BMI chart from CDC/WHO instead.',
+      },
+      {
+        question: 'Is my health data saved?',
+        answer: 'No. Height and weight are entered locally and never transmitted. Refresh the page to clear them.',
+      },
+    ],
     relatedTools: ['age-calculator', 'percentage-calculator', 'weight-converter'],
   },
   {
@@ -3941,6 +4573,28 @@ export const tools: Tool[] = [
     icon: 'Percent',
     keywords: ['percentage calculator', 'calculate percent', 'percent calculator', 'percentage'],
     tags: ['utility', 'percentage', 'calculator', 'calculate', 'percent'],
+    faq: [
+      {
+        question: 'What percentage calculations does this tool handle?',
+        answer: 'Common operations: X% of Y, X is what % of Y, percent increase/decrease between two numbers, adding or subtracting a percentage from a value, and reverse-percentage (find the original before a markup or discount).',
+      },
+      {
+        question: 'How do I calculate percent increase?',
+        answer: 'Percent change = ((new − old) ÷ old) × 100. For example, 50 to 60 is a 20% increase: (60 − 50) ÷ 50 × 100 = 20. The tool does this automatically when you enter both numbers.',
+      },
+      {
+        question: 'How do I find the original price before discount?',
+        answer: 'If you have the sale price and discount %: original = sale ÷ (1 − discount/100). Example: $80 after 20% off → 80 ÷ 0.8 = $100. Use the "reverse percentage" mode.',
+      },
+      {
+        question: 'What is the difference between percent and percentage points?',
+        answer: 'Percent is a relative change (5% to 10% is a 100% increase). Percentage points are the absolute difference (5% to 10% is a 5-point increase). Important when discussing interest rates or polls.',
+      },
+      {
+        question: 'How accurate are the results?',
+        answer: 'Calculations use full JavaScript floating-point precision. Displayed results are rounded to 4 decimal places by default; you can adjust the precision shown.',
+      },
+    ],
     relatedTools: ['bmi-calculator', 'age-calculator', 'unit-converter'],
   },
   {
@@ -3954,6 +4608,28 @@ export const tools: Tool[] = [
     icon: 'Shield',
     keywords: ['password strength', 'password checker', 'secure password', 'password test'],
     tags: ['utility', 'password', 'strength', 'checker', 'secure', 'test'],
+    faq: [
+      {
+        question: 'How does the password strength checker work?',
+        answer: 'It scores your password based on length, character variety (uppercase, lowercase, digits, symbols), entropy, and presence of common patterns. The result is a strength rating from Very Weak to Very Strong.',
+      },
+      {
+        question: 'What makes a strong password?',
+        answer: 'Length first (15+ characters), mixed character types, no dictionary words, no personal info (name, birthday), and no reuse across sites. A long random passphrase is stronger than a short complex string.',
+      },
+      {
+        question: 'How long should my password be?',
+        answer: 'For high-value accounts, aim for 15+ random characters or a 4–6-word passphrase. Anything under 12 characters with common patterns can be brute-forced in hours with modern GPUs.',
+      },
+      {
+        question: 'Is my password sent anywhere when I test it?',
+        answer: 'No. The entire strength analysis runs locally in your browser. The password never leaves your device — completely private.',
+      },
+      {
+        question: 'Should I use a password manager?',
+        answer: 'Yes. A password manager generates and stores unique strong passwords per site, so you only need to remember one strong master password. This eliminates reuse risk entirely.',
+      },
+    ],
     relatedTools: ['random-password-generator', 'secure-token-generator', 'bcrypt-hash-generator'],
   },
   {
@@ -3975,6 +4651,18 @@ export const tools: Tool[] = [
       {
         question: 'What token format should I use?',
         answer: 'Hex tokens are compact and commonly used. Base64 tokens are more compact and URL-safe. Alphanumeric tokens use only letters and numbers, making them easier to work with in some contexts.',
+      },
+      {
+        question: 'What length should my token be?',
+        answer: 'Session tokens: 32+ random characters (≥128 bits of entropy). API keys: 40+ characters. CSRF tokens: 16–32 characters. Longer is always more secure but adds storage overhead — pick the shortest length that satisfies your threat model.',
+      },
+      {
+        question: 'How does this differ from UUID v4?',
+        answer: 'UUID v4 is a specific 128-bit format (8-4-4-4-12 hex digits, ~122 random bits). Secure tokens can be any length and use the full alphabet you choose. Use UUIDs when you need the standard format, secure tokens for everything else.',
+      },
+      {
+        question: 'Is the randomness cryptographically secure?',
+        answer: 'Yes — tokens come from `crypto.getRandomValues()`, the browser\'s CSPRNG. This is suitable for authentication tokens, API keys, and any security-sensitive use. Not the same as `Math.random()`, which is predictable.',
       },
     ],
     exampleOutput: {
@@ -4003,6 +4691,18 @@ export const tools: Tool[] = [
         question: 'When should I use Nano ID instead of UUID?',
         answer: 'Nano ID is ideal when you need shorter, URL-friendly identifiers like in web applications, short links, or when storage space matters. UUID is better when you need the standard 128-bit format.',
       },
+      {
+        question: 'What is the default alphabet?',
+        answer: 'A-Z, a-z, 0-9, _ and - — all URL-safe characters that can appear in path segments and query parameters without escaping. You can also customize the alphabet for specific needs.',
+      },
+      {
+        question: 'How likely are collisions?',
+        answer: 'A 21-character Nano ID (default) gives ~126 bits of entropy. To have a 1% chance of collision you would need to generate ~10^15 IDs — astronomically safe for any practical application.',
+      },
+      {
+        question: 'Can I use shorter Nano IDs?',
+        answer: 'Yes, but shorter IDs collide more easily. For ~1 million IDs, 10 characters is safe. For ~1 billion, use 14+. The tool lets you set any length 4–36.',
+      },
     ],
     exampleOutput: {
       output: 'V1StGXR8_Z5jdHi6B-myT\nJ6N3kqW7xR9mP2vL8hT5c\nA4bC7dE9fG1hI3jK5lM7n',
@@ -4029,6 +4729,18 @@ export const tools: Tool[] = [
       {
         question: 'What is transliteration?',
         answer: 'Transliteration converts characters from one alphabet to another. For example, "café" becomes "cafe" and "naïve" becomes "naive". This ensures URLs work across all systems.',
+      },
+      {
+        question: 'Which separator should I use?',
+        answer: 'Hyphens (`-`) are the standard for SEO — most search engines treat them as word separators. Underscores (`_`) are valid but treated as part of a word. Avoid spaces, which must be percent-encoded.',
+      },
+      {
+        question: 'Should I include the date or ID in slugs?',
+        answer: 'For evergreen content, skip the date so URLs stay relevant. For time-sensitive content (news, events), include the year. Adding a numeric ID (`post-123-my-title`) makes slugs unique even when titles repeat.',
+      },
+      {
+        question: 'How long should a slug be?',
+        answer: 'Aim for 3–5 meaningful words (under ~60 characters). Long slugs get truncated in search results and are less shareable. The tool lets you cap maximum length and trim trailing partial words.',
       },
     ],
     exampleOutput: {
@@ -4093,6 +4805,28 @@ export const tools: Tool[] = [
     icon: 'FileSpreadsheet',
     keywords: ['csv to excel', 'csv to xlsx', 'convert csv', 'spreadsheet creator'],
     tags: ['office', 'csv', 'excel', 'xlsx', 'convert', 'spreadsheet', 'creator'],
+    faq: [
+      {
+        question: 'How do I convert CSV to Excel?',
+        answer: 'Upload your CSV file or paste the data, preview the parsed columns, and click Convert to Excel. The tool generates a real .xlsx file ready to open in Excel, Google Sheets, or LibreOffice.',
+      },
+      {
+        question: 'What delimiters are supported?',
+        answer: 'Commas (default), tabs, semicolons, and pipes. The tool auto-detects the most likely delimiter from the first few rows but you can override it manually.',
+      },
+      {
+        question: 'Will the column types be preserved?',
+        answer: 'The tool infers numbers, dates, and booleans automatically so Excel sees them as the correct types — not just text. For ambiguous columns, you can force "text only" to prevent leading zeros from being stripped.',
+      },
+      {
+        question: 'Can I handle CSVs with quoted fields containing commas?',
+        answer: 'Yes. The parser follows RFC 4180: double-quoted fields can contain commas and line breaks. Internal quotes are escaped as `""`. Malformed quoting is reported with a row number.',
+      },
+      {
+        question: 'Is there a row/file size limit?',
+        answer: 'Anything that fits in browser memory works — typically up to ~1 million rows or a few hundred MB. The whole conversion runs locally, so nothing is uploaded.',
+      },
+    ],
     relatedTools: ['excel-to-csv', 'excel-to-json', 'json-to-csv'],
     howToUse: [
       'Upload or paste your CSV data',
@@ -4112,6 +4846,28 @@ export const tools: Tool[] = [
     icon: 'FileCode',
     keywords: ['excel to json', 'xlsx to json', 'spreadsheet to json', 'convert excel'],
     tags: ['office', 'excel', 'json', 'xlsx', 'spreadsheet', 'convert'],
+    faq: [
+      {
+        question: 'How is each row converted to JSON?',
+        answer: 'The first row becomes the JSON keys; each subsequent row becomes one object. So a sheet with columns Name/Age/Email gives `[{"Name": "...", "Age": 30, "Email": "..."}, ...]`.',
+      },
+      {
+        question: 'What if my Excel file has multiple sheets?',
+        answer: 'You can pick which sheet to convert from a dropdown, or convert all sheets at once into a nested object keyed by sheet name. The tool shows a preview before downloading.',
+      },
+      {
+        question: 'Are dates and numbers preserved as their native types?',
+        answer: 'Yes — dates are emitted as ISO 8601 strings (e.g. `2025-04-15`), numbers as numeric values, booleans as `true`/`false`. Cell formulas are evaluated and only their result is exported.',
+      },
+      {
+        question: 'How are empty cells handled?',
+        answer: 'By default empty cells become `null`. You can switch to "skip empty" mode to omit the key entirely, useful when downstream consumers prefer absence to null.',
+      },
+      {
+        question: 'Is my Excel file uploaded anywhere?',
+        answer: 'No. Parsing happens entirely client-side using SheetJS. Your spreadsheet never leaves your browser — safe for confidential financial or HR data.',
+      },
+    ],
     relatedTools: ['json-to-excel', 'excel-to-csv', 'csv-to-json'],
     howToUse: [
       'Upload your Excel file',
@@ -4131,6 +4887,28 @@ export const tools: Tool[] = [
     icon: 'FileCode',
     keywords: ['json to excel', 'json to xlsx', 'convert json', 'spreadsheet from json'],
     tags: ['office', 'json', 'excel', 'xlsx', 'convert', 'spreadsheet'],
+    faq: [
+      {
+        question: 'What JSON structure should I provide?',
+        answer: 'An array of flat objects works best: `[{"name": "...", "age": 30}, ...]`. The keys of the first object become the column headers; each object becomes a row.',
+      },
+      {
+        question: 'What happens with nested objects or arrays?',
+        answer: 'Nested values are flattened with dot notation (`user.name`) or serialized as JSON strings, depending on the option you pick. For complex hierarchies consider preprocessing the JSON to flat objects first.',
+      },
+      {
+        question: 'Can I control column order?',
+        answer: 'Yes — the tool uses the key order of the first object as the column order. To force a specific order, ensure the first object lists keys in that sequence.',
+      },
+      {
+        question: 'Are types preserved in the Excel output?',
+        answer: 'Numbers stay numeric, booleans become TRUE/FALSE, and ISO date strings are recognized as dates by Excel. Strings remain text — leading zeros are preserved if you mark a column as text.',
+      },
+      {
+        question: 'How large a JSON can I convert?',
+        answer: 'Anything that fits in browser memory — typically tens of thousands of rows comfortably. For huge datasets, split into multiple files or use a server-side library.',
+      },
+    ],
     relatedTools: ['excel-to-json', 'json-to-csv', 'csv-to-excel'],
     howToUse: [
       'Paste your JSON data or upload a file',
@@ -4150,6 +4928,28 @@ export const tools: Tool[] = [
     icon: 'FileCode',
     keywords: ['excel to xml', 'xlsx to xml', 'spreadsheet to xml', 'convert excel'],
     tags: ['office', 'excel', 'xml', 'xlsx', 'spreadsheet', 'convert'],
+    faq: [
+      {
+        question: 'How is Excel data represented in XML?',
+        answer: 'Each sheet becomes a `<sheet>` element; each row becomes a `<row>` element; each cell becomes a child element named after its column header. Numbers and dates are emitted as text content.',
+      },
+      {
+        question: 'Can I customize the XML element names?',
+        answer: 'Column names from your header row are sanitized into valid XML element names (spaces become underscores, leading digits get prefixed). You can configure root and row element names before exporting.',
+      },
+      {
+        question: 'Why convert Excel to XML?',
+        answer: 'XML is the lingua franca of legacy enterprise systems, SOAP APIs, and many B2B integrations. You may also need XML to feed reports into older accounting or BI tools.',
+      },
+      {
+        question: 'Are formulas evaluated or preserved?',
+        answer: 'Formulas are evaluated and the resulting value is exported. The formula text itself is dropped — if you need to keep formulas, save the Excel file directly instead.',
+      },
+      {
+        question: 'How are special characters in cells handled?',
+        answer: 'Reserved XML characters (`<`, `>`, `&`, `"`, `\'`) are automatically escaped to their entity equivalents (`&lt;`, `&gt;`, etc.) so the output is always valid XML.',
+      },
+    ],
     relatedTools: ['xml-to-json', 'excel-to-json', 'json-to-xml'],
     howToUse: [
       'Upload your Excel file',
@@ -4169,6 +4969,28 @@ export const tools: Tool[] = [
     icon: 'Database',
     keywords: ['excel to sql', 'xlsx to sql', 'spreadsheet to sql', 'sql generator'],
     tags: ['office', 'excel', 'sql', 'xlsx', 'spreadsheet', 'generator'],
+    faq: [
+      {
+        question: 'What SQL dialect is generated?',
+        answer: 'Standard ANSI INSERT statements that work in MySQL, PostgreSQL, SQLite, SQL Server, and Oracle with little or no modification. You can pick the dialect to enable engine-specific quoting and identifier rules.',
+      },
+      {
+        question: 'How is the table name determined?',
+        answer: 'You enter a table name; columns are derived from the first row of your Excel sheet. The tool sanitizes column names into valid SQL identifiers (snake_case, no spaces).',
+      },
+      {
+        question: 'Does it also generate the CREATE TABLE statement?',
+        answer: 'Yes — toggle the option to include a CREATE TABLE with inferred column types (INT, DECIMAL, VARCHAR, DATE, BOOLEAN) based on cell content. Review the types before running on a real database.',
+      },
+      {
+        question: 'How are strings with quotes escaped?',
+        answer: 'Single quotes inside string values are doubled (`O\'Brien` → `O\'\'Brien`) per SQL standard. NULLs are emitted as the `NULL` keyword without quotes.',
+      },
+      {
+        question: 'Can I run the SQL directly?',
+        answer: 'Copy the generated statements and paste them into your database client (MySQL Workbench, pgAdmin, DBeaver, etc.). Always run on a test database first to catch type or constraint mismatches.',
+      },
+    ],
     relatedTools: ['sql-formatter', 'csv-to-json', 'excel-to-csv'],
     howToUse: [
       'Upload your Excel file',
@@ -4188,6 +5010,28 @@ export const tools: Tool[] = [
     icon: 'Layers',
     keywords: ['merge excel', 'combine excel', 'join spreadsheets', 'excel merger'],
     tags: ['office', 'merge', 'excel', 'combine', 'join', 'spreadsheets', 'merger'],
+    faq: [
+      {
+        question: 'How does merge work — by sheets or by rows?',
+        answer: 'Two modes: "by sheets" keeps each input file as a separate tab in the output workbook; "by rows" stacks rows from all files into a single sheet (requires matching column headers).',
+      },
+      {
+        question: 'How many files can I merge at once?',
+        answer: 'Up to ~20 files in one operation, depending on file sizes. The output is a single .xlsx file containing all the combined data.',
+      },
+      {
+        question: 'What if my files have different column structures?',
+        answer: 'In "by sheets" mode this is fine — each sheet keeps its own columns. In "by rows" mode the tool either aligns common columns and pads missing ones with empty cells, or rejects the merge — your choice.',
+      },
+      {
+        question: 'Will formulas, formatting, and charts be preserved?',
+        answer: 'Cell values, basic formatting (bold, colors), and column widths are preserved. Complex artifacts (charts, conditional formatting, macros) may be dropped — open the merged file in Excel to verify.',
+      },
+      {
+        question: 'How are duplicate rows handled?',
+        answer: 'Duplicates are kept by default. Toggle "remove exact duplicate rows" to deduplicate. Partial duplicates (same key, different values) are not deduplicated — that requires manual cleanup.',
+      },
+    ],
     relatedTools: ['excel-to-csv', 'excel-to-json', 'csv-to-excel'],
     howToUse: [
       'Upload multiple Excel files',
@@ -4209,6 +5053,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['word to pdf', 'docx to pdf', 'convert word', 'document to pdf'],
     tags: ['office', 'word', 'pdf', 'docx', 'convert', 'document'],
+    faq: [
+      {
+        question: 'Will my Word formatting be preserved in the PDF?',
+        answer: 'Most formatting is preserved: headings, fonts, bold/italic, lists, tables, basic image placement, and page breaks. Very complex layouts (text boxes, SmartArt, fields) may render slightly differently — preview before sharing.',
+      },
+      {
+        question: 'What Word versions are supported?',
+        answer: 'Modern .docx files from Word 2007+, Google Docs exports, LibreOffice Writer, and Pages are all supported. The older .doc binary format is not — open it in Word and re-save as .docx first.',
+      },
+      {
+        question: 'How is the page size determined?',
+        answer: 'The tool reads the page setup from the Word file (Letter, A4, custom). If your document uses unusual margins or orientation, those carry through to the PDF.',
+      },
+      {
+        question: 'Can I convert a password-protected Word file?',
+        answer: 'Encrypted .docx files must be unlocked first — Word will prompt you to remove the password before saving an unencrypted copy. The tool cannot decrypt files for you.',
+      },
+      {
+        question: 'Is my document uploaded to a server?',
+        answer: 'No. The conversion runs entirely in your browser using docx-parsing and PDF-rendering libraries. Your file never leaves your device.',
+      },
+    ],
     relatedTools: ['pdf-to-word', 'word-to-txt', 'markdown-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4228,6 +5094,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['pdf to word', 'pdf to docx', 'convert pdf', 'pdf editor'],
     tags: ['office', 'pdf', 'word', 'docx', 'convert', 'editor'],
+    faq: [
+      {
+        question: 'Will the Word output match the PDF layout exactly?',
+        answer: 'For text-heavy PDFs the layout closely matches the original. Multi-column pages, complex tables, footnotes, and PDFs created by scanning may need manual cleanup in Word after conversion.',
+      },
+      {
+        question: 'Can I convert scanned PDFs (image-only)?',
+        answer: 'Without OCR, scanned PDFs produce a Word document with images instead of editable text. Run the PDF through OCR first (or use a dedicated OCR tool) to make the text searchable and editable.',
+      },
+      {
+        question: 'Are images, tables, and fonts preserved?',
+        answer: 'Inline images and basic tables are preserved. Custom fonts fall back to the closest installed font on the reader\'s machine; embed common system fonts when creating the source PDF for best results.',
+      },
+      {
+        question: 'Does this work for password-protected PDFs?',
+        answer: 'No. Remove the password first using your PDF reader (File → Properties → Security) or a dedicated unlock tool, then convert the unlocked copy.',
+      },
+      {
+        question: 'Is the conversion done locally?',
+        answer: 'Yes. PDF parsing runs in your browser via pdfjs; the .docx is generated client-side. Nothing is uploaded, suitable for confidential documents.',
+      },
+    ],
     relatedTools: ['word-to-pdf', 'extract-text-pdf', 'pdf-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -4247,6 +5135,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['word to txt', 'docx to txt', 'extract text word', 'word text'],
     tags: ['office', 'word', 'txt', 'docx', 'extract'],
+    faq: [
+      {
+        question: 'Why convert Word to plain text?',
+        answer: 'Plain text is universally readable, lightweight, and free of proprietary formatting — ideal for feeding documents into scripts, NLP pipelines, version control, or any system that does not need styling.',
+      },
+      {
+        question: 'What formatting is lost?',
+        answer: 'Everything visual: fonts, bold/italic, colors, headings, tables, images, page layout. Only the textual content is preserved in reading order.',
+      },
+      {
+        question: 'Are images extracted alongside the text?',
+        answer: 'No — this tool outputs text only. If you also need the images, use our Extract Images from Word tool in parallel.',
+      },
+      {
+        question: 'How is the text ordered?',
+        answer: 'Top-to-bottom, left-to-right reading order based on the document\'s logical flow. Multi-column layouts are linearized one column at a time.',
+      },
+      {
+        question: 'What about headers, footers, and footnotes?',
+        answer: 'Headers and footers are included once at the start/end. Footnotes are appended in order at the end of the document with their reference markers.',
+      },
+    ],
     relatedTools: ['word-to-pdf', 'extract-text-pdf', 'word-word-counter'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4266,6 +5176,28 @@ export const tools: Tool[] = [
     icon: 'Layers',
     keywords: ['merge word', 'combine docx', 'join documents', 'word merger'],
     tags: ['office', 'merge', 'word', 'combine', 'docx', 'join', 'documents'],
+    faq: [
+      {
+        question: 'How many Word documents can I merge?',
+        answer: 'Up to about 20 documents in one pass, depending on size. Documents are concatenated in the order you arrange them in the file list.',
+      },
+      {
+        question: 'Will formatting from each document be kept?',
+        answer: 'Yes — each document\'s styles, fonts, headings, and basic formatting carry over. If different documents use conflicting styles (e.g. same name, different definitions), the first document\'s styles take precedence.',
+      },
+      {
+        question: 'Are page breaks inserted between documents?',
+        answer: 'Yes by default — each merged document starts on a new page. Toggle "continuous" to flow them one into the next without forced breaks.',
+      },
+      {
+        question: 'Can I merge documents from different sources (Google Docs export, Pages export)?',
+        answer: 'Yes, as long as they are all in .docx format. Older .doc files must be re-saved as .docx first.',
+      },
+      {
+        question: 'What about headers, footers, and page numbers?',
+        answer: 'The first document\'s headers/footers are kept; subsequent documents\' headers are dropped to avoid conflicts. Re-add unified page numbering in Word after merging if needed.',
+      },
+    ],
     relatedTools: ['word-to-pdf', 'split-word', 'extract-images-word'],
     howToUse: [
       'Upload multiple Word documents',
@@ -4285,6 +5217,28 @@ export const tools: Tool[] = [
     icon: 'Scissors',
     keywords: ['split word', 'divide docx', 'split document', 'word splitter'],
     tags: ['office', 'split', 'word', 'divide', 'docx', 'document', 'splitter'],
+    faq: [
+      {
+        question: 'How can I split a Word document?',
+        answer: 'Two modes: by page count (e.g. one file per 10 pages) or by heading (start a new file at every Heading 1). The tool gives you a ZIP archive containing all the split pieces.',
+      },
+      {
+        question: 'Will the formatting be preserved in each split file?',
+        answer: 'Yes — each output is a valid .docx with the same styles, fonts, and theme as the original. Inline images and tables stay attached to the section they belonged to.',
+      },
+      {
+        question: 'Can I name the split files?',
+        answer: 'Yes — pick a prefix (e.g. "chapter") and the tool numbers them sequentially: `chapter-1.docx`, `chapter-2.docx`, etc. When splitting by headings, the heading text is used as the filename.',
+      },
+      {
+        question: 'What happens to headers and footers?',
+        answer: 'Each split inherits the original document\'s header/footer. Page numbers restart from 1 in each file — useful if you want each part to stand alone.',
+      },
+      {
+        question: 'Why split a document instead of just deleting pages?',
+        answer: 'Splitting preserves the original, produces multiple shareable files at once, and is automated for large documents. Manual deletion in Word is fine for one-off edits but slow for batches.',
+      },
+    ],
     relatedTools: ['merge-word', 'word-to-pdf', 'extract-text-pdf'],
     howToUse: [
       'Upload your Word document',
@@ -4304,6 +5258,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['word counter', 'docx word count', 'document counter', 'word document'],
     tags: ['office', 'word', 'counter', 'docx', 'count', 'document'],
+    faq: [
+      {
+        question: 'What statistics does the tool show?',
+        answer: 'Word count, character count (with and without spaces), paragraph count, sentence count, and estimated reading time (assuming 200 words per minute).',
+      },
+      {
+        question: 'How is "word" defined?',
+        answer: 'Any whitespace-separated token. Numbers and hyphenated terms count as one word. URLs and email addresses are also counted as single words.',
+      },
+      {
+        question: 'Are headers, footers, and footnotes included?',
+        answer: 'By default yes — they contribute to the document\'s total. Toggle the option to count only body text if your academic or publishing target excludes them.',
+      },
+      {
+        question: 'How accurate is the reading time estimate?',
+        answer: 'Based on the average adult silent reading speed of 200–250 wpm. For technical or dense material, real reading time can be 2–3× longer. Use it as a rough indicator.',
+      },
+      {
+        question: 'Is the file uploaded anywhere?',
+        answer: 'No. The document is parsed entirely in your browser. Word counts, character counts, and reading times never leave your device.',
+      },
+    ],
     relatedTools: ['word-counter', 'character-counter', 'word-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4323,6 +5299,28 @@ export const tools: Tool[] = [
     icon: 'Image',
     keywords: ['extract images', 'word images', 'docx images', 'document images'],
     tags: ['office', 'extract', 'images', 'word', 'docx', 'document'],
+    faq: [
+      {
+        question: 'How does image extraction work?',
+        answer: '.docx files are ZIP archives internally. The tool reads the embedded `word/media/` folder and pulls out every image found there, preserving its original format (PNG, JPG, GIF, etc.).',
+      },
+      {
+        question: 'Will I get all images in their original quality?',
+        answer: 'Yes — extraction is lossless because the images are simply read from the archive, not re-encoded. Each image keeps its original resolution and format.',
+      },
+      {
+        question: 'How are extracted images named?',
+        answer: 'Images use the names from inside the Word document (often `image1.png`, `image2.jpeg`, etc.). The tool packages everything into a ZIP for batch download.',
+      },
+      {
+        question: 'What if my document has hundreds of images?',
+        answer: 'No problem — extraction is fast and the output ZIP is created on the fly. Very large documents may take a few seconds to process in the browser.',
+      },
+      {
+        question: 'Will I also get inline icons and chart images?',
+        answer: 'Yes for inline pictures. Auto-generated charts and SmartArt are stored as XML rather than raster images, so they will not appear as separate files — only their fallback PNG renditions (if any).',
+      },
+    ],
     relatedTools: ['extract-images-pdf', 'extract-images-ppt', 'word-to-pdf'],
     howToUse: [
       'Upload your Word document (.docx)',
@@ -4344,6 +5342,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['pdf page count', 'count pdf pages', 'pdf info', 'pdf pages'],
     tags: ['office', 'pdf', 'page', 'count', 'pages', 'info'],
+    faq: [
+      {
+        question: 'How does the page counter work?',
+        answer: 'The tool reads the PDF\'s internal structure and counts the page objects. The result appears within a second, even for large files, because no rendering is needed.',
+      },
+      {
+        question: 'What else does the tool show besides the page count?',
+        answer: 'File size, PDF version, page dimensions (Letter, A4, custom), creation and modification dates, author and producer metadata, and whether the PDF is encrypted.',
+      },
+      {
+        question: 'Can it count pages in an encrypted PDF?',
+        answer: 'Only metadata that does not require decryption (page count, file size, basic info). Author/title and other metadata behind the password are hidden until you unlock the file.',
+      },
+      {
+        question: 'Is the file uploaded for processing?',
+        answer: 'No — counting and metadata extraction happen entirely in your browser. Your PDF never leaves your device, so it is safe for confidential documents.',
+      },
+      {
+        question: 'Why does my reader show a different count?',
+        answer: 'Some readers include a cover/banner thumbnail as "page 0" or split spread pages. The internal PDF page count is the authoritative number — what most tools (printers, page-based pricing) actually use.',
+      },
+    ],
     relatedTools: ['merge-pdf', 'split-pdf', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4363,6 +5383,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['extract text pdf', 'pdf to text', 'copy pdf text', 'pdf text extractor'],
     tags: ['office', 'extract', 'pdf', 'copy', 'extractor'],
+    faq: [
+      {
+        question: 'Will this work on scanned (image-only) PDFs?',
+        answer: 'No — without OCR, scanned PDFs contain no extractable text, just images. Run the PDF through an OCR tool first to make the text machine-readable.',
+      },
+      {
+        question: 'Is the reading order preserved?',
+        answer: 'Generally yes for single-column documents. Multi-column layouts, tables, and complex page templates may produce out-of-order text that needs cleanup.',
+      },
+      {
+        question: 'Can I extract text from a specific page range?',
+        answer: 'Yes — specify the page range (e.g. "5-15" or "1,3,7") and the tool extracts only those pages. Useful when you only need a chapter or appendix.',
+      },
+      {
+        question: 'Are footnotes, headers, and footers included?',
+        answer: 'Yes by default — everything visible in the page flow is extracted. Toggle filtering options to skip page numbers, running headers, or recurring footer text.',
+      },
+      {
+        question: 'Is my PDF uploaded?',
+        answer: 'No. The extraction uses pdfjs in your browser. Confidential PDFs (contracts, internal reports) stay on your device.',
+      },
+    ],
     relatedTools: ['extract-images-pdf', 'pdf-to-word', 'pdf-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -4382,6 +5424,28 @@ export const tools: Tool[] = [
     icon: 'Image',
     keywords: ['extract images pdf', 'pdf images', 'pdf image extractor', 'extract from pdf'],
     tags: ['office', 'extract', 'images', 'pdf', 'image', 'extractor'],
+    faq: [
+      {
+        question: 'What images get extracted?',
+        answer: 'All raster images embedded in the PDF — photos, screenshots, logos, diagrams stored as bitmaps. Vector graphics (lines, shapes drawn with PDF primitives) are not raster images and are not extracted.',
+      },
+      {
+        question: 'Will the extracted images keep their original quality?',
+        answer: 'Yes. Images are pulled directly from the PDF\'s internal stream in their stored format (usually JPEG or PNG) — no re-encoding, no loss of quality.',
+      },
+      {
+        question: 'How are images named?',
+        answer: 'Sequentially: `image-1.jpg`, `image-2.png`, etc., based on the order they appear in the document. The tool delivers all images bundled in a single ZIP for easy download.',
+      },
+      {
+        question: 'Why is one image split into multiple pieces?',
+        answer: 'Some PDFs (especially scanned ones) tile a single visual into several internal images for compression. You may need to recombine them in an image editor.',
+      },
+      {
+        question: 'Can I extract from a specific page only?',
+        answer: 'Yes — set a page range to extract only from those pages. Useful when you want the figures from a specific chapter or section.',
+      },
+    ],
     relatedTools: ['extract-text-pdf', 'extract-images-word', 'pdf-to-ppt'],
     howToUse: [
       'Upload your PDF file',
@@ -4401,6 +5465,28 @@ export const tools: Tool[] = [
     icon: 'FileSpreadsheet',
     keywords: ['pdf to excel', 'pdf to xlsx', 'extract table pdf', 'pdf converter'],
     tags: ['office', 'pdf', 'excel', 'xlsx', 'extract', 'table', 'converter'],
+    faq: [
+      {
+        question: 'What kinds of PDF tables can be converted?',
+        answer: 'Clean tabular PDFs (financial reports, exported spreadsheets, structured invoices) convert well. Complex tables with merged cells, multi-line headers, or borderless layouts often need manual cleanup in Excel.',
+      },
+      {
+        question: 'Can it detect tables automatically?',
+        answer: 'The tool detects table-like structures based on text alignment and spacing. If automatic detection misses something, you can manually mark the rows/columns to capture.',
+      },
+      {
+        question: 'Will scanned PDFs work?',
+        answer: 'No — without OCR, the tool cannot recognize text in scanned images. Run OCR first to make the table cells readable, then convert.',
+      },
+      {
+        question: 'How are numbers and dates handled?',
+        answer: 'The tool infers numeric and date cells so Excel treats them with the correct type. For ambiguous columns (e.g. account numbers with leading zeros), mark them as text to preserve the formatting.',
+      },
+      {
+        question: 'Can I extract tables from specific pages only?',
+        answer: 'Yes — specify a page range so the tool ignores irrelevant content (cover pages, narrative sections) and focuses only on the pages with the tables you want.',
+      },
+    ],
     relatedTools: ['pdf-to-csv', 'extract-text-pdf', 'csv-to-excel'],
     howToUse: [
       'Upload your PDF file',
@@ -4420,6 +5506,28 @@ export const tools: Tool[] = [
     icon: 'FileSpreadsheet',
     keywords: ['pdf to csv', 'extract table pdf', 'pdf table', 'pdf converter'],
     tags: ['office', 'pdf', 'csv', 'extract', 'table', 'converter'],
+    faq: [
+      {
+        question: 'When should I use PDF to CSV vs PDF to Excel?',
+        answer: 'CSV when you need plain text for scripts, databases, or import into any tool. Excel (.xlsx) when you want formatting, multiple sheets, or formula support out of the box.',
+      },
+      {
+        question: 'What delimiter is used in the output?',
+        answer: 'Comma by default. You can switch to tab, semicolon, or pipe for compatibility with regional Excel versions or downstream tools that prefer non-comma separators.',
+      },
+      {
+        question: 'How are cells with commas inside them handled?',
+        answer: 'They are wrapped in double quotes per RFC 4180. Internal quotes are doubled. The output is always valid CSV that round-trips through standard parsers.',
+      },
+      {
+        question: 'Will scanned PDFs work?',
+        answer: 'No — without OCR, image-only PDFs have no extractable text. Pass them through OCR first.',
+      },
+      {
+        question: 'Can I extract multiple tables into one CSV?',
+        answer: 'Yes — all detected tables in the page range are concatenated. To keep them separate, run the tool once per page or use Excel output which gives one sheet per table.',
+      },
+    ],
     relatedTools: ['csv-to-json', 'pdf-to-excel', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4439,6 +5547,28 @@ export const tools: Tool[] = [
     icon: 'Presentation',
     keywords: ['pdf to ppt', 'pdf to powerpoint', 'convert pdf', 'pdf slides'],
     tags: ['office', 'pdf', 'ppt', 'powerpoint', 'convert', 'slides'],
+    faq: [
+      {
+        question: 'How does PDF to PowerPoint conversion work?',
+        answer: 'Each PDF page becomes one PowerPoint slide. Text, images, and basic layout are placed onto the slide so it visually matches the original page.',
+      },
+      {
+        question: 'Will text be editable in PowerPoint?',
+        answer: 'For PDFs with real text, yes — each text block becomes an editable text box in PowerPoint. For scanned/image-only PDFs, the slide will contain an image of the page instead.',
+      },
+      {
+        question: 'Are the slide dimensions standard?',
+        answer: 'The tool maps to a 16:9 widescreen slide by default. For PDFs with unusual aspect ratios (A4 portrait, US Letter), choose the matching slide size to avoid letterboxing.',
+      },
+      {
+        question: 'Will hyperlinks in the PDF carry over?',
+        answer: 'Most clickable hyperlinks transfer to the slide and remain functional. Form fields, annotations, and embedded media usually do not carry over.',
+      },
+      {
+        question: 'What about complex layouts with overlapping elements?',
+        answer: 'Visually they should match. To restructure for presentation use (one bullet per line, larger fonts, etc.), expect manual editing in PowerPoint after conversion.',
+      },
+    ],
     relatedTools: ['ppt-to-pdf', 'extract-text-pdf', 'extract-images-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4458,6 +5588,28 @@ export const tools: Tool[] = [
     icon: 'Layers',
     keywords: ['merge pdf', 'combine pdf', 'join pdf', 'pdf merger'],
     tags: ['office', 'merge', 'pdf', 'combine', 'join', 'merger'],
+    faq: [
+      {
+        question: 'How many PDFs can I merge at once?',
+        answer: 'Up to 20+ files in one operation depending on size. Total memory matters more than file count — combining a few large PDFs may be slower than many small ones.',
+      },
+      {
+        question: 'Will bookmarks, links, and form fields be preserved?',
+        answer: 'Internal links and bookmarks from each PDF are kept and re-targeted to the merged document\'s page numbers. Form fields are preserved but may need re-naming to avoid conflicts.',
+      },
+      {
+        question: 'Can I reorder PDFs before merging?',
+        answer: 'Yes — drag the files in the upload list to set their order. The first file in the list becomes the cover of the merged PDF.',
+      },
+      {
+        question: 'Will the merged PDF be larger than the sum of inputs?',
+        answer: 'Usually slightly smaller because duplicate fonts and resources are deduplicated. Encrypted source PDFs need to be unlocked first; they cannot be merged directly.',
+      },
+      {
+        question: 'Is my data uploaded anywhere?',
+        answer: 'No. PDF parsing and assembly use pdf-lib in your browser. Files are never transmitted, suitable for confidential contracts or legal documents.',
+      },
+    ],
     relatedTools: ['split-pdf', 'pdf-page-counter', 'markdown-to-pdf'],
     howToUse: [
       'Upload multiple PDF files',
@@ -4477,6 +5629,28 @@ export const tools: Tool[] = [
     icon: 'Scissors',
     keywords: ['split pdf', 'divide pdf', 'extract pages pdf', 'pdf splitter'],
     tags: ['office', 'split', 'pdf', 'divide', 'extract', 'pages', 'splitter'],
+    faq: [
+      {
+        question: 'What split modes are available?',
+        answer: 'By page range (e.g. "1-5, 8, 12-20" creates 3 output files), by every N pages (auto-split into N-page chunks), or extract specific single pages.',
+      },
+      {
+        question: 'Will the output files preserve everything from the original?',
+        answer: 'Yes — bookmarks for the extracted pages, links targeting included pages, fonts, and images all carry across. Metadata (title, author) is duplicated to each output file.',
+      },
+      {
+        question: 'Can I extract a single page only?',
+        answer: 'Yes — enter just the page number (e.g. "7") to get a single-page PDF. Useful for sharing a specific receipt, certificate, or appendix without sending the whole document.',
+      },
+      {
+        question: 'How are output files named?',
+        answer: 'Sequentially with a prefix and the page range: `myfile-1-5.pdf`, `myfile-6-10.pdf`. All output files are delivered together in a ZIP for easy download.',
+      },
+      {
+        question: 'Is splitting reversible?',
+        answer: 'Yes — use our Merge PDF tool to recombine the split files. As long as they came from the same source PDF, the round trip produces an equivalent document.',
+      },
+    ],
     relatedTools: ['merge-pdf', 'pdf-page-counter', 'extract-text-pdf'],
     howToUse: [
       'Upload your PDF file',
@@ -4498,6 +5672,28 @@ export const tools: Tool[] = [
     icon: 'Presentation',
     keywords: ['ppt slide count', 'powerpoint slides', 'count slides', 'pptx info'],
     tags: ['office', 'ppt', 'slide', 'count', 'powerpoint', 'slides', 'pptx'],
+    faq: [
+      {
+        question: 'How does the slide counter work?',
+        answer: 'PPTX files are ZIP archives — the tool counts the slide XML files inside without rendering anything, so results appear within a second.',
+      },
+      {
+        question: 'What other metadata does it show?',
+        answer: 'Slide count, file size, slide dimensions (16:9, 4:3, custom), embedded font list, image count, author and title metadata, and creation/modification timestamps.',
+      },
+      {
+        question: 'Does it count hidden slides?',
+        answer: 'Yes — hidden slides are still present in the file. The tool can show total vs visible slide counts separately so you know how many will actually appear in presentation mode.',
+      },
+      {
+        question: 'Can it count slides in the older .ppt format?',
+        answer: 'Only the modern .pptx format (PowerPoint 2007+). Convert older .ppt files to .pptx in PowerPoint first by saving them as the new format.',
+      },
+      {
+        question: 'Is my presentation uploaded?',
+        answer: 'No. The file is read and analyzed in your browser; nothing is transmitted. Safe for confidential client decks and internal slide reviews.',
+      },
+    ],
     relatedTools: ['merge-ppt', 'split-ppt', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4517,6 +5713,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['extract text ppt', 'powerpoint text', 'ppt text', 'pptx text extractor'],
     tags: ['office', 'extract', 'ppt', 'powerpoint', 'pptx', 'extractor'],
+    faq: [
+      {
+        question: 'What text gets extracted from a slide?',
+        answer: 'Title text, body bullet points, text in shapes and text boxes, table cells, and speaker notes. Slide numbers and decorative elements are skipped.',
+      },
+      {
+        question: 'Are speaker notes included?',
+        answer: 'Yes — they are appended after each slide\'s body text, labeled as notes. Toggle the option if you only want the slide-visible text.',
+      },
+      {
+        question: 'How is text from multiple slides organized?',
+        answer: 'Each slide is prefaced with "Slide N:" followed by its content. This makes it easy to grep, search, or paste into another document while preserving structure.',
+      },
+      {
+        question: 'Can I extract from a specific slide range?',
+        answer: 'Yes — enter a range like "1-10" or "5,7,12" to extract only those slides. Useful for harvesting content from a specific section.',
+      },
+      {
+        question: 'What about text inside images or charts?',
+        answer: 'Image text is not OCR\'d; charts emit their data labels but not the chart itself. For text in images, run OCR on the image first.',
+      },
+    ],
     relatedTools: ['extract-images-ppt', 'ppt-to-images', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4536,6 +5754,28 @@ export const tools: Tool[] = [
     icon: 'Image',
     keywords: ['extract images ppt', 'powerpoint images', 'ppt images', 'pptx image extractor'],
     tags: ['office', 'extract', 'images', 'ppt', 'powerpoint', 'pptx', 'image'],
+    faq: [
+      {
+        question: 'What types of images get extracted?',
+        answer: 'Raster pictures and screenshots embedded in slides (PNG, JPG, GIF, etc.). Shapes drawn with PowerPoint primitives and SmartArt are not raster images and are not extracted as files.',
+      },
+      {
+        question: 'Will images keep their original quality?',
+        answer: 'Yes — extraction is lossless. The tool reads images from the pptx archive in their original encoded form without re-encoding.',
+      },
+      {
+        question: 'How is this different from PPT to Images?',
+        answer: 'This tool extracts the individual embedded images (logos, photos) used INSIDE slides. PPT to Images renders each entire slide as a single image. Pick based on whether you want the source pictures or full slide visuals.',
+      },
+      {
+        question: 'Are slide backgrounds extracted?',
+        answer: 'Yes if they were inserted as picture fills. Solid-color and gradient backgrounds are not images, so they are not extracted.',
+      },
+      {
+        question: 'How are extracted images named?',
+        answer: 'Sequentially as `image-1.png`, `image-2.jpg`, etc., based on order of appearance in the file. All images are bundled into a single ZIP for download.',
+      },
+    ],
     relatedTools: ['extract-text-ppt', 'ppt-to-images', 'extract-images-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4555,6 +5795,28 @@ export const tools: Tool[] = [
     icon: 'Image',
     keywords: ['ppt to images', 'powerpoint to images', 'slides to png', 'ppt converter'],
     tags: ['office', 'ppt', 'images', 'powerpoint', 'slides', 'png', 'converter'],
+    faq: [
+      {
+        question: 'What does PPT to Images do?',
+        answer: 'It renders each slide of your presentation as a separate image file (PNG or JPG). Each slide becomes one image of the entire visible page.',
+      },
+      {
+        question: 'PNG vs JPG — which should I choose?',
+        answer: 'PNG for crisp text and graphics (lossless), larger files. JPG for photo-heavy slides (lossy, smaller). For sharing on the web or embedding in docs, PNG is the safer default.',
+      },
+      {
+        question: 'What resolution will the images be?',
+        answer: 'By default the tool exports at 1920×1080 (16:9) or matching slide dimensions. You can choose Low (1280px), Standard (1920px), or High (3840px) for retina displays.',
+      },
+      {
+        question: 'How is this different from Extract Images from PPT?',
+        answer: 'Extract Images pulls out the source pictures embedded in slides (logos, photos). PPT to Images renders the visible slide itself as one image. Different use cases.',
+      },
+      {
+        question: 'Will animations and transitions be captured?',
+        answer: 'No — only the static end state of each slide is rendered. Animation steps and transition effects need a screen-recording tool to capture.',
+      },
+    ],
     relatedTools: ['video-to-images', 'extract-images-ppt', 'ppt-to-pdf'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4574,6 +5836,28 @@ export const tools: Tool[] = [
     icon: 'FileText',
     keywords: ['ppt to pdf', 'powerpoint to pdf', 'convert ppt', 'pptx to pdf'],
     tags: ['office', 'ppt', 'pdf', 'powerpoint', 'convert', 'pptx'],
+    faq: [
+      {
+        question: 'Why convert PowerPoint to PDF?',
+        answer: 'PDFs preserve the exact visual layout regardless of fonts installed, are universally readable without PowerPoint, and are easier to share via email or embed in websites.',
+      },
+      {
+        question: 'Will fonts be embedded in the PDF?',
+        answer: 'Yes — common fonts are embedded so the PDF renders identically on any device. For unusual fonts, the tool falls back to the closest standard font. Embed your fonts in PowerPoint before exporting for best results.',
+      },
+      {
+        question: 'Are animations and transitions preserved?',
+        answer: 'No — PDF is a static format so animations are flattened to their end state. Each slide becomes one PDF page.',
+      },
+      {
+        question: 'What page size does the PDF use?',
+        answer: 'The PDF page matches your slide dimensions: 16:9 widescreen becomes ~10×5.6 inches, 4:3 becomes 10×7.5 inches. Custom slide sizes are honored.',
+      },
+      {
+        question: 'Can I include speaker notes?',
+        answer: 'Yes — toggle "Include speaker notes" to add notes below each slide on the PDF page, or use notes-only mode for a printable handout.',
+      },
+    ],
     relatedTools: ['pdf-to-ppt', 'ppt-slide-counter', 'merge-ppt'],
     howToUse: [
       'Upload your PowerPoint file (.pptx)',
@@ -4593,6 +5877,28 @@ export const tools: Tool[] = [
     icon: 'Layers',
     keywords: ['merge ppt', 'combine powerpoint', 'join ppt', 'ppt merger'],
     tags: ['office', 'merge', 'ppt', 'combine', 'powerpoint', 'join', 'merger'],
+    faq: [
+      {
+        question: 'How many PowerPoint files can I merge?',
+        answer: 'Up to about 20 files in one operation. Files are concatenated in the order shown — drag the file list to reorder before merging.',
+      },
+      {
+        question: 'Will themes and master slides be preserved?',
+        answer: 'The first file\'s theme and slide masters are kept as the base. Slides from subsequent files retain their content but adopt the base theme. For mixed-theme decks, expect some manual cleanup.',
+      },
+      {
+        question: 'What about images, fonts, and embedded media?',
+        answer: 'All preserved — images carry across at original quality, fonts are embedded, and video/audio links remain functional as long as the source files are accessible.',
+      },
+      {
+        question: 'Can I add a divider slide between merged decks?',
+        answer: 'Toggle "insert section divider" to add a blank or titled slide between each merged file. Useful for keeping content from different sources visually separated.',
+      },
+      {
+        question: 'Is the merge done locally?',
+        answer: 'Yes — parsing and assembly happen in your browser via pptx-parsing libraries. Your presentations never leave your device.',
+      },
+    ],
     relatedTools: ['split-ppt', 'ppt-slide-counter', 'ppt-to-pdf'],
     howToUse: [
       'Upload multiple PowerPoint files',
@@ -4612,6 +5918,28 @@ export const tools: Tool[] = [
     icon: 'Scissors',
     keywords: ['split ppt', 'divide powerpoint', 'extract slides', 'ppt splitter'],
     tags: ['office', 'split', 'ppt', 'divide', 'powerpoint', 'extract', 'slides'],
+    faq: [
+      {
+        question: 'How can I split a PowerPoint file?',
+        answer: 'Three modes: by slide range (e.g. "1-10, 12, 15-20"), by every N slides (auto-chunk), or by section breaks in the deck. The output is a ZIP of separate .pptx files.',
+      },
+      {
+        question: 'Will each split keep the original theme?',
+        answer: 'Yes — every output file inherits the source deck\'s slide masters, themes, fonts, and layouts. Each is a fully self-contained presentation ready to open.',
+      },
+      {
+        question: 'Can I extract a single slide?',
+        answer: 'Yes — enter just the slide number to get a one-slide .pptx. Useful for sharing a specific chart or excerpt without sending the whole deck.',
+      },
+      {
+        question: 'Are embedded images and media preserved?',
+        answer: 'Yes — each split file carries the images, audio, and video used on its slides. Hyperlinks targeting included slides remain functional; links to slides in other split files become unresolved.',
+      },
+      {
+        question: 'How are output files named?',
+        answer: 'Sequentially with the original filename + slide range: `mydeck-1-10.pptx`, `mydeck-11-20.pptx`. The ZIP wrapper makes downloading all of them a single click.',
+      },
+    ],
     relatedTools: ['merge-ppt', 'ppt-slide-counter', 'ppt-to-images'],
     howToUse: [
       'Upload your PowerPoint file',
@@ -4963,7 +6291,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What speed range is supported?',
-        answer: 'You can set speed from 0.25x (quarter speed) to 4x (four times faster).',
+        answer: 'You can set speed from 0.25x (quarter speed, slow motion) up to 8x (eight times faster, time-lapse). Use the preset buttons or the custom slider for any value in between.',
+      },
+      {
+        question: 'Will changing speed affect audio?',
+        answer: 'Yes. Audio is re-timed along with video using the atempo filter to keep it natural. For extreme speeds outside 0.5–2x, multiple atempo passes are chained automatically so the pitch stays believable.',
+      },
+      {
+        question: 'Does slowing down a video make it smoother?',
+        answer: 'Slow motion does not add new frames — it just plays existing frames longer, which can look choppy on low-framerate sources. For smoother slow-mo, start with a high-framerate (60fps+) original.',
+      },
+      {
+        question: 'How is output duration calculated?',
+        answer: 'New duration equals original duration divided by the speed multiplier. For example, a 10-second clip at 2x becomes 5 seconds; at 0.5x it becomes 20 seconds.',
+      },
+      {
+        question: 'Is video quality preserved when changing speed?',
+        answer: 'Yes. The video is re-encoded with H.264 at high quality so frame-level detail is preserved. Only the playback timing changes.',
       },
     ],
     relatedTools: ['reverse-video', 'loop-video', 'trim-video'],
@@ -4988,7 +6332,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What audio formats can I extract?',
-        answer: 'You can extract audio in MP3, AAC, WAV, and other popular formats.',
+        answer: 'You can extract audio in MP3, AAC, WAV, OGG, FLAC, and other popular formats. MP3 is the most universally compatible; WAV/FLAC are lossless if quality matters more than size.',
+      },
+      {
+        question: 'Is the extracted audio quality preserved?',
+        answer: 'When you extract to a lossless format like WAV or FLAC, the audio matches the source bit-for-bit. MP3 and AAC re-encode with a target bitrate, which is good enough for most listening but loses a tiny amount of fidelity.',
+      },
+      {
+        question: 'Which video formats can I extract audio from?',
+        answer: 'MP4, WebM, MOV, AVI, MKV, FLV, 3GP and most other common video containers are supported. The tool reads whichever audio track is embedded inside.',
+      },
+      {
+        question: 'Can I extract just a portion of the audio?',
+        answer: 'This tool extracts the full audio track. To grab only a clip, trim the video first with the Trim Video tool, then extract audio from the trimmed file.',
+      },
+      {
+        question: 'Does this work for videos with no audio track?',
+        answer: 'No — if the source video has no embedded audio, there is nothing to extract and the tool will return an error. You can verify by playing the video locally with sound enabled.',
       },
     ],
     relatedTools: ['mp4-to-mp3', 'mute-video', 'video-to-images'],
@@ -5013,7 +6373,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'Is the video quality affected?',
-        answer: 'No, muting only removes the audio track while preserving video quality completely.',
+        answer: 'No. Muting only strips the audio track; the video stream is copied over unchanged, so there is zero quality loss and processing is nearly instant.',
+      },
+      {
+        question: 'Why would I want to mute a video?',
+        answer: 'Common reasons: remove copyrighted background music before sharing, get rid of unwanted background noise, prepare clean footage to overlay your own voiceover, or comply with social platform rules that require silent ads.',
+      },
+      {
+        question: 'Will the file size decrease after muting?',
+        answer: 'Yes, slightly. The audio track usually accounts for 5–15% of total file size, so the muted output is a few percent smaller.',
+      },
+      {
+        question: 'What video formats are supported?',
+        answer: 'MP4, WebM, MOV, AVI, MKV and most other common containers. The output keeps the same format as the input by default.',
+      },
+      {
+        question: 'Can I add a new audio track after muting?',
+        answer: 'Not directly with this tool, but the muted video can be paired with new audio in any video editor. We have separate tools for extracting audio you might want to layer back in.',
       },
     ],
     relatedTools: ['extract-audio', 'mp4-to-mp3', 'video-to-gif'],
@@ -5038,7 +6414,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'How many frames can I extract?',
-        answer: 'You can extract frames at specific intervals (e.g., every 1 second) or extract all frames.',
+        answer: 'You can extract frames at fixed intervals (e.g. every 1 second, every 10 frames) or every single frame. For a 30-second 30fps clip, "every frame" yields 900 images — be mindful of total size.',
+      },
+      {
+        question: 'What image format are the frames saved in?',
+        answer: 'You can choose PNG (lossless, larger files, supports transparency) or JPG (smaller, slightly lossy, no transparency). PNG is best for further editing; JPG is best for sharing.',
+      },
+      {
+        question: 'How are frames packaged for download?',
+        answer: 'All extracted frames are bundled into a single ZIP archive named after the source video. Filenames include the frame index or timestamp so you can re-sort them later.',
+      },
+      {
+        question: 'Does extraction quality match the original?',
+        answer: 'Yes when using PNG — frames are decoded directly from the source. JPG output uses a high quality setting (~90) so visible loss is minimal.',
+      },
+      {
+        question: 'Can I extract a specific time range?',
+        answer: 'This tool extracts from the whole video. For a sub-range, trim the video first, then run frame extraction on the trimmed file.',
       },
     ],
     relatedTools: ['video-thumbnail', 'video-frame-extractor', 'video-screenshot'],
@@ -5063,7 +6455,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'Will reversing affect audio too?',
-        answer: 'Yes, both video and audio are reversed. You can choose to mute the audio if preferred.',
+        answer: 'Yes — both video and audio are played backwards by default. Reversed speech sounds garbled, so for social-media reverse effects most people prefer to mute the audio first.',
+      },
+      {
+        question: 'Does reversing reduce video quality?',
+        answer: 'No. The reverse filter re-encodes at high quality, so the output is visually indistinguishable from the source when played frame by frame.',
+      },
+      {
+        question: 'How long should the input clip be?',
+        answer: 'Reversing requires loading the entire clip into memory, so keep it under ~30 seconds for the smoothest experience. Longer clips will work but may slow the browser down.',
+      },
+      {
+        question: 'Is reversing the same as playing video backwards in a player?',
+        answer: 'No. A player that scrubs backwards re-decodes frames on the fly. Our tool produces a new video file that plays in normal order on any device — perfect for sharing on TikTok, Reels, or YouTube.',
+      },
+      {
+        question: 'Can I reverse just part of a video?',
+        answer: 'Trim the clip to the section you want first, then reverse it. To get a "forward then backward" boomerang effect, also use Merge Videos to splice the original and the reversed copy.',
       },
     ],
     relatedTools: ['change-video-speed', 'loop-video', 'trim-video'],
@@ -5088,7 +6496,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'How many times can I loop a video?',
-        answer: 'You can loop a video up to 10 times. Note that the output file size will increase with each loop.',
+        answer: 'You can loop a video up to 10 times in a single pass. For longer loops, run the tool twice on its own output (looping a 10x file gives 100x).',
+      },
+      {
+        question: 'Will the output file size grow with each loop?',
+        answer: 'Yes — output size is roughly N times the input, where N is the loop count. The video is concatenated, not just flagged to repeat.',
+      },
+      {
+        question: 'Does the loop transition smoothly?',
+        answer: 'The end of one iteration cuts directly to the start of the next. For a seamless loop, make sure the first and last frames of your source match closely, or use a clip that fades to black at both ends.',
+      },
+      {
+        question: 'Why not use HTML video loop attribute instead?',
+        answer: 'The HTML `<video loop>` attribute only loops during playback on web pages. Our tool produces a real file that loops natively on any device — useful for social posts, GIFs, or sending to non-web players.',
+      },
+      {
+        question: 'Can I create a boomerang (forward + reverse) effect?',
+        answer: 'Yes — first run Reverse Video on your clip, then use Merge Videos to combine the original followed by the reversed copy. Loop the result if you want it to repeat.',
       },
     ],
     relatedTools: ['reverse-video', 'change-video-speed', 'merge-videos'],
@@ -5113,7 +6537,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'Can I choose which frame to use as thumbnail?',
-        answer: 'Yes, you can specify the timestamp to capture the thumbnail from any point in the video.',
+        answer: 'Yes — set any timestamp (e.g. 00:00:05.250) and the tool will grab the closest frame at that point. Some platforms like YouTube prefer a frame slightly into the video rather than the very first frame.',
+      },
+      {
+        question: 'What image format does the thumbnail use?',
+        answer: 'JPG is the default for small file size and broad compatibility. PNG is available when you need lossless quality or transparency-safe encoding.',
+      },
+      {
+        question: 'What resolution will the thumbnail be?',
+        answer: 'By default the thumbnail matches the video resolution exactly (e.g. 1920×1080 for Full HD). You can resize it afterwards with our Image Resizer if a platform requires a specific size.',
+      },
+      {
+        question: 'How is this different from Video Screenshot?',
+        answer: 'Both grab a still frame. Thumbnail Extractor is optimized for picking a single representative frame for use as a video poster; Video Screenshot is geared toward grabbing multiple frames at chosen points.',
+      },
+      {
+        question: 'Why is the thumbnail blurry?',
+        answer: 'Blurry thumbnails usually mean the source frame had motion blur or low resolution. Pick a different timestamp at a calmer moment, or use a higher-resolution source video.',
       },
     ],
     relatedTools: ['video-to-images', 'video-screenshot', 'add-text-to-video'],
@@ -5138,7 +6578,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'Can I split at multiple points?',
-        answer: 'Yes, you can define multiple split points to create several video segments at once.',
+        answer: 'Yes — enter as many timestamps as you need. The tool creates one output segment between each consecutive pair plus one for the trailing portion, packaged together as a ZIP.',
+      },
+      {
+        question: 'Will splitting reduce quality?',
+        answer: 'No. When the cut points align with keyframes, splitting is lossless (the streams are copied without re-encoding). For arbitrary cut points, the affected segment is re-encoded at high quality.',
+      },
+      {
+        question: 'How do I split a video into equal-length parts?',
+        answer: 'Enter evenly-spaced timestamps. For example, to split a 60-second video into three 20-second clips, enter 00:00:20 and 00:00:40 as your split points.',
+      },
+      {
+        question: 'What is the difference between Trim and Split?',
+        answer: 'Trim keeps a single contiguous range and discards the rest. Split keeps everything but breaks it into multiple files at the points you specify.',
+      },
+      {
+        question: 'Can I rejoin split segments later?',
+        answer: 'Yes — use the Merge Videos tool to concatenate them back. As long as the segments came from the same source video, the join is seamless.',
       },
     ],
     relatedTools: ['trim-video', 'merge-videos', 'crop-video'],
@@ -5163,7 +6619,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'Can I customize the text appearance?',
-        answer: 'Yes, you can set font size, color, position, and choose from various font styles.',
+        answer: 'Yes — pick from 35+ fonts (sans, serif, display, monospace, handwriting), set any font size, choose any color, and drag the text anywhere on the video preview.',
+      },
+      {
+        question: 'How do I position the text precisely?',
+        answer: 'The preview shows the actual video with a draggable text overlay. Drag it to any spot, click somewhere on the video to drop it there, or use the 9 preset position buttons (top-left, top, top-right, … bottom-right).',
+      },
+      {
+        question: 'Will the text appear for the whole video or just part of it?',
+        answer: 'This tool overlays the text on every frame from start to end. For text that appears only during a section, trim the clip first, add text, then merge it back with the untrimmed parts.',
+      },
+      {
+        question: 'Does the text support emoji and Vietnamese / accented characters?',
+        answer: 'Latin characters and most accented letters render correctly with the default fonts. Emoji rendering depends on the chosen font; for full emoji support pick a font that ships with color emoji glyphs.',
+      },
+      {
+        question: 'Why does my text look blurry on the output?',
+        answer: 'The most common cause is too-small font size compared to video resolution. Increase font size for HD/4K videos. The preview shows the actual pixel size that will be rendered.',
       },
     ],
     relatedTools: ['add-watermark-to-video', 'video-thumbnail', 'merge-videos'],
@@ -5188,7 +6660,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What image formats work for watermarks?',
-        answer: 'PNG with transparency works best, but JPG and other image formats are also supported.',
+        answer: 'PNG with transparency works best because the background of your logo stays see-through. JPG, GIF, WebP, and SVG are also supported, but solid-background images will show a visible rectangle around the logo.',
+      },
+      {
+        question: 'How do I position the watermark?',
+        answer: 'Drag the watermark anywhere on the live preview, click on the video to drop it at that point, or use one of the 9 preset position buttons. The exact percentage position is displayed live.',
+      },
+      {
+        question: 'Can I control the watermark size and opacity?',
+        answer: 'Yes. The scale slider sets the watermark width from 5% to 50% of the video width (height auto-scales to keep aspect ratio). The opacity slider goes from 10% (very subtle) to 100% (solid).',
+      },
+      {
+        question: 'Will the watermark appear on every frame?',
+        answer: 'Yes — the watermark is composited onto every frame for the entire duration. For watermarks that only show in part of the video, trim first, watermark, then merge with the un-watermarked sections.',
+      },
+      {
+        question: 'Why use a watermark on my videos?',
+        answer: 'Watermarks protect ownership, drive recognition of your brand, and discourage re-uploads. A subtle semi-transparent logo in a corner is effective without distracting from the content.',
       },
     ],
     relatedTools: ['add-text-to-video', 'video-thumbnail', 'merge-videos'],
@@ -5213,7 +6701,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'What formats are supported?',
-        answer: 'We support MP4, WebM, AVI, MOV, MKV, and many other popular video formats.',
+        answer: 'Input: MP4, WebM, AVI, MOV, MKV, FLV, 3GP, M4V and most other common containers. Output: MP4 (H.264/AAC), WebM (VP8/Vorbis), AVI (MPEG-4/MP3), and MOV (H.264/AAC).',
+      },
+      {
+        question: 'Which output format should I choose?',
+        answer: 'MP4 is the safest default — it plays everywhere. WebM is ideal for embedding on websites because of smaller files. AVI is mostly for legacy Windows software. MOV is preferred when sending footage to macOS/iOS editing tools.',
+      },
+      {
+        question: 'Will converting reduce quality?',
+        answer: 'Re-encoding always introduces some loss, but our default H.264 settings preserve visible quality well. For lossless workflows, prefer formats that match your source codec or use the Compress Video tool with a high-quality setting.',
+      },
+      {
+        question: 'Why is WebM conversion slower than MP4?',
+        answer: 'WebM uses VP8 which is heavier to encode in the browser than H.264. The trade-off is smaller files; for large clips, MP4 will finish faster.',
+      },
+      {
+        question: 'Are subtitles or metadata preserved?',
+        answer: 'Subtitle tracks and chapter metadata are not currently retained during conversion. Audio tracks are kept and re-encoded; video metadata like rotation is normalized.',
       },
     ],
     relatedTools: ['compress-video', 'video-to-gif', 'mp4-to-mp3'],
@@ -5238,7 +6742,23 @@ export const tools: Tool[] = [
     faq: [
       {
         question: 'How do I know which frame number to extract?',
-        answer: 'You can enter either a frame number or a timestamp. The tool shows the video duration to help you choose.',
+        answer: 'You can enter either a frame number or a timestamp. Frame number = timestamp × frame rate (e.g. 5 seconds × 30fps = frame 150). The tool shows the video duration and frame rate to help you calculate.',
+      },
+      {
+        question: 'How is this different from Video to Images?',
+        answer: 'Video to Images extracts frames at regular intervals (every Nth frame or every N seconds). Frame Extractor lets you pick exact individual frames you care about — useful for grabbing a specific moment.',
+      },
+      {
+        question: 'Can I extract multiple specific frames at once?',
+        answer: 'Yes — enter a comma-separated list of frame numbers or timestamps (e.g. "10, 50, 120" or "0:00:01, 0:00:05, 0:00:12"). All extracted frames are zipped together for download.',
+      },
+      {
+        question: 'What output formats are available?',
+        answer: 'PNG (lossless, larger) or JPG (smaller, slightly lossy). Pick PNG when you plan to edit the frame further; JPG when you just need to preview or share it.',
+      },
+      {
+        question: 'Why are some frames identical when I extract sequential frames?',
+        answer: 'Static scenes (no motion) produce visually identical frames. The content really is the same — the source video had no change between those frame numbers.',
       },
     ],
     relatedTools: ['video-to-images', 'video-screenshot', 'video-thumbnail'],
@@ -5264,6 +6784,26 @@ export const tools: Tool[] = [
       {
         question: 'How do I capture a screenshot from a video?',
         answer: 'Upload your video, navigate to the desired timestamp using the preview player or enter the time directly, then click "Capture Screenshot" to save the frame as an image.',
+      },
+      {
+        question: 'What image format does the screenshot use?',
+        answer: 'PNG by default for lossless quality. JPG is also available for smaller files. PNG keeps transparency where applicable; JPG offers better compression for photo-like content.',
+      },
+      {
+        question: 'Can I capture multiple screenshots at once?',
+        answer: 'This tool grabs a single frame per click. For batch capture at multiple timestamps, use Video Frame Extractor. For evenly-spaced captures, use Video to Images.',
+      },
+      {
+        question: 'What resolution will the screenshot be?',
+        answer: 'The screenshot matches the source video resolution exactly — no upscaling or downscaling. A 1080p video gives you 1920×1080 stills.',
+      },
+      {
+        question: 'Why does my screenshot look pixelated?',
+        answer: 'The source video has limited resolution, especially after compression by streaming platforms. A still frame can never look sharper than the underlying video frame.',
+      },
+      {
+        question: 'How is this different from Video Thumbnail Extractor?',
+        answer: 'Both grab one still. Screenshot is for ad-hoc captures during review or annotation; Thumbnail Extractor is geared toward producing a poster image for video listings.',
       },
     ],
     relatedTools: ['video-thumbnail', 'video-to-images', 'video-frame-extractor'],

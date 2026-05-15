@@ -84,7 +84,15 @@ export default function JsonToCsvClient() {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">JSON Input</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-gray-700">JSON Input</label>
+          <button
+            onClick={loadSample}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            Load Sample
+          </button>
+        </div>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -95,7 +103,6 @@ export default function JsonToCsvClient() {
 
       <div className="flex gap-2">
         <button onClick={convert} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Convert to CSV</button>
-        <button onClick={loadSample} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Load Sample</button>
         <button onClick={clear} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Clear</button>
       </div>
 

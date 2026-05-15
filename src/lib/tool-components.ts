@@ -179,6 +179,7 @@ export const TextToBase64Client = dynamic(() => import('@/components/tool-client
 export const Base64ToTextClient = dynamic(() => import('@/components/tool-clients/Base64ToTextClient'), { ssr: false });
 export const UnixTimeToDateClient = dynamic(() => import('@/components/tool-clients/UnixTimeToDateClient'), { ssr: false });
 export const DateToUnixTimeClient = dynamic(() => import('@/components/tool-clients/DateToUnixTimeClient'), { ssr: false });
+export const UrlToQrCodeClient = dynamic(() => import('@/components/tool-clients/UrlToQrCodeClient'), { ssr: false });
 
 export const converterToolComponents: Record<string, ComponentType> = {
   'csv-to-json': CsvToJsonClient,
@@ -190,6 +191,7 @@ export const converterToolComponents: Record<string, ComponentType> = {
   'base64-to-text': Base64ToTextClient,
   'unix-time-to-date': UnixTimeToDateClient,
   'date-to-unix-time': DateToUnixTimeClient,
+  'url-to-qr-code': UrlToQrCodeClient,
 };
 
 // ==================== MISC TOOLS ====================

@@ -54,15 +54,29 @@ export default function ConvertVideoClient() {
   const getCodecArgs = (format: OutputFormat): string[] => {
     switch (format) {
       case 'mp4':
-        return ['-c:v', 'libx264', '-c:a', 'aac'];
+        return ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac'];
       case 'webm':
-        return ['-c:v', 'libvpx-vp9', '-c:a', 'libopus'];
+        // libvpx-vp9 in @ffmpeg/core WASM exceeds the default 2GB memory
+        // budget on most clips and crashes with "memory access out of
+        // bounds". libvpx (VP8) is much lighter and still produces a
+        // valid WebM file. The extra flags cap CPU effort and disable
+        // multi-threading (wasm worker threads are limited).
+        return [
+          '-c:v', 'libvpx',
+          '-b:v', '1M',
+          '-crf', '30',
+          '-deadline', 'realtime',
+          '-cpu-used', '5',
+          '-row-mt', '1',
+          '-threads', '1',
+          '-c:a', 'libvorbis',
+        ];
       case 'avi':
         return ['-c:v', 'mpeg4', '-c:a', 'mp3'];
       case 'mov':
-        return ['-c:v', 'libx264', '-c:a', 'aac'];
+        return ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac'];
       default:
-        return ['-c:v', 'libx264', '-c:a', 'aac'];
+        return ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac'];
     }
   };
 
@@ -83,6 +97,11 @@ export default function ConvertVideoClient() {
       ]);
 
       const data = await readOutputFile(ffmpeg, outputName);
+      if (data.byteLength === 0) {
+        throw new Error(
+          `Output is empty — ${outputFormat.toUpperCase()} encode likely failed. Check the browser console for the FFmpeg log.`,
+        );
+      }
       return new Blob([data], { type: getMimeType(outputFormat) });
     } catch (error) {
       console.error('Error converting video:', error);

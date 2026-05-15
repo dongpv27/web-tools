@@ -5,7 +5,10 @@ import JSZip from 'jszip';
 
 interface WordFile {
   name: string;
-  content: string;
+  // Original docx zip bytes — needed to rebuild the package on merge.
+  data: ArrayBuffer;
+  // Extracted document.xml content for paragraph combination.
+  documentXml: string;
 }
 
 export default function MergeWordClient() {
@@ -25,14 +28,16 @@ export default function MergeWordClient() {
 
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-        const zip = await JSZip.loadAsync(file);
+        const data = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(data);
         const documentXml = zip.file('word/document.xml');
 
         if (documentXml) {
           const content = await documentXml.async('text');
           newFiles.push({
             name: file.name,
-            content: content,
+            data,
+            documentXml: content,
           });
         }
       }
@@ -70,52 +75,33 @@ export default function MergeWordClient() {
     setMerging(true);
 
     try {
-      // Create a new document by combining the XML content
-      const zip = new JSZip();
+      // Use the first file's original zip as the template package, then
+      // replace word/document.xml with combined paragraphs.
+      const zip = await JSZip.loadAsync(files[0].data);
 
-      // Use the first file as a template
-      const firstFile = await JSZip.loadAsync(
-        await fetch(URL.createObjectURL(new Blob([files[0].content]))).then(r => r.blob())
-      );
-
-      // Copy all files from first document except document.xml
-      const documentFiles: string[] = [];
-      firstFile.forEach((path, file) => {
-        if (!file.dir && path !== 'word/document.xml') {
-          documentFiles.push(path);
-        }
-      });
-
-      // Combine all paragraphs from all documents
+      // Combine all paragraphs from each document's body
       let combinedParagraphs = '';
-      for (const file of files) {
+      for (let idx = 0; idx < files.length; idx++) {
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(file.content, 'text/xml');
+        const xmlDoc = parser.parseFromString(files[idx].documentXml, 'text/xml');
         const body = xmlDoc.getElementsByTagName('w:body')[0];
         if (body) {
           const paragraphs = body.getElementsByTagName('w:p');
           for (let i = 0; i < paragraphs.length; i++) {
-            combinedParagraphs += paragraphs[i].outerHTML;
+            combinedParagraphs += new XMLSerializer().serializeToString(paragraphs[i]);
           }
         }
-        // Add a page break between documents
-        combinedParagraphs += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
-      }
-
-      // Create modified document.xml
-      const modifiedContent = files[0].content.replace(
-        /<w:body>[\s\S]*<\/w:body>/,
-        `<w:body>${combinedParagraphs}</w:body>`
-      );
-
-      // Add files to zip
-      for (const path of documentFiles) {
-        const file = firstFile.file(path);
-        if (file) {
-          const content = await file.async('blob');
-          zip.file(path, content);
+        // Page break between documents (skip after last)
+        if (idx < files.length - 1) {
+          combinedParagraphs += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
         }
       }
+
+      // Replace the body of the template document.xml
+      const modifiedContent = files[0].documentXml.replace(
+        /<w:body>[\s\S]*<\/w:body>/,
+        `<w:body>${combinedParagraphs}</w:body>`,
+      );
 
       zip.file('word/document.xml', modifiedContent);
 

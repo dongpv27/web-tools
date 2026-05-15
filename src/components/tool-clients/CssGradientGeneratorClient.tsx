@@ -16,24 +16,17 @@ export default function CssGradientGeneratorClient() {
     { color: '#3B82F6', position: 0 },
     { color: '#8B5CF6', position: 100 },
   ]);
-  const [cssOutput, setCssOutput] = useState('');
 
-  const generateCss = () => {
-    const sortedStops = [...colorStops].sort((a, b) => a.position - b.position);
-    const stops = sortedStops.map(s => `${s.color} ${s.position}%`).join(', ');
-
-    let gradient: string;
-    if (gradientType === 'linear') {
-      gradient = `linear-gradient(${angle}deg, ${stops})`;
-    } else if (gradientType === 'radial') {
-      gradient = `radial-gradient(circle, ${stops})`;
-    } else {
-      gradient = `conic-gradient(from ${angle}deg, ${stops})`;
-    }
-
-    setCssOutput(`background: ${gradient};`);
-    return gradient;
-  };
+  // Derived values — never call setState during render.
+  const sortedStops = [...colorStops].sort((a, b) => a.position - b.position);
+  const stopsStr = sortedStops.map((s) => `${s.color} ${s.position}%`).join(', ');
+  const previewGradient =
+    gradientType === 'linear'
+      ? `linear-gradient(${angle}deg, ${stopsStr})`
+      : gradientType === 'radial'
+        ? `radial-gradient(circle, ${stopsStr})`
+        : `conic-gradient(from ${angle}deg, ${stopsStr})`;
+  const cssOutput = `background: ${previewGradient};`;
 
   const addColorStop = () => {
     const newPosition = 50;
@@ -51,8 +44,6 @@ export default function CssGradientGeneratorClient() {
     newStops[index] = { ...newStops[index], ...updates };
     setColorStops(newStops);
   };
-
-  const previewGradient = generateCss();
 
   const presets = [
     { name: 'Sunset', stops: [{ color: '#FF512F', position: 0 }, { color: '#DD2476', position: 100 }] },
@@ -74,7 +65,7 @@ export default function CssGradientGeneratorClient() {
       {/* Preview */}
       <div
         className="h-32 rounded-lg border border-gray-200"
-        style={{ background: previewGradient.replace('background: ', '').replace(';', '') }}
+        style={{ background: previewGradient }}
       />
 
       {/* Gradient Type */}

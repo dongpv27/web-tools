@@ -4,8 +4,9 @@ import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 
-// Set up worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// pdfjs-dist v5 ships only ESM worker (pdf.worker.min.mjs). Served locally
+// from /public/pdfjs/ to avoid CDN dependency and version drift.
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
 
 export default function PdfToWordClient() {
   const [converting, setConverting] = useState(false);
@@ -95,8 +96,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const blob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-    } catch {
-      alert('Error converting PDF. Note: This works best with text-based PDFs.');
+    } catch (err) {
+      console.error('PDF to Word conversion failed:', err);
+      alert(
+        'Error converting PDF: ' +
+          (err instanceof Error ? err.message : 'Unknown error') +
+          '\nNote: This works best with text-based PDFs.',
+      );
     } finally {
       setConverting(false);
     }

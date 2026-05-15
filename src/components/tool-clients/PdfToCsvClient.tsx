@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Set up worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
 
 export default function PdfToCsvClient() {
   const [converting, setConverting] = useState(false);
@@ -76,7 +76,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const csvContent = csvLines.join('\n');
       setCsvPreview(csvContent.split('\n').slice(0, 20).join('\n'));
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      // Prepend UTF-8 BOM so Excel opens non-ASCII characters (Vietnamese,
+      // Japanese, Chinese, etc.) correctly instead of treating bytes as ANSI.
+      const blob = new Blob(['﻿', csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
     } catch {

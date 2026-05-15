@@ -3,25 +3,45 @@
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
 
-export default function QrCodeGeneratorClient() {
-  const [text, setText] = useState('https://example.com');
+export default function UrlToQrCodeClient() {
+  const [url, setUrl] = useState('https://example.com');
   const [size, setSize] = useState(256);
   const [errorLevel, setErrorLevel] = useState<'L' | 'M' | 'Q' | 'H'>('M');
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const normalizeUrl = (raw: string): string => {
+    const trimmed = raw.trim();
+    if (!trimmed) return '';
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return trimmed;
+    return 'https://' + trimmed;
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    if (!text) {
+    const trimmed = url.trim();
+    if (!trimmed) {
       const ctx = canvas.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
       setError('');
+      setWarning('');
       return;
     }
 
-    QRCode.toCanvas(canvas, text, {
+    const finalUrl = normalizeUrl(trimmed);
+
+    try {
+      new URL(finalUrl);
+      setWarning(finalUrl !== trimmed ? `URL normalized to: ${finalUrl}` : '');
+    } catch {
+      setError('Invalid URL format');
+      return;
+    }
+
+    QRCode.toCanvas(canvas, finalUrl, {
       width: size,
       errorCorrectionLevel: errorLevel,
       margin: 2,
@@ -29,12 +49,12 @@ export default function QrCodeGeneratorClient() {
     })
       .then(() => setError(''))
       .catch((e: Error) => setError(e.message));
-  }, [text, size, errorLevel]);
+  }, [url, size, errorLevel]);
 
   const download = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
-    link.download = 'qrcode.png';
+    link.download = 'url-qrcode.png';
     link.href = canvasRef.current.toDataURL('image/png');
     link.click();
   };
@@ -42,14 +62,17 @@ export default function QrCodeGeneratorClient() {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter text or URL..."
-          rows={3}
-          className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+        <label className="block text-sm font-medium text-gray-700 mb-2">URL</label>
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://your-website.com"
+          className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {warning && !error && (
+          <p className="mt-2 text-xs text-amber-600">{warning}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -94,7 +117,7 @@ export default function QrCodeGeneratorClient() {
       <div className="flex justify-center">
         <button
           onClick={download}
-          disabled={!text || !!error}
+          disabled={!url.trim() || !!error}
           className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Download QR Code

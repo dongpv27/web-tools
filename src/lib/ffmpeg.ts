@@ -77,6 +77,82 @@ export async function loadVideoFile(
   await ffmpeg.writeFile(inputName, await fetchFile(file));
 }
 
+// FFmpeg `drawtext` filter requires a real TTF font inside the WASM
+// filesystem (FreeType can't parse WOFF/WOFF2). The @ffmpeg/core build
+// does not bundle one. We fetch TTFs on demand and cache by URL.
+const DEFAULT_FONT_URL =
+  'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Regular.ttf';
+const FALLBACK_FONT_URL =
+  'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSans/full/ttf/NotoSans-Regular.ttf';
+
+const loadedFonts = new Map<string, string>(); // url -> in-FS path
+
+function looksLikeTTF(bytes: Uint8Array): boolean {
+  if (bytes.byteLength < 4) return false;
+  const sig = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+  // 0x00010000 (TrueType), 0x4F54544F "OTTO" (OpenType/CFF),
+  // 0x74727565 "true" (Apple), 0x74746366 "ttcf" (collection).
+  return sig === 0x00010000 || sig === 0x4f54544f || sig === 0x74727565 || sig === 0x74746366;
+}
+
+async function writeFontFromUrl(ffmpeg: FFmpeg, url: string): Promise<string> {
+  const cached = loadedFonts.get(url);
+  if (cached) return cached;
+  const buf = await fetchFile(url);
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf as ArrayBuffer);
+  if (!looksLikeTTF(bytes)) {
+    throw new Error(`Fetched font is not a TTF (${url}). Got ${bytes.byteLength} bytes.`);
+  }
+  // Filename derived from URL so different fonts don't clobber each other.
+  const path = `font-${loadedFonts.size}.ttf`;
+  await ffmpeg.writeFile(path, bytes);
+  loadedFonts.set(url, path);
+  return path;
+}
+
+/**
+ * Load a font into FFmpeg's virtual FS and return its path, ready for use
+ * with `drawtext=fontfile=...`. Caches by URL across calls.
+ *
+ * @param ffmpeg  FFmpeg instance.
+ * @param url     Optional TTF URL. Defaults to Roboto. Must be a TTF/OTF —
+ *                WOFF/WOFF2 will fail the signature check.
+ */
+export async function ensureFont(ffmpeg: FFmpeg, url?: string): Promise<string> {
+  const primary = url ?? DEFAULT_FONT_URL;
+  try {
+    return await writeFontFromUrl(ffmpeg, primary);
+  } catch (primaryErr) {
+    // Fall back to Noto Sans (only when the caller didn't ask for a
+    // specific font). If a specific font was requested and failed, surface
+    // the error so the user knows.
+    if (url && url !== DEFAULT_FONT_URL) throw primaryErr;
+    try {
+      return await writeFontFromUrl(ffmpeg, FALLBACK_FONT_URL);
+    } catch (fallbackErr) {
+      throw new Error(
+        `Failed to load a TTF font for drawtext. ${
+          primaryErr instanceof Error ? primaryErr.message : String(primaryErr)
+        } | fallback: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`,
+      );
+    }
+  }
+}
+
+/**
+ * Escape a user-supplied string for use inside an FFmpeg `drawtext` filter's
+ * `text='...'` argument. Per FFmpeg docs the characters that need escaping
+ * inside the single-quoted value are `\`, `'`, `:`, `%`, and `,`.
+ */
+export function escapeDrawtext(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/:/g, '\\:')
+    .replace(/%/g, '\\%')
+    .replace(/,/g, '\\,');
+}
+
 export async function readOutputFile(
   ffmpeg: FFmpeg,
   outputName: string

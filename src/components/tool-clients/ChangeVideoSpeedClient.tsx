@@ -6,6 +6,31 @@ import VideoPreview from '@/components/video/VideoPreview';
 import VideoProcessor from '@/components/video/VideoProcessor';
 import { getFFmpeg, loadVideoFile, readOutputFile } from '@/lib/ffmpeg';
 
+/**
+ * FFmpeg's atempo filter accepts values in [0.5, 2.0] only. To shift tempo
+ * outside that window, chain multiple atempo filters whose product equals
+ * the desired speed. Examples:
+ *   0.25 → "atempo=0.5,atempo=0.5"
+ *   0.4  → "atempo=0.5,atempo=0.8"
+ *   3    → "atempo=2,atempo=1.5"
+ *   4    → "atempo=2,atempo=2"
+ */
+function buildAtempoChain(speed: number): string {
+  if (speed >= 0.5 && speed <= 2.0) return `atempo=${speed}`;
+  const factors: number[] = [];
+  let remaining = speed;
+  while (remaining < 0.5) {
+    factors.push(0.5);
+    remaining /= 0.5;
+  }
+  while (remaining > 2.0) {
+    factors.push(2.0);
+    remaining /= 2.0;
+  }
+  factors.push(Number(remaining.toFixed(4)));
+  return factors.map((f) => `atempo=${f}`).join(',');
+}
+
 export default function ChangeVideoSpeedClient() {
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -50,8 +75,11 @@ export default function ChangeVideoSpeedClient() {
 
       await loadVideoFile(ffmpeg, file, inputName);
 
-      const videoFilter = `setpts=${1/speed}*PTS`;
-      const audioFilter = `atempo=${speed}`;
+      const videoFilter = `setpts=${1 / speed}*PTS`;
+      // atempo only accepts values in [0.5, 2.0]. For tempos outside that
+      // range, chain multiple atempo filters whose product equals `speed`
+      // (e.g. 0.25 = 0.5 * 0.5, 4 = 2 * 2).
+      const audioFilter = buildAtempoChain(speed);
 
       await ffmpeg.exec([
         '-i', inputName,
@@ -76,7 +104,7 @@ export default function ChangeVideoSpeedClient() {
     return 'Normal';
   };
 
-  const presetSpeeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+  const presetSpeeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6, 8];
 
   return (
     <div className="space-y-6">
@@ -125,7 +153,7 @@ export default function ChangeVideoSpeedClient() {
               <input
                 type="range"
                 min="0.25"
-                max="4"
+                max="8"
                 step="0.05"
                 value={speed}
                 onChange={(e) => setSpeed(Number(e.target.value))}

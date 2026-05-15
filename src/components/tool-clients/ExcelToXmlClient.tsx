@@ -9,13 +9,17 @@ export default function ExcelToXmlClient() {
   const [preview, setPreview] = useState<string[][]>([]);
   const [xmlOutput, setXmlOutput] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
+  const [inputFileName, setInputFileName] = useState<string>('');
   const [rootName, setRootName] = useState<string>('rows');
   const [rowName, setRowName] = useState<string>('row');
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   
-  const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
+  const processFile = (file: File) => {
+    setInputFileName(file.name);
+    setFileName(file.name.replace(/\.[^/.]+$/, ''));
     setXmlOutput('');
 
     const reader = new FileReader();
@@ -104,7 +108,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!xmlOutput) return;
     try {
       await navigator.clipboard.writeText(xmlOutput);
-      alert('Copied to clipboard!');
     } catch {
       const textArea = document.createElement('textarea');
       textArea.value = xmlOutput;
@@ -112,8 +115,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('Copied to clipboard!');
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const clear = () => {
@@ -122,6 +126,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPreview([]);
     setXmlOutput('');
     setFileName('');
+    setInputFileName('');
     setWorkbook(null);
   };
 
@@ -149,6 +154,19 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Imported File */}
+          {inputFileName && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-md">
+              <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-sm text-gray-700 truncate" title={inputFileName}>
+                <span className="text-gray-500">Imported:</span>{' '}
+                <span className="font-medium">{inputFileName}</span>
+              </span>
+            </div>
+          )}
+
           {/* Sheet Selection */}
           {sheets.length > 1 && (
             <div>
@@ -217,13 +235,21 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           )}
 
-          {/* Convert Button */}
-          <button
-            onClick={convertToXml}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Convert to XML
-          </button>
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button
+              onClick={convertToXml}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Convert to XML
+            </button>
+            <button
+              onClick={clear}
+              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
 
           {/* Output */}
           {xmlOutput && (
@@ -248,20 +274,27 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </button>
                 <button
                   onClick={copy}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg inline-flex items-center gap-1.5 transition-colors duration-700 ${
+                    copied
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  Copy to Clipboard
+                  {copied ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied
+                    </>
+                  ) : (
+                    'Copy to Clipboard'
+                  )}
                 </button>
               </div>
             </div>
           )}
 
-          <button
-            onClick={clear}
-            className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Clear
-          </button>
         </div>
       )}
     </div>

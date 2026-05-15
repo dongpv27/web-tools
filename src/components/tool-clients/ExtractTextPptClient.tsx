@@ -9,6 +9,7 @@ export default function ExtractTextPptClient() {
   const [slideCount, setSlideCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +78,6 @@ export default function ExtractTextPptClient() {
     if (!extractedText) return;
     try {
       await navigator.clipboard.writeText(extractedText);
-      alert('Copied to clipboard!');
     } catch {
       const textArea = document.createElement('textarea');
       textArea.value = extractedText;
@@ -85,8 +85,9 @@ export default function ExtractTextPptClient() {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('Copied to clipboard!');
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const downloadText = () => {
@@ -162,9 +163,22 @@ export default function ExtractTextPptClient() {
             </button>
             <button
               onClick={copyText}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              className={`px-4 py-2 text-sm font-medium rounded-lg inline-flex items-center gap-1.5 transition-colors duration-700 ${
+                copied
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              Copy to Clipboard
+              {copied ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Copied
+                </>
+              ) : (
+                'Copy to Clipboard'
+              )}
             </button>
             <button
               onClick={clear}

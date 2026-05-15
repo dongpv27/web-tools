@@ -3,12 +3,70 @@
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 
+// Flatten nested objects/arrays into dot-notation keys so each leaf becomes
+// its own Excel column. Arrays of primitives are joined; arrays of objects
+// are flattened with bracket-index notation (items[0].name).
+function flattenObject(
+  obj: unknown,
+  prefix = '',
+  out: Record<string, unknown> = {},
+): Record<string, unknown> {
+  if (obj === null || obj === undefined) {
+    if (prefix) out[prefix] = obj ?? '';
+    return out;
+  }
+  if (typeof obj !== 'object') {
+    out[prefix] = obj;
+    return out;
+  }
+  if (Array.isArray(obj)) {
+    if (obj.length === 0) {
+      out[prefix] = '';
+      return out;
+    }
+    const allPrimitive = obj.every((v) => v === null || typeof v !== 'object');
+    if (allPrimitive) {
+      out[prefix] = obj.join(', ');
+      return out;
+    }
+    obj.forEach((item, i) => {
+      flattenObject(item, prefix ? `${prefix}[${i}]` : `[${i}]`, out);
+    });
+    return out;
+  }
+  const entries = Object.entries(obj as Record<string, unknown>);
+  if (entries.length === 0 && prefix) {
+    out[prefix] = '';
+    return out;
+  }
+  for (const [k, v] of entries) {
+    const next = prefix ? `${prefix}.${k}` : k;
+    flattenObject(v, next, out);
+  }
+  return out;
+}
+
+type NestedMode = 'flatten' | 'stringify';
+
 export default function JsonToExcelClient() {
   const [jsonData, setJsonData] = useState<string>('');
   const [preview, setPreview] = useState<Record<string, unknown>[]>([]);
   const [error, setError] = useState<string>('');
   const [fileName, setFileName] = useState<string>('converted');
+  const [nestedMode, setNestedMode] = useState<NestedMode>('flatten');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const transformRow = (row: unknown, mode: NestedMode): Record<string, unknown> => {
+    if (row === null || typeof row !== 'object') return { value: row };
+    if (mode === 'flatten') return flattenObject(row);
+    // stringify mode: keep top-level keys, but JSON-encode nested values
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(row as Record<string, unknown>)) {
+      if (v !== null && typeof v === 'object') out[k] = JSON.stringify(v);
+      else out[k] = v;
+    }
+    return out;
+  };
 
   
   const processFile = (file: File) => {setFileName(file.name.replace(/\.[^/.]+$/, ''));
@@ -27,18 +85,17 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (file) processFile(file);
   };
 
-  const validateAndPreview = (text: string) => {
+  const validateAndPreview = (text: string, mode: NestedMode = nestedMode) => {
     setError('');
     try {
       const parsed = JSON.parse(text);
-      if (Array.isArray(parsed)) {
-        setPreview(parsed.slice(0, 5));
-      } else if (typeof parsed === 'object') {
-        setPreview([parsed]);
-      } else {
+      const rows = Array.isArray(parsed) ? parsed : typeof parsed === 'object' ? [parsed] : null;
+      if (!rows) {
         setError('JSON must be an array of objects or a single object');
         setPreview([]);
+        return;
       }
+      setPreview(rows.slice(0, 5).map((r) => transformRow(r, mode)));
     } catch {
       setError('Invalid JSON format');
       setPreview([]);
@@ -50,19 +107,29 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     validateAndPreview(text);
   };
 
+  const handleNestedModeChange = (mode: NestedMode) => {
+    setNestedMode(mode);
+    if (jsonData.trim()) validateAndPreview(jsonData, mode);
+  };
+
   const convertToExcel = () => {
     if (!jsonData.trim() || error) return;
 
     try {
       const parsed = JSON.parse(jsonData);
-      const data = Array.isArray(parsed) ? parsed : [parsed];
+      const rows = Array.isArray(parsed) ? parsed : [parsed];
+      const data = rows.map((r) => transformRow(r, nestedMode));
 
-      // Create workbook
+      // Collect a stable, union header order: keys from the first row, then
+      // any new keys discovered in later rows (preserves user-intuitive order).
+      const headerSet = new Set<string>();
+      for (const row of data) for (const k of Object.keys(row)) headerSet.add(k);
+      const header = Array.from(headerSet);
+
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(data);
+      const ws = XLSX.utils.json_to_sheet(data, { header });
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
-      // Download
       XLSX.writeFile(wb, `${fileName}.xlsx`);
     } catch {
       alert('Error converting JSON to Excel');
@@ -76,8 +143,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileName('converted');
   };
 
-  // Get headers from preview data
-  const headers = preview.length > 0 ? Object.keys(preview[0]) : [];
+  // Union of headers across all preview rows
+  const headers = Array.from(
+    preview.reduce<Set<string>>((set, row) => {
+      Object.keys(row).forEach((k) => set.add(k));
+      return set;
+    }, new Set<string>()),
+  );
 
   return (
     <div className="space-y-6">
@@ -125,6 +197,40 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             className="w-full h-40 p-4 font-mono text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+        </div>
+
+        {/* Nested handling */}
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">
+            Nested Objects{' '}
+            <span className="text-xs text-gray-400">
+              (how to handle objects/arrays inside JSON)
+            </span>
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleNestedModeChange('flatten')}
+              className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                nestedMode === 'flatten'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Flatten (dot notation)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNestedModeChange('stringify')}
+              className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                nestedMode === 'stringify'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Stringify as JSON
+            </button>
+          </div>
         </div>
 
         {/* Preview */}
