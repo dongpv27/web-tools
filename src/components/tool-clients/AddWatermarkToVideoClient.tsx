@@ -250,7 +250,7 @@ export default function AddWatermarkToVideoClient() {
                 <div className="flex items-center gap-3 bg-white rounded-lg p-3">
                   {watermarkUrl && (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={watermarkUrl} alt="Watermark" className="w-16 h-16 object-contain" />
+                    <img src={watermarkUrl} alt="Watermark image to overlay on video" className="w-16 h-16 object-contain" />
                   )}
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-700 truncate">{watermarkFile.name}</p>

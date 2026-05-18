@@ -122,7 +122,7 @@ export default function Base64ToImageClient() {
 
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <img src={imageSrc} alt="Converted" className="max-w-full max-h-96 mx-auto" />
+            <img src={imageSrc} alt="Converted image result" className="max-w-full max-h-96 mx-auto" />
           </div>
 
           {/* Download */}

@@ -12,7 +12,15 @@ import ExampleOutput from '@/components/tools/ExampleOutput';
 import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
 import { getCategoryById } from '@/lib/categories';
-import { absoluteUrl, SITE_NAME, TWITTER_HANDLE, toolOgImage } from '@/lib/site';
+import { getPostsMentioningTool } from '@/lib/blog';
+import {
+  absoluteUrl,
+  SITE_NAME,
+  TWITTER_HANDLE,
+  toolOgImage,
+  trimMetaDescription,
+} from '@/lib/site';
+import { generateIntro, generateBenefits, generateHowToUse } from '@/lib/seo-templates';
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
@@ -37,14 +45,17 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   const category = getCategoryById(tool.category);
   const ogImage = toolOgImage(tool.name, category?.name);
 
+  const metaDescription = trimMetaDescription(tool.description);
+  const socialDescription = trimMetaDescription(tool.shortDescription || tool.description);
+
   return {
     title: pageTitle,
-    description: tool.description,
+    description: metaDescription,
     keywords: tool.keywords.join(', '),
     alternates: { canonical },
     openGraph: {
       title: pageTitle,
-      description: tool.shortDescription,
+      description: socialDescription,
       type: 'website',
       url: absoluteUrl(canonical),
       siteName: SITE_NAME,
@@ -53,7 +64,7 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
     twitter: {
       card: 'summary_large_image',
       title: pageTitle,
-      description: tool.shortDescription,
+      description: socialDescription,
       site: TWITTER_HANDLE,
       images: [ogImage],
     },
@@ -111,6 +122,9 @@ export default async function ToolPage({ params }: ToolPageProps) {
       url: absoluteUrl('/'),
     },
   };
+
+  // Blog posts that mention this tool — surfaced as "Related reading".
+  const relatedPosts = getPostsMentioningTool(tool.slug);
 
   // Sidebar content with popular tools (same as home page)
   const popularTools = tools.slice(0, 8);
@@ -170,33 +184,14 @@ export default async function ToolPage({ params }: ToolPageProps) {
         )}
       </div>
 
-      {/* SEO Content */}
-      <SeoContent.WhatIs
-        name={tool.name}
-        description={
-          tool.seoContent?.intro ||
-          `${tool.name} is a free online tool that ${tool.shortDescription.toLowerCase()}. This tool processes your data entirely in your browser, ensuring your privacy and security. No data is ever sent to any server.`
-        }
-      />
+      {/* SEO Content — when tool.seoContent isn't provided, fall back to
+          deterministic per-tool generators (varied across the 178 tools to
+          avoid site-wide duplicate copy). */}
+      <SeoContent.WhatIs name={tool.name} description={generateIntro(tool)} />
 
-      <SeoContent.WhyUse
-        benefits={[
-          '100% free with no hidden costs or limitations',
-          'Your data stays private - all processing happens in your browser',
-          'No registration or installation required',
-          'Works on any device - desktop, tablet, or mobile',
-          'Fast and instant results',
-        ]}
-      />
+      <SeoContent.WhyUse benefits={generateBenefits(tool)} />
 
-      <SeoContent.HowToUse
-        steps={tool.howToUse || [
-          `Enter your input in the ${tool.name.toLowerCase()} above`,
-          'Click the action button to process',
-          'View the result in the output area',
-          'Use the copy button to copy the result to your clipboard',
-        ]}
-      />
+      <SeoContent.HowToUse steps={generateHowToUse(tool)} />
 
       {tool.seoContent?.examples?.length ? (
         <SeoContent.Examples examples={tool.seoContent.examples} />
@@ -216,6 +211,27 @@ export default async function ToolPage({ params }: ToolPageProps) {
       {/* Related Tools */}
       {relatedTools.length > 0 && (
         <RelatedTools tools={relatedTools} title="Try these related tools" />
+      )}
+
+      {/* Related Reading — pulls blog posts that link to this tool. Builds
+          the Tool ← Blog inbound link graph (better SEO + onward navigation). */}
+      {relatedPosts.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Related reading</h2>
+          <ul className="space-y-2">
+            {relatedPosts.map((post) => (
+              <li key={post.slug}>
+                <a
+                  href={`/blog/${post.slug}`}
+                  className="block p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition"
+                >
+                  <p className="font-semibold text-gray-900">{post.title}</p>
+                  <p className="text-sm text-gray-600 mt-1">{post.description}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* CTA — explore more in the same category + all tools */}

@@ -116,7 +116,7 @@ export default function ImageBlurClient() {
           <div className="border border-gray-200 rounded-lg p-4">
             <img
               src={image}
-              alt="Blurred"
+              alt="Blurred image preview"
               className="max-h-64 mx-auto"
               style={{ filter: `blur(${blurAmount}px)` }}
             />

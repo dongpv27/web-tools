@@ -117,14 +117,48 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
+  const postUrl = absoluteUrl(`/blog/${post.slug}`);
+  // Both BlogPosting and Article are valid; BlogPosting is a subtype of
+  // Article. Emit both as a @graph so rich-snippet eligibility covers both
+  // blog-style and generic article displays.
   const articleSchema = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    author: { '@type': 'Organization', name: SITE_NAME },
-    mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        '@id': postUrl + '#blogposting',
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        dateModified: post.date,
+        author: { '@type': 'Organization', name: SITE_NAME },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_NAME,
+          logo: { '@type': 'ImageObject', url: absoluteUrl('/icon') },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+        url: postUrl,
+        inLanguage: 'en',
+      },
+      {
+        '@type': 'Article',
+        '@id': postUrl + '#article',
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        dateModified: post.date,
+        author: { '@type': 'Organization', name: SITE_NAME },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_NAME,
+          logo: { '@type': 'ImageObject', url: absoluteUrl('/icon') },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+        url: postUrl,
+        inLanguage: 'en',
+      },
+    ],
   };
 
   return (

@@ -8,7 +8,13 @@ import MainLayout from '@/components/layout/MainLayout';
 import CtaBlock from '@/components/seo/CtaBlock';
 import { getToolsByCategory } from '@/lib/tools';
 import { categories, getCategoryBySlug } from '@/lib/categories';
-import { absoluteUrl, SITE_NAME, TWITTER_HANDLE, toolOgImage } from '@/lib/site';
+import {
+  absoluteUrl,
+  SITE_NAME,
+  TWITTER_HANDLE,
+  toolOgImage,
+  trimMetaDescription,
+} from '@/lib/site';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
@@ -43,13 +49,15 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const title = `${category.name} - Free Online Tools`;
   const ogImage = toolOgImage(category.name, 'Category');
 
+  const metaDescription = trimMetaDescription(category.description);
+
   return {
     title,
-    description: category.description,
+    description: metaDescription,
     alternates: { canonical },
     openGraph: {
       title,
-      description: category.description,
+      description: metaDescription,
       type: 'website',
       url: absoluteUrl(canonical),
       siteName: SITE_NAME,
@@ -58,7 +66,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     twitter: {
       card: 'summary_large_image',
       title,
-      description: category.description,
+      description: metaDescription,
       site: TWITTER_HANDLE,
       images: [ogImage],
     },
@@ -144,15 +152,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {category.description}
       </p>
 
-      {/* Long-form intro */}
-      <section className="prose prose-sm max-w-3xl text-gray-600 mb-8">
-        <p>
-          Our {categoryLow} collection brings together {categoryTools.length}+ utilities that
-          run entirely in your browser. No accounts, no uploads, no usage caps — open a tool
-          and get an answer in seconds. Whether you&apos;re troubleshooting an issue, working
-          on a personal project, or shipping production code, you can chain these tools
-          together to handle most day-to-day tasks without leaving the page.
-        </p>
+      {/* Long-form intro (200+ words, SEO depth + visitor context) */}
+      <section className="prose prose-sm max-w-3xl text-gray-600 mb-8 space-y-4">
+        {category.longDescription.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </section>
 
       {/* Featured tools */}

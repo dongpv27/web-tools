@@ -132,9 +132,9 @@ export default function ImagePixelateClient() {
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
             {processedImage ? (
-              <img src={processedImage} alt="Pixelated" className="max-h-64 mx-auto" />
+              <img src={processedImage} alt="Pixelated image preview" className="max-h-64 mx-auto" />
             ) : (
-              <img src={image} alt="Original" className="max-h-64 mx-auto" />
+              <img src={image} alt="Original uploaded image preview" className="max-h-64 mx-auto" />
             )}
           </div>
 

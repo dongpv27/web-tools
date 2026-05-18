@@ -239,7 +239,7 @@ export default function VideoFrameExtractorClient() {
               {extractedFrames.length === 1 && (
                 <div className="space-y-3">
                   <div className="border border-gray-200 rounded-lg p-4">
-                    <img src={extractedFrames[0]} alt="Extracted frame" className="max-w-full mx-auto rounded" />
+                    <img src={extractedFrames[0]} alt="Extracted video frame" className="max-w-full mx-auto rounded" />
                   </div>
                   <button
                     onClick={() => downloadSingleFrame(extractedFrames[0], frameNumbers[0])}

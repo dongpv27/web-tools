@@ -93,7 +93,7 @@ export default function ImageBrightnessClient() {
           <div className="border border-gray-200 rounded-lg p-4">
             <img
               src={image}
-              alt="Preview"
+              alt="Uploaded image preview"
               className="max-h-64 mx-auto"
               style={{ filter: `brightness(${brightness}%)` }}
             />

@@ -101,7 +101,7 @@ export default function ImageGrayscaleClient() {
           <div className="border border-gray-200 rounded-lg p-4">
             <img
               src={image}
-              alt="Grayscale"
+              alt="Grayscale image preview"
               className="max-h-64 mx-auto"
               style={{ filter: 'grayscale(100%)' }}
             />

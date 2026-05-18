@@ -178,7 +178,7 @@ export default function VideoScreenshotClient() {
             <span className="text-sm text-gray-500">at {formatTime(currentTime)}</span>
           </div>
           <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <img src={screenshot} alt="Screenshot" className="max-w-full mx-auto rounded" />
+            <img src={screenshot} alt="Captured video frame" className="max-w-full mx-auto rounded" />
           </div>
           <button
             onClick={downloadScreenshot}

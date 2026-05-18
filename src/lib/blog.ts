@@ -161,3 +161,19 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
 export function getAllPosts(): BlogPost[] {
   return [...posts].sort((a, b) => (a.date < b.date ? 1 : -1));
 }
+
+/** Return blog posts whose body or tags mention the given tool slug.
+ *  Used on tool pages to surface "Related reading" links into the blog —
+ *  builds the inbound Tool ← Blog link graph that complements relatedTools.
+ */
+export function getPostsMentioningTool(toolSlug: string, limit = 3): BlogPost[] {
+  if (!toolSlug) return [];
+  const needle = `/${toolSlug}`;
+  return getAllPosts()
+    .filter(
+      (p) =>
+        (p.body && p.body.includes(needle)) ||
+        (p.tags && p.tags.includes(toolSlug)),
+    )
+    .slice(0, limit);
+}

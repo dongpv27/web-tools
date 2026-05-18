@@ -153,7 +153,7 @@ export default function VideoThumbnailClient() {
           {thumbnail && (
             <div className="space-y-3">
               <div className="border border-gray-200 rounded-lg p-4">
-                <img src={thumbnail} alt="Thumbnail" className="max-w-full mx-auto rounded" />
+                <img src={thumbnail} alt="Generated video thumbnail" className="max-w-full mx-auto rounded" />
               </div>
               <button
                 onClick={downloadThumbnail}

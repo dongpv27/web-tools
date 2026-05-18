@@ -137,7 +137,7 @@ export default function ImageBorderClient() {
               borderRadius: borderRadius > 0 ? `${borderRadius}px` : undefined,
             }}
           >
-            <img src={image} alt="Preview" className="max-h-64 mx-auto block" style={{ borderRadius: borderRadius > 0 ? `${borderRadius}px` : undefined }} />
+            <img src={image} alt="Uploaded image preview" className="max-h-64 mx-auto block" style={{ borderRadius: borderRadius > 0 ? `${borderRadius}px` : undefined }} />
           </div>
 
           {/* Actions */}

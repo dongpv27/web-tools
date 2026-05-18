@@ -125,7 +125,7 @@ export default function ImageFlipClient() {
           <div className="border border-gray-200 rounded-lg p-4">
             <img
               src={image}
-              alt="Flipped"
+              alt="Flipped image preview"
               className="max-h-64 mx-auto"
               style={{ transform: flipDirection === 'horizontal' ? 'scaleX(-1)' : 'scaleY(-1)' }}
             />

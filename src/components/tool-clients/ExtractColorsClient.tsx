@@ -177,7 +177,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <img src={image} alt="Preview" className="max-h-48 mx-auto" />
+            <img src={image} alt="Uploaded image preview" className="max-h-48 mx-auto" />
           </div>
 
           {/* Number of Colors */}

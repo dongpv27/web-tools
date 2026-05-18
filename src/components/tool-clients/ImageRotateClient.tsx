@@ -121,7 +121,7 @@ export default function ImageRotateClient() {
 
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <img src={image} alt="Preview" className="max-h-64 mx-auto" />
+            <img src={image} alt="Uploaded image preview" className="max-h-64 mx-auto" />
           </div>
 
           {/* Rotation Control */}

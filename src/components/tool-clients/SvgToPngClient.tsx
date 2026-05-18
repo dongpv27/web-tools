@@ -246,7 +246,7 @@ export default function SvgToPngClient() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">PNG Preview</label>
-            <img src={pngUrl} alt="Converted PNG" className="max-w-full rounded-lg border border-gray-200" />
+            <img src={pngUrl} alt="Image converted to PNG" className="max-w-full rounded-lg border border-gray-200" />
           </div>
 
           <button

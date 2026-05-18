@@ -114,7 +114,7 @@ export default function ImageColorPickerClient() {
           <div className="border border-gray-200 rounded-lg p-2">
             <img
               src={image}
-              alt="Pick a color"
+              alt="Image to pick a color from — click anywhere to sample"
               onClick={handleImageClick}
               className="max-w-full max-h-64 mx-auto cursor-crosshair"
             />

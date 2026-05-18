@@ -170,11 +170,11 @@ export default function PngCompressorClient() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Original</label>
-              <img src={originalImage!} alt="Original" className="w-full rounded-lg border border-gray-200" />
+              <img src={originalImage!} alt="Original uploaded image preview" className="w-full rounded-lg border border-gray-200" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Compressed</label>
-              <img src={compressedImage} alt="Compressed" className="w-full rounded-lg border border-gray-200" />
+              <img src={compressedImage} alt="Compressed image preview" className="w-full rounded-lg border border-gray-200" />
             </div>
           </div>
 

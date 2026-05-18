@@ -112,12 +112,12 @@ export default function WebpToPngClient() {
           <div className="grid grid-cols-2 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-2 text-center">Original WebP</p>
-              <img src={image} alt="Original" className="max-h-48 mx-auto" />
+              <img src={image} alt="Original uploaded image preview" className="max-h-48 mx-auto" />
             </div>
             {processedImage && (
               <div className="border border-gray-200 rounded-lg p-4">
                 <p className="text-xs text-gray-500 mb-2 text-center">Converted PNG</p>
-                <img src={processedImage} alt="Converted" className="max-h-48 mx-auto" />
+                <img src={processedImage} alt="Converted image result" className="max-h-48 mx-auto" />
               </div>
             )}
           </div>

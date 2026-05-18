@@ -291,7 +291,7 @@ export default function CropImageClient() {
           >
             <img
               src={imageSrc}
-              alt="Preview"
+              alt="Uploaded image preview"
               className="block"
               style={{ maxWidth: '100%', maxHeight: '500px' }}
               draggable={false}

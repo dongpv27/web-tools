@@ -185,7 +185,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {/* Original Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-2 text-center">Original Image</p>
-            <img src={image} alt="Original" className="max-h-48 mx-auto" />
+            <img src={image} alt="Original uploaded image preview" className="max-h-48 mx-auto" />
             <p className="text-xs text-gray-500 mt-2 text-center">
               {originalSize.width} × {originalSize.height} px
             </p>
@@ -221,7 +221,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               >
                 <img
                   src={previewUrl}
-                  alt="Preview"
+                  alt="Uploaded image preview"
                   style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: selectedSize <= 64 ? 'pixelated' : 'auto' }}
                 />
               </div>

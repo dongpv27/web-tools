@@ -100,7 +100,7 @@ export default function ImageToBase64Client() {
 
           {/* Preview */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <img src={imagePreview} alt="Preview" className="max-h-48 mx-auto" />
+            <img src={imagePreview} alt="Uploaded image preview" className="max-h-48 mx-auto" />
           </div>
 
           {/* Result */}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -78,6 +78,17 @@ export const metadata: Metadata = {
   },
 };
 
+// Next 13+ App Router: viewport/themeColor live in a separate export, not
+// in metadata. This emits <meta name="viewport"> and <meta name="theme-color">.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -115,8 +126,16 @@ export default function RootLayout({
         </>
       )}
       <body className={`${inter.variable} font-sans antialiased bg-gray-50`}>
+        {/* Skip link — keyboard users press Tab once to jump past the header.
+            Visually hidden until focused. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <Header />
-        <main className="min-h-screen">
+        <main id="main-content" className="min-h-screen" tabIndex={-1}>
           {children}
         </main>
         <Footer />
