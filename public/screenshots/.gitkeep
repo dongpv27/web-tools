@@ -1,0 +1,7 @@
+# Tool screenshots
+
+Drop captured screenshots here as `<tool-slug>.png` (e.g. `json-formatter.png`).
+
+The `<ToolScreenshot>` component automatically picks them up on the next build.
+
+Capture all top tools at once with: `npm run capture-screenshots`

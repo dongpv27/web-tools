@@ -8,6 +8,7 @@ import RelatedTools from '@/components/tools/RelatedTools';
 import RecentTools from '@/components/tools/RecentTools';
 import CtaBlock from '@/components/seo/CtaBlock';
 import ToolRenderer from '@/components/tools/ToolRenderer';
+import ToolScreenshot from '@/components/tools/ToolScreenshot';
 import ExampleOutput from '@/components/tools/ExampleOutput';
 import MainLayout from '@/components/layout/MainLayout';
 import { getToolBySlug, getRelatedTools, tools } from '@/lib/tools';
@@ -166,6 +167,10 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
       <h1 className="text-3xl font-bold text-gray-900 mb-4">{tool.seoTitle || tool.name}</h1>
       <p className="text-gray-600 mb-8">{tool.description}</p>
+
+      {/* Optional screenshot — renders only when /public/screenshots/<slug>.png exists.
+          Captured via `npm run capture-screenshots`. */}
+      <ToolScreenshot slug={tool.slug} alt={`${tool.name} screenshot`} priority />
 
       {/* Tool Card */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">

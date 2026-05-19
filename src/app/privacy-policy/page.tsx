@@ -1,22 +1,26 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import MainLayout from '@/components/layout/MainLayout';
+import Breadcrumb from '@/components/layout/Breadcrumb';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - Love Web Tools',
-  description: 'Privacy Policy for Love Web Tools. Learn how we protect your privacy and handle data.',
+  title: 'Privacy Policy',
+  description:
+    'How Love Web Tools handles your data — short version: everything runs in your browser, we never see your content. Read the full Privacy Policy.',
   alternates: { canonical: '/privacy-policy' },
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <MainLayout>
+      <Breadcrumb items={[{ label: 'Privacy Policy' }]} />
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Privacy <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">Policy</span>
           </h1>
-          <p className="text-gray-600">Last updated: March 10, 2026</p>
+          <p className="text-gray-600">Last updated: May 19, 2026</p>
         </div>
 
         {/* Content */}
@@ -93,40 +97,176 @@ export default function PrivacyPolicyPage() {
 
           {/* Cookies */}
           <section className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Cookies and Tracking Technologies</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Cookies and Similar Technologies</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Currently, our Service does not use cookies or any tracking technologies. We do not
-              set any cookies on your device when you visit or use our website.
+              A cookie is a small text file stored on your device by your web browser. Our Service
+              uses cookies and similar technologies (such as the browser&apos;s local storage) for the
+              purposes described below. Some are set by us directly; others are set by trusted
+              third parties such as Google.
+            </p>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">4.1 Strictly Necessary (set by us)</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              We store a small amount of data in your browser&apos;s <strong>local storage</strong>{' '}
+              (not a cookie) to remember which tools you have recently used, so they can appear in
+              the &quot;Recently Used&quot; sidebar. This information stays on your device and is never
+              transmitted to our servers. You can clear it at any time through your browser&apos;s
+              site-data settings.
+            </p>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">4.2 Analytics Cookies (Google Analytics 4)</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              We use Google Analytics 4 (GA4) to understand aggregate usage of the Service —
+              which pages are visited, where visitors come from, and how the site performs on
+              different devices. GA4 sets cookies (typically named <code>_ga</code> and
+              <code>_ga_*</code>) that include a randomly-generated client identifier. We have
+              enabled IP anonymisation, which truncates IP addresses before any storage.
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
-              However, please note that:
+              Google may also use this data in accordance with the{' '}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                Google Privacy Policy
+              </a>
+              . You can opt out of Google Analytics by installing the{' '}
+              <a
+                href="https://tools.google.com/dlpage/gaoptout"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                Google Analytics Opt-out Browser Add-on
+              </a>
+              .
             </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-              <li>Your web browser may store certain data locally (cache, local storage) for performance purposes</li>
-              <li>If we add cookies in the future, we will update this Privacy Policy and provide appropriate notice</li>
-              <li>You can manage browser data through your browser settings at any time</li>
-            </ul>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">4.3 Advertising Cookies (Google AdSense)</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              We may display ads served by Google AdSense or other third-party advertising
+              partners. These partners use cookies (including the{' '}
+              <strong>DoubleClick DART cookie</strong>) to serve ads based on visits to our
+              Service and other sites on the internet. The DART cookie enables Google and its
+              partners to show ads based on your prior visits.
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              You can opt out of personalised advertising by Google by visiting{' '}
+              <a
+                href="https://www.google.com/settings/ads"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                Google Ads Settings
+              </a>
+              . You can also opt out of third-party vendor use of cookies for personalised
+              advertising via{' '}
+              <a
+                href="https://www.aboutads.info/choices/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                aboutads.info
+              </a>
+              {' '}or{' '}
+              <a
+                href="https://www.youronlinechoices.eu/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                youronlinechoices.eu
+              </a>{' '}
+              (for users in the EU).
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              For more details on how Google uses information from sites that use its services,
+              see{' '}
+              <a
+                href="https://policies.google.com/technologies/partner-sites"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:underline"
+              >
+                How Google uses information from sites or apps that use our services
+              </a>
+              .
+            </p>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">4.4 Managing Cookies</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Most browsers let you refuse, accept, or delete cookies through their settings.
+              Blocking strictly necessary cookies may prevent parts of the Service from working
+              correctly. For instructions tailored to your browser, see your browser&apos;s help
+              documentation (Chrome, Firefox, Safari, Edge, etc.).
+            </p>
           </section>
 
           {/* Third-Party Services */}
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Third-Party Services</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Currently, we do not use any third-party analytics, advertising, or tracking services
-              on our website. Our Service operates independently without integrating external services
-              that would collect your data.
+              We rely on a small number of third-party services to operate and improve the
+              Service. These vendors may receive limited technical information (such as IP
+              address and User-Agent) necessary to perform their function. None of the data you
+              process inside the tools themselves (text, images, files) is ever shared with any
+              third party — that data never leaves your browser.
             </p>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              We may use the following in the future:
-            </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-              <li><strong>Content Delivery Network (CDN):</strong> To deliver content faster, which may log basic technical information</li>
-              <li><strong>Analytics Services:</strong> To understand website usage (we will update this policy if implemented)</li>
+
+            <ul className="list-disc list-inside text-gray-600 space-y-3 ml-4">
+              <li>
+                <strong>Vercel</strong> — our hosting provider. Receives standard HTTP request
+                metadata (IP, headers) to deliver pages. See{' '}
+                <a
+                  href="https://vercel.com/legal/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-600 hover:underline"
+                >
+                  Vercel Privacy Policy
+                </a>
+                .
+              </li>
+              <li>
+                <strong>Cloudflare</strong> — content delivery network and security layer.
+                Receives request metadata to cache content and block malicious traffic. See{' '}
+                <a
+                  href="https://www.cloudflare.com/privacypolicy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-600 hover:underline"
+                >
+                  Cloudflare Privacy Policy
+                </a>
+                .
+              </li>
+              <li>
+                <strong>Google Analytics 4</strong> — measures aggregate, anonymised usage. See
+                Section 4.2 above and the{' '}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-600 hover:underline"
+                >
+                  Google Privacy Policy
+                </a>
+                .
+              </li>
+              <li>
+                <strong>Google AdSense and partner ad networks</strong> — when ads are enabled,
+                Google and its partners may serve ads on the Service. See Section 4.3 above.
+              </li>
+              <li>
+                <strong>Public CDNs (jsDelivr, fonts)</strong> — we load a small number of
+                public assets (fonts for PDF generation, certain libraries) from public CDNs.
+                These services may log standard request metadata.
+              </li>
             </ul>
-            <p className="text-gray-600 leading-relaxed mt-4">
-              If we add any third-party services in the future, we will update this Privacy Policy
-              to reflect those changes and provide appropriate disclosure.
-            </p>
           </section>
 
           {/* Data Security */}
@@ -174,24 +314,61 @@ export default function PrivacyPolicyPage() {
 
           {/* Children's Privacy */}
           <section className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Children&apos;s Privacy</h2>
-            <p className="text-gray-600 leading-relaxed">
-              Our Service is not intended for children under the age of 13 (or 16 in certain
-              jurisdictions). We do not knowingly collect personal information from children.
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Children&apos;s Privacy (COPPA)</h2>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Our Service is not directed to children under the age of 13 (or 16 in certain
+              EU jurisdictions), and we do not knowingly collect personal information from
+              children. In compliance with the Children&apos;s Online Privacy Protection Act
+              (COPPA) and similar regulations:
+            </p>
+            <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
+              <li>We do not knowingly target advertising at children</li>
+              <li>We do not knowingly create user profiles based on children&apos;s activity</li>
+              <li>If we become aware that we have collected personal information from a child
+                  under 13 without verifiable parental consent, we will delete it promptly</li>
+            </ul>
+            <p className="text-gray-600 leading-relaxed mt-4">
               If you are a parent or guardian and believe that your child has provided us with
-              personal information, please contact us immediately, and we will take steps to
-              delete such information.
+              personal information, please contact us at <strong>contact@lovewebtools.com</strong>{' '}
+              and we will take steps to remove that information.
             </p>
           </section>
 
-          {/* International Users */}
+          {/* International Users / GDPR / CCPA */}
           <section className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. International Data Transfers</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. International Users, GDPR, and CCPA</h2>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">9.1 International Data Transfers</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Our Service is hosted on Vercel&apos;s global edge network and routed through
+              Cloudflare. By using the Service, you understand that limited technical
+              information (such as IP address and request metadata) may be processed in any
+              country where our service providers operate, including the United States.
+            </p>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">9.2 European Economic Area (GDPR)</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              If you are in the European Economic Area (EEA), United Kingdom, or Switzerland,
+              you have the rights described in Section 7 above (access, rectification, erasure,
+              restriction, portability, objection) under the General Data Protection Regulation
+              (GDPR). Our legal basis for processing the limited data we collect is{' '}
+              <strong>legitimate interest</strong> in operating, securing, and improving the
+              Service, and your <strong>consent</strong> where applicable (e.g. analytics and
+              advertising cookies).
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              You can withdraw consent at any time by clearing your cookies and using the
+              opt-out links in Sections 4.2 and 4.3. To exercise any GDPR right, contact us at
+              <strong> contact@lovewebtools.com</strong>.
+            </p>
+
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">9.3 California Residents (CCPA / CPRA)</h3>
             <p className="text-gray-600 leading-relaxed">
-              Our website may be accessed from various countries around the world. If you are
-              accessing our Service from outside the country where our servers are located,
-              please be aware that your information may be transferred to, stored, and processed
-              in a different jurisdiction. By using our Service, you consent to such transfers.
+              If you are a California resident, the California Consumer Privacy Act (CCPA) and
+              its amendments give you rights to know what personal information is collected,
+              the right to delete it, and the right to opt out of any sale of personal
+              information. <strong>We do not sell personal information.</strong> To exercise
+              any CCPA right, contact us at <strong>contact@lovewebtools.com</strong>.
             </p>
           </section>
 
@@ -216,8 +393,25 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="bg-gray-50 rounded-xl p-6">
               <p className="text-gray-800 font-semibold mb-2">Love Web Tools</p>
-              <p className="text-gray-600">Email: contact@lovewebtools.com</p>
-              <p className="text-gray-600">Website: lovewebtools.com</p>
+              <p className="text-gray-600">
+                Email:{' '}
+                <a href="mailto:contact@lovewebtools.com" className="text-cyan-600 hover:underline">
+                  contact@lovewebtools.com
+                </a>
+              </p>
+              <p className="text-gray-600">
+                Website:{' '}
+                <a href="https://lovewebtools.com" className="text-cyan-600 hover:underline">
+                  lovewebtools.com
+                </a>
+              </p>
+              <p className="text-gray-600 mt-2">
+                Or use our{' '}
+                <Link href="/contact" className="text-cyan-600 hover:underline">
+                  Contact page
+                </Link>{' '}
+                for general inquiries.
+              </p>
             </div>
           </section>
 
@@ -235,6 +429,6 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

@@ -1,16 +1,20 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import MainLayout from '@/components/layout/MainLayout';
+import Breadcrumb from '@/components/layout/Breadcrumb';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - Love Web Tools',
-  description: 'Terms of Service for Love Web Tools. Read our terms and conditions for using our free online tools.',
+  title: 'Terms of Service',
+  description:
+    'Terms of Service for Love Web Tools — the rules of the road for using our 178+ free, client-side tools. No signup required, no warranty implied.',
   alternates: { canonical: '/terms-of-service' },
 };
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <MainLayout>
+      <Breadcrumb items={[{ label: 'Terms of Service' }]} />
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -274,6 +278,6 @@ export default function TermsOfServicePage() {
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

@@ -20,14 +20,32 @@ export default function Footer() {
               Free online tools for developers, designers, and everyone. 100% client-side processing for your privacy.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link
+                href="/contact"
+                aria-label="Contact us via email"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <Mail className="w-5 h-5" />
+              </Link>
+              {/* Placeholders for future social channels. Replace the href when
+                  a real GitHub repo / Twitter handle is ready. */}
+              <a
+                href="#"
+                aria-label="GitHub"
+                aria-disabled="true"
+                tabIndex={-1}
+                className="text-gray-400 hover:text-white transition-colors opacity-50 cursor-not-allowed"
+              >
                 <Github className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a
+                href="#"
+                aria-label="Twitter"
+                aria-disabled="true"
+                tabIndex={-1}
+                className="text-gray-400 hover:text-white transition-colors opacity-50 cursor-not-allowed"
+              >
                 <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Mail className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -111,9 +129,12 @@ export default function Footer() {
           <p className="text-sm text-gray-400">
             &copy; {new Date().getFullYear()} Love Web Tools. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-6 justify-center md:justify-end">
             <Link href="/about" className="text-sm text-gray-400 hover:text-white transition-colors">
               About
+            </Link>
+            <Link href="/contact" className="text-sm text-gray-400 hover:text-white transition-colors">
+              Contact
             </Link>
             <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white transition-colors">
               Privacy Policy
