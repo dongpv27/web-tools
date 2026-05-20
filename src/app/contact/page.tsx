@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import MainLayout from '@/components/layout/MainLayout';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Mail, MessageSquare, Bug, Lightbulb } from 'lucide-react';
+import ContactForm from '@/components/contact/ContactForm';
 
 const CONTACT_EMAIL = 'contact@lovewebtools.com';
 
@@ -38,25 +39,29 @@ export default function ContactPage() {
           </p>
         </header>
 
-        {/* Primary CTA — email */}
-        <section className="bg-white border border-gray-200 rounded-2xl p-8 mb-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-            <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center">
-              <Mail className="w-7 h-7 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">Email us</h2>
-              <p className="text-gray-600 mb-3">
-                The fastest way to reach the team. Include a screenshot if you&apos;re reporting
-                a bug.
+        {/* Contact form — primary submission channel */}
+        <section className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 mb-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Send us a message</h2>
+          <ContactForm />
+        </section>
+
+        {/* Direct email fallback */}
+        <section className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-10">
+          <div className="flex items-start gap-3">
+            <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-gray-700">
+                Prefer email directly?{' '}
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  {CONTACT_EMAIL}
+                </a>
               </p>
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                {CONTACT_EMAIL}
-              </a>
+              <p className="text-xs text-gray-500 mt-1">
+                Same destination as the form above — pick whichever is more convenient.
+              </p>
             </div>
           </div>
         </section>

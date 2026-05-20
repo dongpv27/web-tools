@@ -14,6 +14,7 @@ Hướng dẫn từng bước deploy site `lovewebtools.com` lên Vercel + Cloud
 8. (Optional) Verify với Yandex Webmaster
 9. Kiểm tra cuối cùng
 10. Setup email `contact@lovewebtools.com` qua Cloudflare Email Routing
+11. Setup contact form backend qua Resend
 
 **Thời gian dự kiến**: 2-3 giờ (chưa tính chờ DNS propagation lên đến 24h).
 
@@ -630,7 +631,91 @@ Chỉ cần email forward về Gmail là mọi liên hệ đều đến đúng �
 
 ---
 
-## 11. Sau khi launch — monitor và iterate
+## 11. Contact form backend (Resend)
+
+Site có form `/contact` POST tới `/api/contact`. Để form gửi email thật cần setup **Resend** — 100 email/ngày miễn phí, không cần credit card.
+
+### 11.1 Tạo tài khoản Resend
+
+1. Truy cập https://resend.com/signup
+2. Đăng ký bằng email (hoặc GitHub OAuth)
+3. Verify email
+
+### 11.2 Lấy API key
+
+1. Dashboard Resend → **API Keys** → **Create API Key**
+2. Name: `lovewebtools-prod`
+3. Permission: **Sending access** (đủ cho form, không cần Full access)
+4. Domain: **All domains** (tạm thời, sẽ restrict sau khi verify domain ở 11.4)
+5. **Add**
+6. Copy API key dạng `re_xxxxxxxxxxxxx` — **chỉ hiện 1 lần**, lưu ngay vào password manager
+
+### 11.3 Set env vars trong Vercel
+
+Vercel → project → Settings → Environment Variables, add 3 biến:
+
+| Key | Value | Scope |
+|---|---|---|
+| `RESEND_API_KEY` | `re_xxxxxxxxxxxxx` (key vừa copy) | Production + Preview |
+| `CONTACT_DESTINATION_EMAIL` | `contact@lovewebtools.com` (hoặc Gmail cá nhân thật) | Production + Preview |
+| `CONTACT_FROM_EMAIL` | `Love Web Tools <onboarding@resend.dev>` | Production + Preview |
+
+> ⚠ **Tại sao dùng `onboarding@resend.dev` làm From?** Resend cho phép gửi từ địa chỉ shared này ngay khi tạo account, không cần verify domain. Sau khi verify domain ở 11.4, đổi sang `noreply@lovewebtools.com` để email không bị flag spam.
+
+Save → **Redeploy** project để env vars apply.
+
+### 11.4 (Optional, recommend sau khi DNS live) Verify domain trong Resend
+
+Để email gửi từ `@lovewebtools.com` thay vì `@resend.dev` (uy tín hơn, ít bị spam):
+
+1. Resend dashboard → **Domains** → **Add Domain** → nhập `lovewebtools.com`
+2. Resend hiển thị 3-4 DNS records cần add (SPF TXT, DKIM CNAME, DMARC TXT)
+3. Vào Cloudflare DNS → site lovewebtools.com → **DNS** → **Records**
+4. Add từng record Resend yêu cầu:
+   - **SPF**: `TXT` record với content `v=spf1 include:_spf.resend.com ~all`
+   - **DKIM**: 2-3 `CNAME` records từ Resend
+   - **DMARC**: `TXT` record `_dmarc` với `v=DMARC1; p=none;`
+5. Tất cả records đặt **DNS only** (mây xám) — không proxy
+6. Resend dashboard → click **Verify DNS** → đợi 5-30 phút
+7. Status chuyển sang **Verified** ✅
+
+8. Update env var trong Vercel:
+   - `CONTACT_FROM_EMAIL` = `Love Web Tools <noreply@lovewebtools.com>`
+9. Redeploy
+
+> ⚠ **Lưu ý SPF với Cloudflare Email Routing**: Nếu đã có SPF record cho Email Routing (`v=spf1 include:_spf.mx.cloudflare.net ~all`), **kết hợp** thành 1 record duy nhất: `v=spf1 include:_spf.mx.cloudflare.net include:_spf.resend.com ~all`. Một domain chỉ được có 1 SPF record.
+
+### 11.5 Test contact form
+
+1. Đợi Vercel deploy xong (sau khi set env vars)
+2. Mở https://lovewebtools.com/contact
+3. Fill form (name, email, message ít nhất 10 ký tự)
+4. Click **Send message**
+5. Trong 5-30 giây, email phải đến destination (Gmail của bạn)
+6. UI hiển thị "Message sent!" ✅
+
+### 11.6 Anti-spam protection (đã built-in)
+
+Form đã có sẵn 2 lớp bảo vệ:
+- **Honeypot field** (hidden, real users không thấy) — bots fill vào field này → backend silently drop request
+- **Rate limit** — 3 submission/IP/phút → bot không thể flood
+
+Khi traffic lớn (≥ 100K visits/tháng), có thể nâng cấp lên Cloudflare Turnstile (free) thay honeypot.
+
+### 11.7 Monitor & troubleshoot
+
+Resend dashboard có tab **Logs** show mọi email đã gửi (delivered / bounced / failed):
+
+| Vấn đề | Fix |
+|---|---|
+| Form submit thành công nhưng không nhận email | Check Resend Logs → tìm email mới nhất → xem status. Nếu bounced → recipient address sai. |
+| "Failed to send" 502 error | Check Vercel logs (Functions tab). Thường do `RESEND_API_KEY` sai hoặc Resend rate limit. |
+| Email vào Spam | Verify domain ở 11.4 + setup DMARC. Email từ `onboarding@resend.dev` dễ vào Spam hơn. |
+| 429 "Too many requests" | Rate limit hit. Đợi 1 phút. |
+
+---
+
+## 12. Sau khi launch — monitor và iterate
 
 ### Trong tuần đầu
 
@@ -654,7 +739,7 @@ Chỉ cần email forward về Gmail là mọi liên hệ đều đến đúng �
 
 ---
 
-## 12. Reference — danh sách URL cần nhớ
+## 13. Reference — danh sách URL cần nhớ
 
 | Mục đích | URL |
 |---|---|
@@ -673,7 +758,7 @@ Chỉ cần email forward về Gmail là mọi liên hệ đều đến đúng �
 
 ---
 
-## 13. Troubleshooting
+## 14. Troubleshooting
 
 ### "Domain verification failed" trong Vercel
 
@@ -727,7 +812,7 @@ Chỉ cần email forward về Gmail là mọi liên hệ đều đến đúng �
 
 ---
 
-## 14. Checklist tóm tắt
+## 15. Checklist tóm tắt
 
 Sao chép checklist này và check từng item:
 
@@ -772,6 +857,15 @@ EMAIL ROUTING
 [ ] (Optional) Catch-all rule enabled
 [ ] (Optional) Gmail "Send mail as" configured để reply từ contact@
 
+CONTACT FORM BACKEND (RESEND)
+[ ] Resend account tạo + email verified
+[ ] API key created và copy lưu password manager
+[ ] RESEND_API_KEY set trong Vercel
+[ ] CONTACT_DESTINATION_EMAIL set
+[ ] CONTACT_FROM_EMAIL set (onboarding@resend.dev hoặc verified domain)
+[ ] Test submit form /contact → email received
+[ ] (Optional) Verify domain trong Resend + đổi From email
+
 QUALITY GATES
 [ ] curl sitemap.xml returns 200
 [ ] curl robots.txt returns 200
@@ -784,7 +878,7 @@ QUALITY GATES
 
 ---
 
-## 15. Hỗ trợ thêm
+## 16. Hỗ trợ thêm
 
 Nếu gặp vấn đề ở bất kỳ bước nào:
 
