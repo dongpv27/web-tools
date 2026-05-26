@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
+import { callConvert, downloadBlob } from '@/lib/convert-api';
+import { pdfjsLoadOptions } from '@/lib/pdfjs-options';
 
 // pdfjs-dist v5 ships only ESM worker (pdf.worker.min.mjs). Served locally
 // from /public/pdfjs/ to avoid CDN dependency and version drift.
@@ -14,11 +16,13 @@ export default function PdfToWordClient() {
   const [fileName, setFileName] = useState<string>('');
   const [pageCount, setPageCount] = useState<number>(0);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
-  const processFile = (file: File) => {setFileName(file.name);
+  const processFile = (file: File) => {
+    setFileName(file.name);
     setDownloadUrl(null);
+    setError('');
   };
 
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,11 +36,12 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
     setConverting(true);
     setProgress(0);
+    setError('');
 
     try {
       const file = fileInput.files[0];
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, ...pdfjsLoadOptions }).promise;
 
       setPageCount(pdf.numPages);
 
@@ -98,10 +103,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setDownloadUrl(url);
     } catch (err) {
       console.error('PDF to Word conversion failed:', err);
-      alert(
-        'Error converting PDF: ' +
-          (err instanceof Error ? err.message : 'Unknown error') +
-          '\nNote: This works best with text-based PDFs.',
+      setError(
+        (err instanceof Error ? err.message : 'Unknown error') +
+          ' — this tool works best with text-based PDFs.',
       );
     } finally {
       setConverting(false);
@@ -116,11 +120,28 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     link.click();
   };
 
+  const convertServer = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+    setConverting(true);
+    setError('');
+    try {
+      const result = await callConvert('pdf-to-word', file, file.name);
+      downloadBlob(result.blob, result.filename);
+    } catch (err) {
+      setError(`Server conversion failed: ${(err as Error).message}`);
+    } finally {
+      setConverting(false);
+    }
+  };
+
   const clear = () => {
     setDownloadUrl(null);
     setFileName('');
     setPageCount(0);
     setProgress(0);
+    setError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -154,6 +175,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </p>
           )}
 
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">
+                <span className="font-medium">Error converting PDF:</span> {error}
+              </p>
+            </div>
+          )}
+
           {converting && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-600">
@@ -169,13 +198,27 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           )}
 
-          <button
-            onClick={convert}
-            disabled={!fileName || converting}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {converting ? 'Converting...' : 'Convert to Word'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={convert}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Quick text extraction in your browser"
+            >
+              {converting ? 'Converting...' : 'Convert in browser'}
+            </button>
+            <button
+              onClick={convertServer}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Server-side: line-aware extraction + heading detection from font sizes"
+            >
+              {converting ? 'Converting...' : 'Convert on server'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">
+            Server version reconstructs line order from PDF coordinates and infers headings from font size — better structure for most text PDFs.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">

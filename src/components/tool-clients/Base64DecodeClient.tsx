@@ -18,8 +18,10 @@ export default function Base64DecodeClient() {
 
     try {
       // Handle Unicode properly
-      const binString = atob(input.trim());
-      const bytes = Uint8Array.from(binString, (char) => char.codePointAt(0) ?? 0);
+      // atob returns a binary string where each char is a single byte (0–255);
+      // charCodeAt is the correct way to reconstruct the byte array.
+      const binString = atob(input.trim().replace(/\s+/g, ''));
+      const bytes = Uint8Array.from(binString, (char) => char.charCodeAt(0));
       const decoded = new TextDecoder().decode(bytes);
       setOutput(decoded);
     } catch (e) {

@@ -4,20 +4,47 @@ import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 
+// Hoisted out of the component so its identity is stable across renders —
+// keeps `instanceof YamlParseError` reliable.
+type SourceLine = { raw: string; trimmed: string; indent: number; lineNo: number };
+
+class YamlParseError extends Error {
+  lineNo: number;
+  constructor(message: string, lineNo: number) {
+    super(message);
+    this.lineNo = lineNo;
+  }
+}
+
 export default function YamlToJsonClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [indent, setIndent] = useState(2);
 
-  // Simple YAML parser for basic YAML structures
-  const parseYaml = (yaml: string): unknown => {
-    const lines = yaml.split('\n');
-    const result: unknown = parseLines(lines, 0, 0).value;
-    return result;
+  const prepLines = (yaml: string): SourceLine[] => {
+    return yaml.split('\n').map((raw, idx) => {
+      const indent = raw.search(/\S/);
+      return {
+        raw,
+        trimmed: raw.trim(),
+        indent: indent === -1 ? 0 : indent,
+        lineNo: idx + 1,
+      };
+    });
   };
 
-  const parseLines = (lines: string[], startIndex: number, baseIndent: number): { value: unknown; nextIndex: number } => {
+  // Simple YAML parser for basic YAML structures
+  const parseYaml = (yaml: string): unknown => {
+    const lines = prepLines(yaml);
+    return parseLines(lines, 0, 0).value;
+  };
+
+  const parseLines = (
+    lines: SourceLine[],
+    startIndex: number,
+    baseIndent: number,
+  ): { value: unknown; nextIndex: number } => {
     const obj: Record<string, unknown> = {};
     const arr: unknown[] = [];
     let isArray = false;
@@ -25,91 +52,154 @@ export default function YamlToJsonClient() {
 
     while (i < lines.length) {
       const line = lines[i];
-      const trimmed = line.trim();
+      const trimmed = line.trimmed;
 
-      // Skip empty lines and comments
-      if (trimmed === '' || trimmed.startsWith('#')) {
+      // Skip empty lines, comments, and document markers
+      if (trimmed === '' || trimmed.startsWith('#') || trimmed === '---' || trimmed === '...') {
         i++;
         continue;
       }
 
-      const currentIndent = line.search(/\S/);
-      if (currentIndent < baseIndent) {
+      if (line.indent < baseIndent) {
         break;
       }
 
       // Array item
-      if (trimmed.startsWith('- ')) {
+      if (trimmed.startsWith('- ') || trimmed === '-') {
         isArray = true;
-        const value = trimmed.slice(2).trim();
+        const value = trimmed === '-' ? '' : trimmed.slice(2).trim();
 
-        // Check if it's a key-value pair in array
-        const colonIndex = value.indexOf(':');
+        if (value === '') {
+          // "- " alone: nested object/array on next line
+          const nested = parseLines(lines, i + 1, line.indent + 2);
+          arr.push(nested.value);
+          i = nested.nextIndex;
+          continue;
+        }
+
+        // Check if it's a key-value pair inside the array item
+        const colonIndex = findKeyColon(value);
         if (colonIndex > 0) {
           const key = value.slice(0, colonIndex).trim();
           const val = value.slice(colonIndex + 1).trim();
 
           if (val === '' || val === '|' || val === '>') {
-            // Nested object or multiline
-            const nested = parseLines(lines, i + 1, currentIndent + 2);
-            arr.push({ [key]: nested.value });
+            const nested = parseLines(lines, i + 1, line.indent + 2);
+            arr.push({ [unquoteKey(key)]: nested.value });
             i = nested.nextIndex;
           } else {
-            arr.push({ [key]: parseValue(val) });
+            arr.push({ [unquoteKey(key)]: parseValue(val, line.lineNo) });
             i++;
           }
         } else {
-          arr.push(parseValue(value));
+          arr.push(parseValue(value, line.lineNo));
           i++;
         }
         continue;
       }
 
       // Key-value pair
-      const colonIndex = trimmed.indexOf(':');
+      const colonIndex = findKeyColon(trimmed);
       if (colonIndex > 0) {
-        const key = trimmed.slice(0, colonIndex).trim();
+        const key = unquoteKey(trimmed.slice(0, colonIndex).trim());
         const value = trimmed.slice(colonIndex + 1).trim();
 
         if (value === '' || value === '|' || value === '>') {
-          // Nested object or multiline string
-          const nested = parseLines(lines, i + 1, currentIndent + 2);
+          const nested = parseLines(lines, i + 1, line.indent + 2);
           obj[key] = nested.value;
           i = nested.nextIndex;
         } else {
-          obj[key] = parseValue(value);
+          obj[key] = parseValue(value, line.lineNo);
           i++;
         }
-      } else {
-        i++;
+        continue;
       }
+
+      throw new YamlParseError(
+        `Unexpected line "${trimmed.slice(0, 60)}${trimmed.length > 60 ? '…' : ''}"`,
+        line.lineNo,
+      );
     }
 
     return {
-      value: isArray ? arr : (Object.keys(obj).length > 0 ? obj : null),
-      nextIndex: i
+      value: isArray ? arr : obj,
+      nextIndex: i,
     };
   };
 
-  const parseValue = (value: string): unknown => {
-    // Remove quotes
-    if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
-      return value.slice(1, -1);
+  // Find the `:` that acts as YAML key separator. Skip colons inside quoted
+  // strings so things like `url: "http://x"` parse correctly.
+  const findKeyColon = (s: string): number => {
+    let quote: string | null = null;
+    for (let j = 0; j < s.length; j++) {
+      const ch = s[j];
+      if (quote) {
+        if (ch === '\\') { j++; continue; }
+        if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'") quote = ch;
+      else if (ch === ':') return j;
+    }
+    return -1;
+  };
+
+  const unquoteKey = (key: string): string => {
+    if (
+      (key.startsWith('"') && key.endsWith('"')) ||
+      (key.startsWith("'") && key.endsWith("'"))
+    ) {
+      return key.slice(1, -1);
+    }
+    return key;
+  };
+
+  // Parse a single inline flow value, e.g. `[1, 2]`, `{a: 1, b: 2}`, `"text"`.
+  const parseFlow = (value: string, lineNo: number): unknown => {
+    // Translate YAML flow syntax to JSON by mapping unquoted bare scalars onto
+    // JSON-compatible literals — good enough for the common case.
+    let normalized = value
+      .replace(/'([^']*)'/g, (_, s) => JSON.stringify(s))
+      .replace(/(?<=[{,]\s*)([A-Za-z_][\w-]*)(?=\s*:)/g, '"$1"');
+    try {
+      return JSON.parse(normalized);
+    } catch {
+      throw new YamlParseError(`Invalid inline value "${value}"`, lineNo);
+    }
+  };
+
+  const parseValue = (value: string, lineNo: number): unknown => {
+    // Inline flow forms
+    if (value.startsWith('[') && value.endsWith(']')) return parseFlow(value, lineNo);
+    if (value.startsWith('{') && value.endsWith('}')) return parseFlow(value, lineNo);
+
+    // Quoted strings
+    if (value.startsWith('"') && value.endsWith('"')) {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value.slice(1, -1);
+      }
+    }
+    if (value.startsWith("'") && value.endsWith("'")) {
+      return value.slice(1, -1).replace(/''/g, "'");
     }
 
-    // Boolean
-    if (value === 'true') return true;
-    if (value === 'false') return false;
+    // Strip trailing comment (only when preceded by whitespace, to keep `#` inside scalars)
+    const commentMatch = value.match(/^([^#]*?)\s+#.*$/);
+    if (commentMatch) value = commentMatch[1].trim();
 
-    // Null
-    if (value === 'null' || value === '~') return null;
+    // Boolean / null (YAML 1.1 spelling variants)
+    if (/^(true|yes|on)$/i.test(value)) return true;
+    if (/^(false|no|off)$/i.test(value)) return false;
+    if (value === 'null' || value === '~' || value === '') return null;
 
-    // Number
-    const num = Number(value);
-    if (!isNaN(num)) return num;
+    // Number — only when entire string parses cleanly as JS number
+    if (/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(value)) {
+      const num = Number(value);
+      if (!isNaN(num)) return num;
+    }
 
-    // String
     return value;
   };
 
@@ -124,7 +214,11 @@ export default function YamlToJsonClient() {
       const parsed = parseYaml(input);
       setOutput(JSON.stringify(parsed, null, indent));
     } catch (e) {
-      setError(`Invalid YAML: ${(e as Error).message}`);
+      if (e instanceof YamlParseError) {
+        setError(`Line ${e.lineNo}: ${e.message}`);
+      } else {
+        setError(`Invalid YAML: ${(e as Error).message}`);
+      }
     }
   };
 

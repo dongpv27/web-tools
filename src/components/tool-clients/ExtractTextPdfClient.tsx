@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import { pdfjsLoadOptions } from '@/lib/pdfjs-options';
 
 // Set up worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
@@ -26,7 +27,7 @@ export default function ExtractTextPdfClient() {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, ...pdfjsLoadOptions }).promise;
       setPageCount(pdf.numPages);
 
       let fullText = '';

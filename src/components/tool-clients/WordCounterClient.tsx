@@ -27,8 +27,41 @@ export default function WordCounterClient() {
     // Words
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-    // Sentences
-    const sentences = text.trim() ? (text.match(/[.!?]+/g) || []).length : 0;
+    // Sentences — count terminal punctuation runs (. ! ?) while ignoring common
+    // abbreviations (Mr. Dr. etc.), decimals (3.14), ellipses (...), and
+    // initials (J. K. Rowling). Heuristic, not perfect, but matches
+    // wordcounter.net's behaviour for normal prose.
+    const sentences = text.trim()
+      ? (() => {
+          const COMMON_ABBR = new Set([
+            'mr','mrs','ms','dr','prof','sr','jr','st','mt',
+            'vs','etc','e.g','i.e','no','vol','dept','inc',
+            'ltd','co','corp','univ','assn','est','approx','min','max','avg',
+          ]);
+          let count = 0;
+          // Iterate punctuation runs and decide if each ends a real sentence.
+          const re = /([.!?]+)(\s+|$)/g;
+          let m: RegExpExecArray | null;
+          while ((m = re.exec(text)) !== null) {
+            const punctEnd = m.index + m[1].length;
+            // Decimal / ellipsis: skip standalone "..." runs and "3.14" forms.
+            if (m[1] === '.' && punctEnd < text.length) {
+              const next = text[punctEnd];
+              const prev = text[m.index - 1];
+              if (/\d/.test(prev) && /\d/.test(next ?? '')) continue;
+            }
+            // Abbreviation: trailing "." preceded by a known abbreviation token.
+            if (m[1] === '.') {
+              const wordMatch = /(\w+)$/.exec(text.slice(0, m.index));
+              if (wordMatch && COMMON_ABBR.has(wordMatch[1].toLowerCase())) continue;
+              // Single-letter initial (e.g. "J." in "J. K. Rowling")
+              if (wordMatch && wordMatch[1].length === 1 && /[A-Z]/.test(wordMatch[1])) continue;
+            }
+            count++;
+          }
+          return count;
+        })()
+      : 0;
 
     // Paragraphs
     const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter(p => p.trim()).length : 0;

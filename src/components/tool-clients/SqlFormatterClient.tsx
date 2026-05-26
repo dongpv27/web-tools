@@ -47,8 +47,10 @@ const KEYWORD_REGEX = buildKeywordRegex();
 function highlightSqlNodes(sql: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
+  // Non-capturing wrapper around KEYWORD_REGEX so its inner group stays at
+  // match[1] and the string groups land at match[2]/match[3] as expected.
   const combined = new RegExp(
-    `(${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`,
+    `(?:${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`,
     'gi'
   );
   let match;
@@ -69,7 +71,7 @@ function highlightSqlNodes(sql: string): React.ReactNode[] {
 
 function highlightHtmlSpan(sql: string): string {
   return sql.replace(
-    new RegExp(`(${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`, 'gi'),
+    new RegExp(`(?:${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`, 'gi'),
     (m, kw, sq, dq) => {
       if (kw) return `<span style="color:#2563eb;font-weight:600">${escHtml(kw)}</span>`;
       if (sq || dq) return `<span style="color:#16a34a">${escHtml(m)}</span>`;
@@ -80,7 +82,7 @@ function highlightHtmlSpan(sql: string): string {
 
 function highlightHtmlFont(sql: string): string {
   return sql.replace(
-    new RegExp(`(${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`, 'gi'),
+    new RegExp(`(?:${KEYWORD_REGEX.source})|('(?:[^'\\\\]|\\\\.)*')|("(?:[^"\\\\]|\\\\.)*")`, 'gi'),
     (m, kw, sq, dq) => {
       if (kw) return `<font color="#2563eb"><b>${escHtml(kw)}</b></font>`;
       if (sq || dq) return `<font color="#16a34a">${escHtml(m)}</font>`;
@@ -301,6 +303,41 @@ export default function SqlFormatterClient() {
   const [database, setDatabase] = useState('Generic');
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('SQL');
 
+  // ── Identifier quoting per dialect ──
+  // Normalise input quoting so cross-dialect SQL renders idiomatically: MSSQL
+  // uses [brackets], MySQL/MDX use `backticks`, Oracle/DB2/standard use "double quotes".
+  // Generic and MS Access leave identifiers as-is.
+  const reQuoteIdentifiers = (sql: string, dialect: string): string => {
+    let target: { open: string; close: string } | null = null;
+    switch (dialect) {
+      case 'MSSQL':
+        target = { open: '[', close: ']' };
+        break;
+      case 'MySQL':
+      case 'MDX':
+        target = { open: '`', close: '`' };
+        break;
+      case 'Oracle/PLSQL':
+      case 'DB2':
+        target = { open: '"', close: '"' };
+        break;
+      default:
+        return sql;
+    }
+    // Detect bracketed [id], backticked `id`, or double-quoted "id" identifiers and
+    // rewrite them. Skip single-quoted strings (literals) entirely.
+    return sql.replace(
+      /'(?:[^'\\]|\\.|'')*'|\[([^\]]+)\]|`([^`]+)`|"([^"]+)"/g,
+      (m, br, bt, dq) => {
+        if (br || bt || dq) {
+          const id = br ?? bt ?? dq;
+          return `${target!.open}${id}${target!.close}`;
+        }
+        return m;
+      },
+    );
+  };
+
   // ── Format SQL ──
   const formatSql = (sql: string, indentValue: number | string): string => {
     const indentStr = indentValue === 'tab' ? '\t' : ' '.repeat(indentValue as number);
@@ -382,8 +419,9 @@ export default function SqlFormatterClient() {
       return;
     }
     try {
-      const formatted = formatSql(input, indent);
-      setOutput(convertOutput(formatted, input, outputFormat));
+      const dialectInput = reQuoteIdentifiers(input, database);
+      const formatted = formatSql(dialectInput, indent);
+      setOutput(convertOutput(formatted, dialectInput, outputFormat));
     } catch (e) {
       setError(`Error formatting SQL: ${(e as Error).message}`);
     }
@@ -396,12 +434,13 @@ export default function SqlFormatterClient() {
       return;
     }
     try {
-      const minified = input
+      const dialectInput = reQuoteIdentifiers(input, database);
+      const minified = dialectInput
         .replace(/--.*$/gm, '')
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/\s+/g, ' ')
         .trim();
-      setOutput(convertOutput(minified, input, outputFormat));
+      setOutput(convertOutput(minified, dialectInput, outputFormat));
     } catch (e) {
       setError(`Error minifying SQL: ${(e as Error).message}`);
     }

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { callConvert, downloadBlob } from '@/lib/convert-api';
 
 export default function ExcelToCsvClient() {
   const [sheets, setSheets] = useState<string[]>([]);
@@ -12,14 +13,18 @@ export default function ExcelToCsvClient() {
   const [inputFileName, setInputFileName] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [error, setError] = useState('');
+  const [serverBusy, setServerBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
   const processFile = (file: File) => {
     setInputFileName(file.name);
     setFileName(file.name.replace(/\.[^/.]+$/, ''));
     setCsvOutput('');
     setPreview([]);
+    setError('');
+    setUploadedFile(file);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -32,11 +37,30 @@ export default function ExcelToCsvClient() {
           setSelectedSheet(wb.SheetNames[0]);
           showPreview(wb, wb.SheetNames[0]);
         }
-      } catch {
-        alert('Error reading Excel file. Please make sure it\'s a valid .xlsx or .xls file.');
+      } catch (err) {
+        setError(
+          (err instanceof Error ? err.message : 'Unknown error') +
+            ' — try the server-side option below for damaged or very large workbooks.',
+        );
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const convertAllSheetsServer = async () => {
+    if (!uploadedFile) return;
+    setError('');
+    setServerBusy(true);
+    try {
+      const result = await callConvert('excel-to-csv', uploadedFile, uploadedFile.name, {
+        fields: { allSheets: 'true', includeBom: 'true' },
+      });
+      downloadBlob(result.blob, result.filename);
+    } catch (err) {
+      setError(`Server conversion failed: ${(err as Error).message}`);
+    } finally {
+      setServerBusy(false);
+    }
   };
 
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +128,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileName('');
     setInputFileName('');
     setWorkbook(null);
+    setUploadedFile(null);
+    setError('');
   };
 
   return (
@@ -191,20 +217,37 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           )}
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={convertToCsv}
               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Convert to CSV
+              Convert selected sheet
             </button>
+            {sheets.length > 1 && (
+              <button
+                onClick={convertAllSheetsServer}
+                disabled={serverBusy}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                title="Process on server and download all sheets as a single ZIP of CSVs"
+              >
+                {serverBusy ? 'Processing…' : `All ${sheets.length} sheets → ZIP (server)`}
+              </button>
+            )}
             <button
               onClick={clear}
-              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+              disabled={serverBusy}
+              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
             >
               Clear
             </button>
           </div>
+
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           {/* Output */}
           {csvOutput && (

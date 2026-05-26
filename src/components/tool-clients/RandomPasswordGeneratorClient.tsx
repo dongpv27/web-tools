@@ -12,6 +12,8 @@ export default function RandomPasswordGeneratorClient() {
     lowercase: true,
     numbers: true,
     symbols: true,
+    excludeSimilar: false,
+    excludeAmbiguous: false,
   });
 
   const getStrength = (pwd: string) => {
@@ -42,6 +44,15 @@ export default function RandomPasswordGeneratorClient() {
     if (options.numbers) chars += numbers;
     if (options.symbols) chars += symbols;
 
+    // Visually similar (easy to confuse when reading): I, l, 1, |, O, 0
+    if (options.excludeSimilar) {
+      chars = chars.replace(/[Il1|O0]/g, '');
+    }
+    // Ambiguous brackets/quotes that some sites or shells choke on
+    if (options.excludeAmbiguous) {
+      chars = chars.replace(/[{}\[\]()\/\\'"`~,;:.<>]/g, '');
+    }
+
     if (chars.length === 0) {
       setPassword('');
       return;
@@ -56,12 +67,16 @@ export default function RandomPasswordGeneratorClient() {
     setPassword(pwd);
   }, [length, options]);
 
+  // Character-type toggles must keep at least one selected; the exclusion
+  // toggles can be turned off freely.
+  const CHAR_TYPE_KEYS: (keyof typeof options)[] = ['uppercase', 'lowercase', 'numbers', 'symbols'];
   const handleOptionChange = (key: keyof typeof options) => {
     const newOptions = { ...options, [key]: !options[key] };
-    // Ensure at least one option is selected
-    if (Object.values(newOptions).some(v => v)) {
-      setOptions(newOptions);
+    if (CHAR_TYPE_KEYS.includes(key)) {
+      const anyCharType = CHAR_TYPE_KEYS.some(k => newOptions[k]);
+      if (!anyCharType) return;
     }
+    setOptions(newOptions);
   };
 
   const strength = password ? getStrength(password) : null;
@@ -121,12 +136,12 @@ export default function RandomPasswordGeneratorClient() {
       <div className="space-y-3">
         <label className="text-sm font-medium text-gray-700">Include Characters</label>
         <div className="grid grid-cols-2 gap-3">
-          {[
+          {([
             { key: 'uppercase', label: 'Uppercase (A-Z)', example: 'ABC' },
             { key: 'lowercase', label: 'Lowercase (a-z)', example: 'abc' },
             { key: 'numbers', label: 'Numbers (0-9)', example: '123' },
             { key: 'symbols', label: 'Symbols (!@#$)', example: '!@#' },
-          ].map(({ key, label, example }) => (
+          ] as const).map(({ key, label, example }) => (
             <label
               key={key}
               className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -144,6 +159,45 @@ export default function RandomPasswordGeneratorClient() {
               <div>
                 <span className="text-sm text-gray-700">{label}</span>
                 <span className="text-xs text-gray-400 ml-1">({example})</span>
+              </div>
+            </label>
+          ))}
+        </div>
+
+        <label className="text-sm font-medium text-gray-700 pt-2 block">Exclude</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {([
+            {
+              key: 'excludeSimilar',
+              label: 'Similar characters',
+              example: 'I l 1 | O 0',
+              hint: 'Easy to mix up when typing or reading.',
+            },
+            {
+              key: 'excludeAmbiguous',
+              label: 'Ambiguous symbols',
+              example: '{ } [ ] ( ) / \\ \' " ` ~',
+              hint: 'Some sites or shells reject these.',
+            },
+          ] as const).map(({ key, label, example, hint }) => (
+            <label
+              key={key}
+              className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                options[key]
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+              title={hint}
+            >
+              <input
+                type="checkbox"
+                checked={options[key]}
+                onChange={() => handleOptionChange(key)}
+                className="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div className="min-w-0">
+                <div className="text-sm text-gray-700">{label}</div>
+                <div className="text-xs text-gray-400 font-mono truncate">{example}</div>
               </div>
             </label>
           ))}

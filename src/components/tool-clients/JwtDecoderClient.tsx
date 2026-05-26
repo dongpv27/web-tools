@@ -75,7 +75,8 @@ const verifyHmac = async (
 const verifyRsa = async (
   message: string,
   sig: string,
-  publicKeyPem: string
+  publicKeyPem: string,
+  hash: 'SHA-256' | 'SHA-384' | 'SHA-512'
 ): Promise<boolean> => {
   try {
     // Convert PEM to ArrayBuffer
@@ -96,7 +97,7 @@ const verifyRsa = async (
     const key = await crypto.subtle.importKey(
       'spki',
       bytes.buffer,
-      { name: 'RSA-PKCS1-v1_5', hash: 'SHA-256' },
+      { name: 'RSA-PKCS1-v1_5', hash },
       false,
       ['verify']
     );
@@ -123,7 +124,9 @@ const verifyRsa = async (
 const verifyEcdsa = async (
   message: string,
   sig: string,
-  publicKeyPem: string
+  publicKeyPem: string,
+  hash: 'SHA-256' | 'SHA-384' | 'SHA-512',
+  namedCurve: 'P-256' | 'P-384' | 'P-521'
 ): Promise<boolean> => {
   try {
     // Convert PEM to ArrayBuffer
@@ -144,7 +147,7 @@ const verifyEcdsa = async (
     const key = await crypto.subtle.importKey(
       'spki',
       bytes.buffer,
-      { name: 'ECDSA', namedCurve: 'P-256' },
+      { name: 'ECDSA', namedCurve },
       false,
       ['verify']
     );
@@ -155,7 +158,7 @@ const verifyEcdsa = async (
     const signatureData = Uint8Array.from(atob(sigBase64), (c) => c.charCodeAt(0));
 
     return await crypto.subtle.verify(
-      { name: 'ECDSA', hash: 'SHA-256' },
+      { name: 'ECDSA', hash },
       key,
       messageData,
       signatureData
@@ -366,7 +369,11 @@ export default function JwtDecoderClient() {
           return;
         }
 
-        isValid = await verifyRsa(signingInput, parts[2], verifyKey);
+        let rsaHash: 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-256';
+        if (algorithm === 'RS384') rsaHash = 'SHA-384';
+        else if (algorithm === 'RS512') rsaHash = 'SHA-512';
+
+        isValid = await verifyRsa(signingInput, parts[2], verifyKey, rsaHash);
 
       } else if (algorithm.startsWith('ES')) {
         // ECDSA verification
@@ -383,7 +390,12 @@ export default function JwtDecoderClient() {
           return;
         }
 
-        isValid = await verifyEcdsa(signingInput, parts[2], verifyKey);
+        let ecHash: 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-256';
+        let ecCurve: 'P-256' | 'P-384' | 'P-521' = 'P-256';
+        if (algorithm === 'ES384') { ecHash = 'SHA-384'; ecCurve = 'P-384'; }
+        else if (algorithm === 'ES512') { ecHash = 'SHA-512'; ecCurve = 'P-521'; }
+
+        isValid = await verifyEcdsa(signingInput, parts[2], verifyKey, ecHash, ecCurve);
 
       } else {
         setVerificationStatus('error');

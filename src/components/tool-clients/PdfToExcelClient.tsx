@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import * as XLSX from 'xlsx';
+import { callConvert, downloadBlob } from '@/lib/convert-api';
+import { pdfjsLoadOptions } from '@/lib/pdfjs-options';
 
 // Set up worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
@@ -13,11 +15,13 @@ export default function PdfToExcelClient() {
   const [fileName, setFileName] = useState<string>('');
   const [pageCount, setPageCount] = useState<number>(0);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
-  const processFile = (file: File) => {setFileName(file.name);
+  const processFile = (file: File) => {
+    setFileName(file.name);
     setDownloadUrl(null);
+    setError('');
   };
 
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +39,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = fileInput.files[0];
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, ...pdfjsLoadOptions }).promise;
 
       setPageCount(pdf.numPages);
 
@@ -79,8 +83,25 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-    } catch {
-      alert('Error converting PDF. Note: This works best with text-based PDFs with tabular data.');
+    } catch (err) {
+      setError(
+        `Browser conversion failed: ${(err as Error).message}. Try the server option below — it uses column-aware extraction.`,
+      );
+    } finally {
+      setConverting(false);
+    }
+  };
+
+  const convertServer = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+    setConverting(true);
+    setError('');
+    try {
+      const result = await callConvert('pdf-to-excel', file, file.name);
+      downloadBlob(result.blob, result.filename);
+    } catch (err) {
+      setError(`Server conversion failed: ${(err as Error).message}`);
     } finally {
       setConverting(false);
     }
@@ -147,13 +168,32 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           )}
 
-          <button
-            onClick={convert}
-            disabled={!fileName || converting}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {converting ? 'Converting...' : 'Convert to Excel'}
-          </button>
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={convert}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {converting ? 'Converting...' : 'Convert in browser'}
+            </button>
+            <button
+              onClick={convertServer}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Server-side: clusters x-positions into columns for table-shaped PDFs"
+            >
+              {converting ? 'Converting...' : 'Convert on server'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">
+            Server version detects table columns from text positions. Browser version puts each line in one cell.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">

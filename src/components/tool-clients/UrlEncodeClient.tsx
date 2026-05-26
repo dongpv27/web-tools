@@ -4,11 +4,25 @@ import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 
+type Mode = 'component' | 'uri' | 'all';
+
 export default function UrlEncodeClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [encodeAll, setEncodeAll] = useState(false);
+  // 'component' — full RFC 3986 encoding of every reserved char (default)
+  // 'uri'       — preserve protocol/slashes (use when encoding a whole URL)
+  // 'all'       — percent-encode every byte (paranoid mode)
+  const [mode, setMode] = useState<Mode>('component');
+
+  const encodeAllBytes = (s: string): string => {
+    const bytes = new TextEncoder().encode(s);
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) {
+      out += '%' + bytes[i].toString(16).toUpperCase().padStart(2, '0');
+    }
+    return out;
+  };
 
   const encode = () => {
     setError('');
@@ -18,8 +32,11 @@ export default function UrlEncodeClient() {
     }
 
     try {
-      // Standard URL encoding (RFC 3986)
-      setOutput(encodeURIComponent(input));
+      let result: string;
+      if (mode === 'uri') result = encodeURI(input);
+      else if (mode === 'all') result = encodeAllBytes(input);
+      else result = encodeURIComponent(input);
+      setOutput(result);
     } catch (e) {
       setError(`Error encoding: ${(e as Error).message}`);
     }
@@ -57,6 +74,20 @@ export default function UrlEncodeClient() {
         />
       </div>
 
+
+      {/* Mode */}
+      <div className="flex items-center gap-2">
+        <label className="text-sm text-gray-600">Mode:</label>
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as Mode)}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="component">Component (encodeURIComponent — for query values)</option>
+          <option value="uri">Full URI (encodeURI — preserves :/?&#)</option>
+          <option value="all">All bytes (percent-encode every character)</option>
+        </select>
+      </div>
 
       {/* Action Buttons */}
       <div className="flex gap-2">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { getFFmpeg } from '@/lib/ffmpeg';
+import { getFFmpeg, validateVideoFile } from '@/lib/ffmpeg';
 
 export default function VideoScreenshotClient() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
@@ -11,17 +11,25 @@ export default function VideoScreenshotClient() {
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     const file = e.target.files?.[0];
-    if (file) {
-      setVideoFile(file);
-      const url = URL.createObjectURL(file);
-      setVideoSrc(url);
-      setScreenshot(null);
+    if (!file) return;
+    const validation = validateVideoFile(file);
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid video file.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
     }
+    if (videoSrc) URL.revokeObjectURL(videoSrc);
+    setVideoFile(file);
+    const url = URL.createObjectURL(file);
+    setVideoSrc(url);
+    setScreenshot(null);
   };
 
   const handleLoadedMetadata = () => {
@@ -95,6 +103,12 @@ export default function VideoScreenshotClient() {
           </div>
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Video Preview */}
       {videoSrc && (

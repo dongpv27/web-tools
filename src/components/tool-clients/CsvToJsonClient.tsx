@@ -10,67 +10,109 @@ export default function CsvToJsonClient() {
   const [error, setError] = useState('');
   const [hasHeader, setHasHeader] = useState(true);
   const [delimiter, setDelimiter] = useState(',');
+  const [inferTypes, setInferTypes] = useState(true);
+
+  // Parse the whole CSV as a stream so that newlines inside quoted fields are
+  // preserved (splitting on \n first would silently corrupt multi-line cells).
+  const parseCsv = (text: string, delim: string): string[][] => {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let cell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') {
+            cell += '"';
+            i++;
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          cell += ch;
+        }
+        continue;
+      }
+
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === delim) {
+        row.push(cell);
+        cell = '';
+      } else if (ch === '\n') {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = '';
+      } else if (ch === '\r') {
+        // Swallow CR — handled by the following LF, or end of input.
+        if (text[i + 1] !== '\n') {
+          row.push(cell);
+          rows.push(row);
+          row = [];
+          cell = '';
+        }
+      } else {
+        cell += ch;
+      }
+    }
+    // Final cell / row
+    if (cell.length > 0 || row.length > 0) {
+      row.push(cell);
+      rows.push(row);
+    }
+    return rows;
+  };
+
+  const coerce = (raw: string): string | number | boolean | null => {
+    const trimmed = raw.trim();
+    if (trimmed === '') return '';
+    if (/^(true|false)$/i.test(trimmed)) return trimmed.toLowerCase() === 'true';
+    if (/^null$/i.test(trimmed)) return null;
+    // Only treat as number if the entire trimmed string is a valid JS number
+    // (excludes leading zeros like "007" which are commonly IDs).
+    if (/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(trimmed)) {
+      return Number(trimmed);
+    }
+    return raw;
+  };
 
   const convert = () => {
     setError('');
-    if (!input.trim()) {
+    // Strip UTF-8 BOM if Excel-exported file is pasted in.
+    const text = input.replace(/^﻿/, '');
+    if (!text.trim()) {
       setError('Please enter CSV data');
       return;
     }
 
     try {
-      const lines = input.trim().split('\n');
-      if (lines.length === 0) {
+      const rows = parseCsv(text, delimiter).filter(r => r.length > 0 && !(r.length === 1 && r[0] === ''));
+      if (rows.length === 0) {
         setError('No data found');
         return;
       }
 
-      const parseCSVLine = (line: string): string[] => {
-        const result: string[] = [];
-        let current = '';
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-
-          if (char === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-              current += '"';
-              i++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (char === delimiter && !inQuotes) {
-            result.push(current.trim());
-            current = '';
-          } else {
-            current += char;
-          }
-        }
-        result.push(current.trim());
-
-        return result;
-      };
-
-      let headers: string[] = [];
-      let dataLines = lines;
+      let headers: string[];
+      let dataRows: string[][];
 
       if (hasHeader) {
-        headers = parseCSVLine(lines[0]);
-        dataLines = lines.slice(1);
+        headers = rows[0].map(h => h.trim());
+        dataRows = rows.slice(1);
       } else {
-        const firstLineLength = parseCSVLine(lines[0]).length;
-        headers = Array.from({ length: firstLineLength }, (_, i) => `column${i + 1}`);
+        headers = Array.from({ length: rows[0].length }, (_, i) => `column${i + 1}`);
+        dataRows = rows;
       }
 
-      const result = dataLines.map(line => {
-        const values = parseCSVLine(line);
-        const obj: Record<string, string> = {};
-
+      const result = dataRows.map(values => {
+        const obj: Record<string, unknown> = {};
         headers.forEach((header, index) => {
-          obj[header] = values[index] || '';
+          const raw = values[index] ?? '';
+          obj[header] = inferTypes ? coerce(raw) : raw;
         });
-
         return obj;
       });
 
@@ -126,6 +168,18 @@ Bob Johnson,35,bob@example.com,Chicago`);
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
           <span className="text-sm text-gray-600">First row is header</span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={inferTypes}
+            onChange={(e) => setInferTypes(e.target.checked)}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-600" title="Convert &quot;123&quot; → 123, &quot;true&quot; → true, &quot;null&quot; → null">
+            Infer types (number, boolean, null)
+          </span>
         </label>
 
         <div className="flex items-center gap-2">

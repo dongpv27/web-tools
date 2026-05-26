@@ -4,71 +4,279 @@ import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 
+// Void elements per HTML spec — no closing tag, indent level doesn't increase.
+const VOID_TAGS = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+  'link', 'meta', 'param', 'source', 'track', 'wbr',
+]);
+
+// Elements whose inner whitespace must be preserved when formatting.
+const RAW_TAGS = new Set(['pre', 'script', 'style', 'textarea']);
+
+// Inline tags whose presence shouldn't force a line break — e.g. <em>, <strong>
+// inside a paragraph. Kept conservative; users can re-indent if needed.
+const INLINE_TAGS = new Set([
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn',
+  'em', 'i', 'kbd', 'mark', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'small',
+  'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr',
+]);
+
+type Token =
+  | { kind: 'doctype'; raw: string }
+  | { kind: 'comment'; raw: string }
+  | { kind: 'cdata'; raw: string }
+  | { kind: 'open'; name: string; raw: string; selfClose: boolean }
+  | { kind: 'close'; name: string; raw: string }
+  | { kind: 'raw'; name: string; body: string }
+  | { kind: 'text'; raw: string };
+
+// Tokenise HTML into a stream of structural nodes. Handles:
+//   • <!DOCTYPE ...> (any casing, multi-line)
+//   • <!-- comments --> (including > inside)
+//   • <![CDATA[ ... ]]>
+//   • <script>/<style>/<pre>/<textarea> with attributes, whose body is
+//     captured verbatim so user JS/CSS isn't mangled.
+//   • Attribute values containing >, ", '
+const tokenise = (src: string): Token[] => {
+  const tokens: Token[] = [];
+  let i = 0;
+  const len = src.length;
+
+  while (i < len) {
+    // DOCTYPE
+    if (src.startsWith('<!', i) && /^<!doctype/i.test(src.slice(i, i + 9))) {
+      const end = src.indexOf('>', i);
+      if (end === -1) {
+        tokens.push({ kind: 'text', raw: src.slice(i) });
+        break;
+      }
+      tokens.push({ kind: 'doctype', raw: src.slice(i, end + 1) });
+      i = end + 1;
+      continue;
+    }
+    // Comment
+    if (src.startsWith('<!--', i)) {
+      const end = src.indexOf('-->', i + 4);
+      if (end === -1) {
+        tokens.push({ kind: 'comment', raw: src.slice(i) });
+        break;
+      }
+      tokens.push({ kind: 'comment', raw: src.slice(i, end + 3) });
+      i = end + 3;
+      continue;
+    }
+    // CDATA (XHTML / SVG context)
+    if (src.startsWith('<![CDATA[', i)) {
+      const end = src.indexOf(']]>', i + 9);
+      if (end === -1) {
+        tokens.push({ kind: 'cdata', raw: src.slice(i) });
+        break;
+      }
+      tokens.push({ kind: 'cdata', raw: src.slice(i, end + 3) });
+      i = end + 3;
+      continue;
+    }
+    // Tag
+    if (src[i] === '<' && (/[a-zA-Z/]/.test(src[i + 1] ?? ''))) {
+      const tagEnd = findTagEnd(src, i);
+      if (tagEnd === -1) {
+        tokens.push({ kind: 'text', raw: src.slice(i) });
+        break;
+      }
+      const raw = src.slice(i, tagEnd + 1);
+      const isClose = raw.startsWith('</');
+      const name = (raw.match(/^<\/?\s*([a-zA-Z][a-zA-Z0-9:-]*)/) || [])[1]?.toLowerCase() ?? '';
+      if (isClose) {
+        tokens.push({ kind: 'close', name, raw });
+        i = tagEnd + 1;
+        continue;
+      }
+      const selfClose = raw.endsWith('/>') || VOID_TAGS.has(name);
+      // Raw-text elements: capture body verbatim until the matching </name>.
+      if (RAW_TAGS.has(name) && !selfClose) {
+        const closeRegex = new RegExp(`</\\s*${name}\\s*>`, 'i');
+        const remainder = src.slice(tagEnd + 1);
+        const closeMatch = remainder.match(closeRegex);
+        if (closeMatch && closeMatch.index !== undefined) {
+          const body = remainder.slice(0, closeMatch.index);
+          tokens.push({ kind: 'open', name, raw, selfClose: false });
+          tokens.push({ kind: 'raw', name, body });
+          tokens.push({ kind: 'close', name, raw: closeMatch[0] });
+          i = tagEnd + 1 + closeMatch.index + closeMatch[0].length;
+          continue;
+        }
+      }
+      tokens.push({ kind: 'open', name, raw, selfClose });
+      i = tagEnd + 1;
+      continue;
+    }
+    // Text run — up to next `<`
+    const next = src.indexOf('<', i);
+    const slice = next === -1 ? src.slice(i) : src.slice(i, next);
+    if (slice) tokens.push({ kind: 'text', raw: slice });
+    if (next === -1) break;
+    i = next;
+  }
+  return tokens;
+};
+
+// Find the index of the `>` that closes a tag starting at `start`, accounting
+// for quoted attribute values that may contain `>`.
+const findTagEnd = (src: string, start: number): number => {
+  let i = start + 1;
+  let quote: string | null = null;
+  while (i < src.length) {
+    const ch = src[i];
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else {
+      if (ch === '"' || ch === "'") quote = ch;
+      else if (ch === '>') return i;
+    }
+    i++;
+  }
+  return -1;
+};
+
+// Reassemble tokens with proper indentation.
+const formatHtml = (src: string, indentValue: number | string): string => {
+  const indentStr = indentValue === 'tab' ? '\t' : ' '.repeat(indentValue as number);
+  const tokens = tokenise(src);
+
+  const out: string[] = [];
+  let depth = 0;
+  let lastWasText = false;
+
+  const pushLine = (s: string) => {
+    out.push(indentStr.repeat(Math.max(0, depth)) + s);
+    lastWasText = false;
+  };
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+
+    if (t.kind === 'doctype') {
+      pushLine(t.raw);
+      continue;
+    }
+    if (t.kind === 'comment') {
+      pushLine(t.raw);
+      continue;
+    }
+    if (t.kind === 'cdata') {
+      pushLine(t.raw);
+      continue;
+    }
+    if (t.kind === 'raw') {
+      // Re-indent each line of the preserved body by the current depth so that
+      // <script>/<style>/<pre> bodies sit visually under their opening tag.
+      const trimmed = t.body.replace(/^\n+|\n+$/g, '');
+      if (trimmed.length === 0) continue;
+      const body = trimmed
+        .split('\n')
+        .map(line => indentStr.repeat(depth) + line)
+        .join('\n');
+      out.push(body);
+      lastWasText = false;
+      continue;
+    }
+    if (t.kind === 'text') {
+      const collapsed = t.raw.replace(/\s+/g, ' ').trim();
+      if (!collapsed) continue;
+      // Glue short text onto the previous line if it followed an inline open tag.
+      const prev = out[out.length - 1];
+      const prevTok = tokens[i - 1];
+      const prevIsInlineOpen =
+        prevTok && prevTok.kind === 'open' && INLINE_TAGS.has(prevTok.name) && !prevTok.selfClose;
+      if (prevIsInlineOpen && prev !== undefined) {
+        out[out.length - 1] = prev + collapsed;
+      } else {
+        pushLine(collapsed);
+      }
+      lastWasText = true;
+      continue;
+    }
+    if (t.kind === 'open') {
+      if (t.selfClose) {
+        pushLine(t.raw);
+        continue;
+      }
+      // If the next non-comment token is a closing tag for the same name with
+      // only short inline text between, keep them on one line — e.g. <p>hi</p>.
+      const next = tokens[i + 1];
+      const after = tokens[i + 2];
+      if (
+        next &&
+        next.kind === 'text' &&
+        !next.raw.includes('\n') &&
+        after &&
+        after.kind === 'close' &&
+        after.name === t.name
+      ) {
+        const inner = next.raw.replace(/\s+/g, ' ').trim();
+        pushLine(`${t.raw}${inner}${after.raw}`);
+        i += 2;
+        continue;
+      }
+      pushLine(t.raw);
+      depth++;
+      continue;
+    }
+    if (t.kind === 'close') {
+      depth = Math.max(0, depth - 1);
+      // If previous output line is the matching opener with only inline text,
+      // we already emitted it together — but this branch handles the general case.
+      if (lastWasText && out.length > 0) {
+        out[out.length - 1] = out[out.length - 1] + t.raw;
+        lastWasText = false;
+      } else {
+        pushLine(t.raw);
+      }
+      continue;
+    }
+  }
+  return out.join('\n').trim();
+};
+
+// Minify while preserving the body of script/style/pre/textarea.
+const minifyHtml = (src: string): string => {
+  const tokens = tokenise(src);
+  const out: string[] = [];
+  for (const t of tokens) {
+    switch (t.kind) {
+      case 'doctype':
+      case 'open':
+      case 'close':
+      case 'cdata':
+        out.push(t.raw);
+        break;
+      case 'comment':
+        // Drop comments — common minify behaviour. Conditional IE comments
+        // (`<!--[if ...]>`) are no longer relevant, but if preserved is wanted
+        // a future flag could keep them.
+        break;
+      case 'raw':
+        out.push(t.body);
+        break;
+      case 'text': {
+        const collapsed = t.raw.replace(/\s+/g, ' ');
+        if (collapsed.trim()) out.push(collapsed);
+        break;
+      }
+    }
+  }
+  return out
+    .join('')
+    // Collapse whitespace between tags
+    .replace(/>\s+</g, '><')
+    .trim();
+};
+
 export default function HtmlFormatterClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [indent, setIndent] = useState<number|string>(2);
-
-  const formatHtml = (html: string, indentValue: number|string): string => {
-    const indentStr = indentValue === 'tab' ? '\t' : ' '.repeat(indentValue as number);
-    let formatted = '';
-    let currentIndent = 0;
-    let inPre = false;
-    let inScript = false;
-    let inStyle = false;
-
-    // Remove extra whitespace between tags
-    html = html.replace(/>\s+</g, '><');
-
-    // Split by tags while keeping them
-    const tokens = html.split(/(<[^>]+>)/g).filter(t => t.trim());
-
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i].trim();
-      if (!token) continue;
-
-      // Check for pre, script, style tags
-      if (token.toLowerCase() === '<pre>') inPre = true;
-      if (token.toLowerCase() === '</pre>') inPre = false;
-      if (token.toLowerCase() === '<script>') inScript = true;
-      if (token.toLowerCase() === '</script>') inScript = false;
-      if (token.toLowerCase() === '<style>') inStyle = true;
-      if (token.toLowerCase() === '</style>') inStyle = false;
-
-      if (inPre || inScript || inStyle) {
-        formatted += token;
-        continue;
-      }
-
-      // Self-closing tags
-      const isSelfClosing = token.endsWith('/>') || /^<br\s*\/?>/i.test(token) ||
-        /^<hr\s*\/?>/i.test(token) || /^<img[^>]*>/i.test(token) ||
-        /^<input[^>]*>/i.test(token) || /^<meta[^>]*>/i.test(token) ||
-        /^<link[^>]*>/i.test(token);
-
-      // Closing tag
-      const isClosing = token.startsWith('</');
-
-      // Opening tag (not self-closing)
-      const isOpening = token.startsWith('<') && !isClosing && !isSelfClosing;
-
-      if (isClosing) {
-        currentIndent = Math.max(0, currentIndent - 1);
-        formatted += '\n' + indentStr.repeat(currentIndent) + token;
-      } else if (isSelfClosing) {
-        formatted += '\n' + indentStr.repeat(currentIndent) + token;
-      } else if (isOpening) {
-        formatted += '\n' + indentStr.repeat(currentIndent) + token;
-        currentIndent++;
-      } else {
-        // Text content
-        formatted += token;
-      }
-    }
-
-    return formatted.trim();
-  };
+  const [indent, setIndent] = useState<number | string>(2);
 
   const format = () => {
     setError('');
@@ -76,10 +284,8 @@ export default function HtmlFormatterClient() {
       setError('Please enter HTML to format');
       return;
     }
-
     try {
-      const formatted = formatHtml(input, indent);
-      setOutput(formatted);
+      setOutput(formatHtml(input, indent));
     } catch (e) {
       setError(`Error formatting HTML: ${(e as Error).message}`);
     }
@@ -91,14 +297,8 @@ export default function HtmlFormatterClient() {
       setError('Please enter HTML to minify');
       return;
     }
-
     try {
-      const minified = input
-        .replace(/\n/g, '')
-        .replace(/\s+/g, ' ')
-        .replace(/>\s+</g, '><')
-        .trim();
-      setOutput(minified);
+      setOutput(minifyHtml(input));
     } catch (e) {
       setError(`Error minifying HTML: ${(e as Error).message}`);
     }
@@ -111,7 +311,9 @@ export default function HtmlFormatterClient() {
   };
 
   const loadSample = () => {
-    setInput('<div class="container"><header><h1>Welcome</h1></header><main><p>This is a paragraph.</p><ul><li>Item 1</li><li>Item 2</li></ul></main><footer><p>&copy; 2024</p></footer></div>');
+    setInput(
+      `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Demo</title><style>body{margin:0;font-family:system-ui}</style></head><body><!-- main content --><div class="container"><header><h1>Welcome</h1></header><main><p>This is a <strong>bold</strong> paragraph with an <a href="https://example.com" title="link >">inline link</a>.</p><ul><li>Item 1</li><li>Item 2</li></ul><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg></main><script>console.log("hi <world>");</script></div></body></html>`,
+    );
     setError('');
   };
 
@@ -133,7 +335,7 @@ export default function HtmlFormatterClient() {
           onChange={setInput}
           placeholder="<html>...</html>"
           rows={10}
-        lineNumbers
+          lineNumbers
         />
       </div>
 

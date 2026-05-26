@@ -2,11 +2,13 @@
 
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { callConvertMulti, downloadBlob } from '@/lib/convert-api';
 
 interface ExcelFile {
   name: string;
   data: Record<string, unknown>[];
   headers: string[];
+  raw: File;
 }
 
 export default function MergeExcelClient() {
@@ -14,6 +16,7 @@ export default function MergeExcelClient() {
   const [mergeMode, setMergeMode] = useState<'sheets' | 'rows'>('rows');
   const [merging, setMerging] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,12 +48,14 @@ export default function MergeExcelClient() {
           name: file.name,
           data,
           headers,
+          raw: file,
         });
       }
 
       setFiles((prev) => [...prev, ...newFiles]);
-    } catch {
-      alert('Error reading files');
+      setError('');
+    } catch (err) {
+      setError(`Could not read one or more files: ${(err as Error).message}`);
     } finally {
       setMerging(false);
       if (fileInputRef.current) {
@@ -73,11 +78,12 @@ export default function MergeExcelClient() {
 
   const merge = () => {
     if (files.length < 2) {
-      alert('Please add at least 2 files to merge');
+      setError('Please add at least 2 files to merge');
       return;
     }
 
     setMerging(true);
+    setError('');
 
     try {
       const workbook = XLSX.utils.book_new();
@@ -104,8 +110,28 @@ export default function MergeExcelClient() {
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-    } catch {
-      alert('Error merging files');
+    } catch (err) {
+      setError(`Browser merge failed: ${(err as Error).message}. Try the server option.`);
+    } finally {
+      setMerging(false);
+    }
+  };
+
+  const mergeServer = async () => {
+    if (files.length < 2) {
+      setError('Please add at least 2 files to merge');
+      return;
+    }
+    setMerging(true);
+    setError('');
+    try {
+      const result = await callConvertMulti(
+        'merge-excel',
+        files.map((f) => ({ file: f.raw, name: f.name })),
+      );
+      downloadBlob(result.blob, result.filename);
+    } catch (err) {
+      setError(`Server merge failed: ${(err as Error).message}`);
     } finally {
       setMerging(false);
     }
@@ -225,18 +251,33 @@ export default function MergeExcelClient() {
         </div>
       )}
 
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={merge}
           disabled={files.length < 2 || merging}
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {merging ? 'Merging...' : 'Merge Files'}
+          {merging ? 'Merging...' : 'Merge in browser'}
+        </button>
+        <button
+          onClick={mergeServer}
+          disabled={files.length < 2 || merging}
+          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Server-side merge — handles large workbooks and many files reliably"
+        >
+          {merging ? 'Merging...' : 'Merge on server'}
         </button>
         <button
           onClick={clear}
-          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+          disabled={merging}
+          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
         >
           Clear
         </button>

@@ -3,34 +3,8 @@
 import { useState, useRef } from 'react';
 import JSZip from 'jszip';
 import { PDFDocument, rgb } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
-
-// Be Vietnam Pro is purpose-built for Vietnamese — guaranteed full coverage
-// of Latin Extended Additional (U+1E00–U+1EFF) including all uppercase
-// Vietnamese letters. Static (non-variable) TTF avoids fontkit subset bugs.
-const FONT_URLS = [
-  'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bevietnampro/BeVietnamPro-Regular.ttf',
-  'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Regular.ttf',
-];
-
-let cachedFontBytes: ArrayBuffer | null = null;
-
-async function loadFontBytes(): Promise<ArrayBuffer> {
-  if (cachedFontBytes) return cachedFontBytes;
-  for (const url of FONT_URLS) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) {
-        const buf = await res.arrayBuffer();
-        cachedFontBytes = buf;
-        return buf;
-      }
-    } catch {
-      // try next
-    }
-  }
-  throw new Error('Failed to load font for PDF embedding');
-}
+import { callConvert, downloadBlob } from '@/lib/convert-api';
+import { pickDocFamily, embedFamily, pickWeight } from '@/lib/pdf-fonts';
 
 // Walk descendants of a paragraph node, collecting text from all OOXML
 // text-bearing elements: w:t (text), w:tab → "\t", w:br → "\n",
@@ -125,10 +99,12 @@ export default function WordToPdfClient() {
       const xml = await documentXml.async('text');
       const paragraphs = extractParagraphs(xml);
 
-      const fontBytes = await loadFontBytes();
       const pdfDoc = await PDFDocument.create();
-      pdfDoc.registerFontkit(fontkit);
-      const font = await pdfDoc.embedFont(fontBytes, { subset: true });
+      // Pick font family from the document's dominant script. Any CJK
+      // detected → use Noto Sans CJK variant; otherwise Be Vietnam Pro.
+      const family = pickDocFamily(paragraphs);
+      const fontSet = await embedFamily(pdfDoc, family);
+      const font = pickWeight(fontSet, false, false);
 
       const fontSize = 11;
       const lineHeight = fontSize * 1.45;
@@ -221,6 +197,21 @@ export default function WordToPdfClient() {
     link.click();
   };
 
+  const convertServer = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+    setConverting(true);
+    setError('');
+    try {
+      const result = await callConvert('word-to-pdf', file, file.name);
+      downloadBlob(result.blob, result.filename);
+    } catch (err) {
+      setError(`Server conversion failed: ${(err as Error).message}`);
+    } finally {
+      setConverting(false);
+    }
+  };
+
   const clear = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
@@ -266,13 +257,27 @@ export default function WordToPdfClient() {
             <p className="text-sm text-red-600">{error}</p>
           )}
 
-          <button
-            onClick={convert}
-            disabled={!fileName || converting}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {converting ? 'Converting...' : 'Convert to PDF'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={convert}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Browser-side conversion with Be Vietnam Pro font — best for Vietnamese/non-Latin text"
+            >
+              {converting ? 'Converting...' : 'Convert in browser'}
+            </button>
+            <button
+              onClick={convertServer}
+              disabled={!fileName || converting}
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Server-side conversion via mammoth — better handling of headings, lists, tables"
+            >
+              {converting ? 'Converting...' : 'Convert on server'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">
+            Browser version preserves Vietnamese/non-Latin text. Server version handles headings, lists, and tables better but uses standard Helvetica (Latin-1 only).
+          </p>
         </div>
       ) : (
         <div className="space-y-4">

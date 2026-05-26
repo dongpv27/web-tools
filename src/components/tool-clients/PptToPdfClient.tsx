@@ -2,13 +2,15 @@
 
 import { useState, useRef } from 'react';
 import JSZip from 'jszip';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
+import { pickDocFamily, embedFamily, pickWeight } from '@/lib/pdf-fonts';
 
 export default function PptToPdfClient() {
   const [converting, setConverting] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
   const [slideCount, setSlideCount] = useState<number>(0);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,6 +19,7 @@ export default function PptToPdfClient() {
 
     setFileName(file.name);
     setDownloadUrl(null);
+    setError('');
 
     try {
       const zip = await JSZip.loadAsync(file);
@@ -27,8 +30,8 @@ export default function PptToPdfClient() {
         const slideCount = files.filter(f => f.endsWith('.xml') && !f.includes('_rels')).length;
         setSlideCount(slideCount);
       }
-    } catch {
-      alert('Error reading PowerPoint file');
+    } catch (err) {
+      setError(`Could not read PowerPoint file: ${(err as Error).message}`);
     }
   };
 
@@ -37,6 +40,7 @@ export default function PptToPdfClient() {
     if (!fileInput?.files?.[0]) return;
 
     setConverting(true);
+    setError('');
 
     try {
       const file = fileInput.files[0];
@@ -69,9 +73,13 @@ export default function PptToPdfClient() {
         }
       }
 
-      // Create PDF
+      // Create PDF — pick font family based on dominant script in the deck
+      // so Vietnamese/CJK text renders correctly instead of as "?".
       const pdfDoc = await PDFDocument.create();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const family = pickDocFamily(slideTexts);
+      const fontSet = await embedFamily(pdfDoc, family);
+      const font = pickWeight(fontSet, false, false);
+      const boldFont = pickWeight(fontSet, true, false);
 
       for (const slideText of slideTexts) {
         const page = pdfDoc.addPage([612, 792]); // Letter size
@@ -82,12 +90,13 @@ export default function PptToPdfClient() {
           x: 50,
           y: height - 50,
           size: 18,
-          font,
+          font: boldFont,
           color: rgb(0, 0, 0),
         });
 
-        // Add text content (wrap text)
-        const lines = wrapText(slideText, font, 12, width - 100);
+        // Add text content (wrap text) — NFC-normalise so any decomposed
+        // characters collapse to precomposed codepoints the embedded font has.
+        const lines = wrapText(slideText.normalize('NFC'), font, 12, width - 100);
         let y = height - 100;
 
         for (const line of lines) {
@@ -107,8 +116,8 @@ export default function PptToPdfClient() {
       const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-    } catch {
-      alert('Error converting PPT to PDF');
+    } catch (err) {
+      setError(`Conversion failed: ${(err as Error).message}`);
     } finally {
       setConverting(false);
     }
@@ -150,6 +159,7 @@ export default function PptToPdfClient() {
     setDownloadUrl(null);
     setFileName('');
     setSlideCount(0);
+    setError('');
   };
 
   return (
@@ -173,6 +183,12 @@ export default function PptToPdfClient() {
             </button>
             <p className="text-sm text-gray-500 mt-2">Convert PPT to PDF</p>
           </div>
+
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           {fileName && (
             <div className="space-y-2">

@@ -22,7 +22,11 @@ export default function TextCaseConverterClient() {
     {
       name: 'Title Case',
       fn: (text: string) =>
-        text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()),
+        text
+          .toLowerCase()
+          .split(/(\s+)/)
+          .map(part => (/\s/.test(part) ? part : part.charAt(0).toUpperCase() + part.slice(1)))
+          .join(''),
       desc: 'Capitalize first letter of each word',
     },
     {
@@ -130,7 +134,7 @@ export default function TextCaseConverterClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Converted Text" showDownload={true} downloadFilename="converted-text.txt" textClassName="text-gray-100" />
+        <ToolResult value={output} label="Converted Text" showDownload={true} downloadFilename="converted-text.txt" />
       )}
 
       {/* Clear Button */}

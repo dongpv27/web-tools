@@ -1,7 +1,78 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import ToolResult from '@/components/tools/ToolResult';
+
+// Tightly grouped cheatsheet: characters → quantifiers → anchors → groups → classes → escapes.
+// Each entry: token, human description. Kept short so the panel doesn't bury results.
+const CHEATSHEET: { section: string; rows: { token: string; desc: string }[] }[] = [
+  {
+    section: 'Character classes',
+    rows: [
+      { token: '.', desc: 'Any character except newline' },
+      { token: '\\d', desc: 'Digit (0-9)' },
+      { token: '\\D', desc: 'Non-digit' },
+      { token: '\\w', desc: 'Word char (a-z, A-Z, 0-9, _)' },
+      { token: '\\W', desc: 'Non-word char' },
+      { token: '\\s', desc: 'Whitespace (space, tab, newline)' },
+      { token: '\\S', desc: 'Non-whitespace' },
+      { token: '[abc]', desc: 'Any of a, b, or c' },
+      { token: '[^abc]', desc: 'Not a, b, or c' },
+      { token: '[a-z]', desc: 'Range from a to z' },
+    ],
+  },
+  {
+    section: 'Quantifiers',
+    rows: [
+      { token: '*', desc: '0 or more (greedy)' },
+      { token: '+', desc: '1 or more (greedy)' },
+      { token: '?', desc: '0 or 1 (optional)' },
+      { token: '{n}', desc: 'Exactly n times' },
+      { token: '{n,}', desc: 'At least n times' },
+      { token: '{n,m}', desc: 'Between n and m times' },
+      { token: '*?', desc: 'Lazy (non-greedy) version' },
+    ],
+  },
+  {
+    section: 'Anchors',
+    rows: [
+      { token: '^', desc: 'Start of string (or line with /m)' },
+      { token: '$', desc: 'End of string (or line with /m)' },
+      { token: '\\b', desc: 'Word boundary' },
+      { token: '\\B', desc: 'Non-word boundary' },
+    ],
+  },
+  {
+    section: 'Groups & references',
+    rows: [
+      { token: '(abc)', desc: 'Capturing group → use as $1 in replace' },
+      { token: '(?:abc)', desc: 'Non-capturing group' },
+      { token: '(?<name>abc)', desc: 'Named group → use as $<name>' },
+      { token: '(a|b)', desc: 'Alternation: a or b' },
+      { token: '\\1', desc: 'Backreference to group 1' },
+    ],
+  },
+  {
+    section: 'Lookaround',
+    rows: [
+      { token: '(?=abc)', desc: 'Positive lookahead (followed by abc)' },
+      { token: '(?!abc)', desc: 'Negative lookahead' },
+      { token: '(?<=abc)', desc: 'Positive lookbehind' },
+      { token: '(?<!abc)', desc: 'Negative lookbehind' },
+    ],
+  },
+  {
+    section: 'Common patterns',
+    rows: [
+      { token: '\\d{4}-\\d{2}-\\d{2}', desc: 'ISO date YYYY-MM-DD' },
+      { token: '[\\w.+-]+@[\\w-]+\\.[\\w.-]+', desc: 'Email (basic)' },
+      { token: 'https?://[^\\s]+', desc: 'URL' },
+      { token: '^[a-zA-Z0-9_]{3,16}$', desc: 'Username (3-16 chars)' },
+      { token: '\\b[0-9a-f]{6}\\b', desc: 'Hex color (6 digits)' },
+    ],
+  },
+];
 
 interface Match {
   match: string;
@@ -17,6 +88,9 @@ export default function RegexTesterClient() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [error, setError] = useState('');
   const [highlightedHtml, setHighlightedHtml] = useState('');
+  const [replacement, setReplacement] = useState('');
+  const [replacedOutput, setReplacedOutput] = useState('');
+  const [showCheatsheet, setShowCheatsheet] = useState(false);
 
   const availableFlags = [
     { flag: 'g', label: 'Global', desc: 'Find all matches' },
@@ -33,6 +107,7 @@ export default function RegexTesterClient() {
     setError('');
     setMatches([]);
     setHighlightedHtml('');
+    setReplacedOutput('');
 
     if (!pattern.trim()) {
       setError('Please enter a regex pattern');
@@ -90,6 +165,14 @@ export default function RegexTesterClient() {
       }
       html += escapeHtml(testString.slice(lastIndex));
       setHighlightedHtml(html);
+
+      // Replacement preview — fresh regex so lastIndex doesn't leak from .exec loop
+      try {
+        const replaceRegex = new RegExp(pattern, flags);
+        setReplacedOutput(testString.replace(replaceRegex, replacement));
+      } catch {
+        setReplacedOutput('');
+      }
     } catch (e) {
       setError(`Invalid regex: ${(e as Error).message}`);
     }
@@ -111,6 +194,8 @@ export default function RegexTesterClient() {
     setMatches([]);
     setHighlightedHtml('');
     setError('');
+    setReplacement('');
+    setReplacedOutput('');
   };
 
   const loadSample = () => {
@@ -186,6 +271,20 @@ export default function RegexTesterClient() {
           placeholder="Enter text to test against the regex"
           rows={5}
           className="w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+        />
+      </div>
+
+      {/* Replacement (optional) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Replacement <span className="text-gray-400 font-normal">(optional — supports <code className="font-mono">$1</code>, <code className="font-mono">$&lt;name&gt;</code>)</span>
+        </label>
+        <input
+          type="text"
+          value={replacement}
+          onChange={(e) => setReplacement(e.target.value)}
+          placeholder="Replacement string"
+          className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -267,12 +366,59 @@ export default function RegexTesterClient() {
         </div>
       )}
 
+      {/* Replacement preview */}
+      {matches.length > 0 && !error && replacement && (
+        <ToolResult value={replacedOutput} label="Replacement Result" />
+      )}
+
       {/* No matches */}
       {highlightedHtml && matches.length === 0 && !error && (
         <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
           <p className="text-sm text-gray-600">No matches found</p>
         </div>
       )}
+
+      {/* Cheatsheet */}
+      <div className="border border-gray-200 rounded-lg">
+        <button
+          type="button"
+          onClick={() => setShowCheatsheet(s => !s)}
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+          aria-expanded={showCheatsheet}
+        >
+          <span className="flex items-center gap-2">
+            {showCheatsheet ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            Regex cheatsheet
+          </span>
+          <span className="text-xs text-gray-500">Click any token to insert into pattern</span>
+        </button>
+        {showCheatsheet && (
+          <div className="px-4 pb-4 pt-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            {CHEATSHEET.map(({ section, rows }) => (
+              <div key={section}>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  {section}
+                </div>
+                <ul className="space-y-1">
+                  {rows.map(({ token, desc }) => (
+                    <li key={token} className="flex items-start gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPattern(p => p + token)}
+                        className="flex-shrink-0 px-1.5 py-0.5 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 font-mono text-gray-700 rounded transition-colors text-left"
+                        title="Click to append to pattern"
+                      >
+                        {token}
+                      </button>
+                      <span className="text-gray-600 leading-relaxed">{desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -16,12 +16,41 @@ export default function TimestampConverterClient() {
   } | null>(null);
   const [error, setError] = useState('');
 
-  // Update current time every second
+  // Tick once per second, but pause while the tab is hidden so background tabs
+  // don't keep re-rendering. Also align to the next whole-second boundary on
+  // start to avoid drift after long idle periods.
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 1000);
-    return () => clearInterval(interval);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const schedule = () => {
+      const now = Date.now();
+      const delay = 1000 - (now % 1000);
+      timer = setTimeout(() => {
+        setCurrentTime(Date.now());
+        schedule();
+      }, delay);
+    };
+
+    const start = () => {
+      if (timer === null && !document.hidden) {
+        setCurrentTime(Date.now());
+        schedule();
+      }
+    };
+    const stop = () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    };
+    const onVisibility = () => (document.hidden ? stop() : start());
+
+    start();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
 
   const formatRelativeTime = (ms: number) => {

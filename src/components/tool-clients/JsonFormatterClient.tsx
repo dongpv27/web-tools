@@ -1,16 +1,116 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 import { ToolError, ToolEmpty } from '@/components/tools/ToolFeedback';
 import { formatJSON, minifyJSON, validateJSON } from '@/lib/utils';
+
+// ─── Tree view ─────────────────────────────────────────────────────────────
+// Collapsible JSON viewer. Keeps recursion shallow by reusing a single component
+// and tracking the expanded state per node via useState.
+function JsonNode({ value, name, depth = 0 }: { value: unknown; name?: string; depth?: number }) {
+  const isObject = value !== null && typeof value === 'object';
+  // Collapse deeply nested branches by default so big payloads load fast.
+  const [open, setOpen] = useState(depth < 2);
+
+  const keyLabel = name !== undefined ? <span className="text-purple-700 font-medium">&quot;{name}&quot;: </span> : null;
+
+  if (!isObject) {
+    let cls = 'text-gray-700';
+    let display: string;
+    if (typeof value === 'string') {
+      cls = 'text-green-700';
+      display = `"${value}"`;
+    } else if (typeof value === 'number') {
+      cls = 'text-blue-700';
+      display = String(value);
+    } else if (typeof value === 'boolean') {
+      cls = 'text-orange-700';
+      display = String(value);
+    } else if (value === null) {
+      cls = 'text-gray-500 italic';
+      display = 'null';
+    } else {
+      display = String(value);
+    }
+    return (
+      <div className="leading-6">
+        {keyLabel}
+        <span className={cls}>{display}</span>
+      </div>
+    );
+  }
+
+  const isArray = Array.isArray(value);
+  const entries = isArray
+    ? (value as unknown[]).map((v, i) => [String(i), v] as const)
+    : Object.entries(value as Record<string, unknown>);
+  const openBracket = isArray ? '[' : '{';
+  const closeBracket = isArray ? ']' : '}';
+  const itemCount = entries.length;
+
+  return (
+    <div className="leading-6">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center align-middle text-gray-500 hover:text-gray-700"
+        aria-expanded={open}
+        aria-label={open ? 'Collapse' : 'Expand'}
+      >
+        {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+      </button>
+      {keyLabel}
+      <span className="text-gray-500">{openBracket}</span>
+      {!open && (
+        <span className="text-gray-400 text-xs ml-1">
+          {itemCount} {isArray ? 'items' : 'keys'}
+        </span>
+      )}
+      {open && (
+        <div className="pl-5 border-l border-gray-200 ml-1.5">
+          {entries.map(([k, v], i) => (
+            <div key={k}>
+              <JsonNode value={v} name={isArray ? undefined : k} depth={depth + 1} />
+              {i < entries.length - 1 && <span className="text-gray-400">,</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      <span className="text-gray-500">{closeBracket}</span>
+    </div>
+  );
+}
+
+function JsonTreePane({ raw }: { raw: string }) {
+  const parsed = useMemo(() => {
+    try {
+      return { ok: true, value: JSON.parse(raw) } as const;
+    } catch (e) {
+      return { ok: false, error: (e as Error).message } as const;
+    }
+  }, [raw]);
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Tree View</label>
+      <div className="px-4 py-3 text-sm font-mono bg-white border border-gray-200 rounded-lg overflow-x-auto">
+        {parsed.ok ? <JsonNode value={parsed.value} /> : <span className="text-red-600">{parsed.error}</span>}
+      </div>
+    </div>
+  );
+}
+
+type ViewMode = 'formatted' | 'tree';
 
 export default function JsonFormatterClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [indent, setIndent] = useState(2);
+  const [viewMode, setViewMode] = useState<ViewMode>('formatted');
 
   const handleFormat = () => {
     setError('');
@@ -149,12 +249,40 @@ export default function JsonFormatterClient() {
 
       {/* Output Section */}
       {output && !error ? (
-        <ToolResult
-          value={output}
-          label="Formatted JSON"
-          language="json"
-          theme="light"
-        />
+        <div className="space-y-2">
+          <div className="flex justify-end">
+            <div className="inline-flex rounded-lg border border-gray-300 bg-white p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('formatted')}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  viewMode === 'formatted' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Text
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('tree')}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  viewMode === 'tree' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Tree
+              </button>
+            </div>
+          </div>
+          {viewMode === 'formatted' ? (
+            <ToolResult
+              value={output}
+              label="Formatted JSON"
+              language="json"
+              theme="light"
+            />
+          ) : (
+            <JsonTreePane raw={output} />
+          )}
+        </div>
       ) : (
         !error && !input && (
           <ToolEmpty

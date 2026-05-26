@@ -23,9 +23,11 @@ const loremWords = [
 
 export default function LoremIpsumClient() {
   const [output, setOutput] = useState('');
-  const [type, setType] = useState<'paragraphs' | 'sentences' | 'words'>('paragraphs');
+  const [type, setType] = useState<'paragraphs' | 'sentences' | 'words' | 'list' | 'headings'>('paragraphs');
   const [count, setCount] = useState(3);
   const [startWithClassic, setStartWithClassic] = useState(true);
+  const [format, setFormat] = useState<'plain' | 'html'>('plain');
+  const [listStyle, setListStyle] = useState<'ul' | 'ol'>('ul');
 
   const classicStart = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit';
 
@@ -56,47 +58,76 @@ export default function LoremIpsumClient() {
     return paragraph.join(' ');
   };
 
+  // Short, title-cased phrase for headings/list items (5–9 words).
+  const generateTitle = (): string => {
+    const len = Math.floor(Math.random() * 5) + 5;
+    return Array.from({ length: len }, generateWord)
+      .map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+      .join(' ');
+  };
+
   const generate = () => {
-    let result = '';
+    const paragraphs: string[] = [];
 
     switch (type) {
       case 'paragraphs':
         for (let i = 0; i < count; i++) {
-          if (startWithClassic && i === 0) {
-            result += classicStart + '. ' + generateParagraph(4);
-          } else {
-            result += generateParagraph();
-          }
-          if (i < count - 1) {
-            result += '\n\n';
-          }
+          paragraphs.push(
+            startWithClassic && i === 0
+              ? classicStart + '. ' + generateParagraph(4)
+              : generateParagraph(),
+          );
         }
-        break;
+        setOutput(
+          format === 'html'
+            ? paragraphs.map(p => `<p>${p}</p>`).join('\n')
+            : paragraphs.join('\n\n'),
+        );
+        return;
 
-      case 'sentences':
+      case 'sentences': {
+        const sentences: string[] = [];
         for (let i = 0; i < count; i++) {
-          if (startWithClassic && i === 0) {
-            result += classicStart + '.';
-          } else {
-            result += generateSentence();
-          }
-          if (i < count - 1) {
-            result += ' ';
-          }
+          sentences.push(
+            startWithClassic && i === 0 ? classicStart + '.' : generateSentence(),
+          );
         }
-        break;
+        setOutput(sentences.join(' '));
+        return;
+      }
 
       case 'words':
+        setOutput(Array.from({ length: count }, generateWord).join(' '));
+        return;
+
+      case 'headings': {
+        const headings: string[] = [];
         for (let i = 0; i < count; i++) {
-          result += generateWord();
-          if (i < count - 1) {
-            result += ' ';
+          const title = generateTitle();
+          // Cycle h2 → h3 → h4 so longer outputs feel like an outline.
+          const level = 2 + (i % 3);
+          if (format === 'html') {
+            headings.push(`<h${level}>${title}</h${level}>`);
+          } else {
+            headings.push(`${'#'.repeat(level)} ${title}`);
           }
         }
-        break;
-    }
+        setOutput(headings.join('\n\n'));
+        return;
+      }
 
-    setOutput(result);
+      case 'list': {
+        const items = Array.from({ length: count }, generateTitle);
+        if (format === 'html') {
+          const inner = items.map(it => `  <li>${it}</li>`).join('\n');
+          setOutput(`<${listStyle}>\n${inner}\n</${listStyle}>`);
+        } else {
+          const prefix = (i: number) => (listStyle === 'ol' ? `${i + 1}. ` : '- ');
+          setOutput(items.map((it, i) => prefix(i) + it).join('\n'));
+        }
+        return;
+      }
+    }
   };
 
   const clearAll = () => {
@@ -118,6 +149,8 @@ export default function LoremIpsumClient() {
             <option value="paragraphs">Paragraphs</option>
             <option value="sentences">Sentences</option>
             <option value="words">Words</option>
+            <option value="headings">Headings</option>
+            <option value="list">List items</option>
           </select>
         </div>
 
@@ -134,18 +167,51 @@ export default function LoremIpsumClient() {
           />
         </div>
 
-        {/* Classic start */}
+        {/* Classic start (only meaningful for prose types) */}
         <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer pb-2">
+          <label
+            className={`flex items-center gap-2 pb-2 ${
+              type === 'paragraphs' || type === 'sentences' ? 'cursor-pointer' : 'opacity-50'
+            }`}
+          >
             <input
               type="checkbox"
               checked={startWithClassic}
               onChange={(e) => setStartWithClassic(e.target.checked)}
+              disabled={type !== 'paragraphs' && type !== 'sentences'}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <span className="text-sm text-gray-600">Start with "Lorem ipsum..."</span>
+            <span className="text-sm text-gray-600">Start with &quot;Lorem ipsum...&quot;</span>
           </label>
         </div>
+      </div>
+
+      {/* Output format options */}
+      <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-gray-200">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">Output:</label>
+          <select
+            value={format}
+            onChange={(e) => setFormat(e.target.value as 'plain' | 'html')}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="plain">Plain text</option>
+            <option value="html">HTML</option>
+          </select>
+        </div>
+        {type === 'list' && (
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">List style:</label>
+            <select
+              value={listStyle}
+              onChange={(e) => setListStyle(e.target.value as 'ul' | 'ol')}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="ul">Bulleted (ul)</option>
+              <option value="ol">Numbered (ol)</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
@@ -166,7 +232,7 @@ export default function LoremIpsumClient() {
 
       {/* Output */}
       {output && (
-        <ToolResult value={output} label="Generated Lorem Ipsum" textClassName="text-gray-100" />
+        <ToolResult value={output} label="Generated Lorem Ipsum" />
       )}
 
       {/* Word Count */}
