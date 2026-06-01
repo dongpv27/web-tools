@@ -4,11 +4,13 @@ import { useState, useCallback, useEffect } from 'react';
 import VideoUpload from '@/components/video/VideoUpload';
 import VideoPreview from '@/components/video/VideoPreview';
 import { getFFmpeg, loadVideoFile, readOutputFile, formatTime } from '@/lib/ffmpeg';
+import { secondsToHMS, hmsToSeconds } from '@/lib/timecode';
 import JSZip from 'jszip';
 
 interface SplitPoint {
   id: string;
   time: number;
+  draft: string;
 }
 
 export default function SplitVideoClient() {
@@ -55,9 +57,11 @@ export default function SplitVideoClient() {
   }, []);
 
   const addSplitPoint = useCallback(() => {
+    const t = duration / 2;
     const newPoint: SplitPoint = {
       id: `${Date.now()}-${Math.random()}`,
-      time: duration / 2,
+      time: t,
+      draft: secondsToHMS(t),
     };
     setSplitPoints(prev => [...prev, newPoint].sort((a, b) => a.time - b.time));
   }, [duration]);
@@ -66,12 +70,26 @@ export default function SplitVideoClient() {
     setSplitPoints(prev => prev.filter(p => p.id !== id));
   }, []);
 
-  const updateSplitPoint = useCallback((id: string, time: number) => {
-    setSplitPoints(prev =>
-      prev.map(p => p.id === id ? { ...p, time } : p)
-        .sort((a, b) => a.time - b.time)
-    );
+  // Update only the draft string while typing — don't re-sort/clamp yet.
+  const setSplitDraft = useCallback((id: string, draft: string) => {
+    setSplitPoints(prev => prev.map(p => p.id === id ? { ...p, draft } : p));
   }, []);
+
+  // Commit on blur: parse, clamp to [0, duration], revert draft if invalid,
+  // then re-sort by time.
+  const commitSplitPoint = useCallback((id: string) => {
+    setSplitPoints(prev =>
+      prev
+        .map(p => {
+          if (p.id !== id) return p;
+          const parsed = hmsToSeconds(p.draft);
+          if (parsed === null) return { ...p, draft: secondsToHMS(p.time) };
+          const val = Math.min(Math.max(0, parsed), duration);
+          return { ...p, time: val, draft: secondsToHMS(val) };
+        })
+        .sort((a, b) => a.time - b.time),
+    );
+  }, [duration]);
 
   const processVideo = useCallback(async () => {
     if (!file || splitPoints.length === 0) return;
@@ -172,15 +190,15 @@ export default function SplitVideoClient() {
                 {splitPoints.map((point) => (
                   <div key={point.id} className="flex items-center gap-2">
                     <input
-                      type="number"
-                      min="0"
-                      max={duration}
-                      step="0.1"
-                      value={point.time}
-                      onChange={(e) => updateSplitPoint(point.id, Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="hh:mm:ss"
+                      value={point.draft}
+                      onChange={(e) => setSplitDraft(point.id, e.target.value)}
+                      onBlur={() => commitSplitPoint(point.id)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                      className="flex-1 px-3 py-2 font-mono border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-500">{formatTime(point.time)}</span>
                     <button
                       onClick={() => removeSplitPoint(point.id)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded"

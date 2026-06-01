@@ -220,6 +220,50 @@ export const ImageToBase64Client = dynamic(
   () => import('@/components/tool-clients/ImageToBase64Client'),
   { ssr: false }
 );
+export const ImageToTextClient = dynamic(
+  () => import('@/components/tool-clients/ImageToTextClient'),
+  { ssr: false }
+);
+export const AudioConverterClient = dynamic(
+  () => import('@/components/tool-clients/AudioConverterClient'),
+  { ssr: false }
+);
+export const AudioTrimmerClient = dynamic(
+  () => import('@/components/tool-clients/AudioTrimmerClient'),
+  { ssr: false }
+);
+export const AudioMergerClient = dynamic(
+  () => import('@/components/tool-clients/AudioMergerClient'),
+  { ssr: false }
+);
+export const AudioCompressorClient = dynamic(
+  () => import('@/components/tool-clients/AudioCompressorClient'),
+  { ssr: false }
+);
+export const AudioVolumeClient = dynamic(
+  () => import('@/components/tool-clients/AudioVolumeClient'),
+  { ssr: false }
+);
+export const AudioSpeedClient = dynamic(
+  () => import('@/components/tool-clients/AudioSpeedClient'),
+  { ssr: false }
+);
+export const AudioReverseClient = dynamic(
+  () => import('@/components/tool-clients/AudioReverseClient'),
+  { ssr: false }
+);
+export const NoiseReducerClient = dynamic(
+  () => import('@/components/tool-clients/NoiseReducerClient'),
+  { ssr: false }
+);
+export const BackgroundRemoverClient = dynamic(
+  () => import('@/components/tool-clients/BackgroundRemoverClient'),
+  { ssr: false }
+);
+export const ImageUpscalerClient = dynamic(
+  () => import('@/components/tool-clients/ImageUpscalerClient'),
+  { ssr: false }
+);
 export const Base64ToImageClient = dynamic(
   () => import('@/components/tool-clients/Base64ToImageClient'),
   { ssr: false }
@@ -810,6 +854,17 @@ export const toolComponentMap: Record<string, ComponentType> = {
   // Image Tools
   'image-resize': ImageResizeClient,
   'image-to-base64': ImageToBase64Client,
+  'image-to-text': ImageToTextClient,
+  'audio-converter': AudioConverterClient,
+  'audio-trimmer': AudioTrimmerClient,
+  'audio-merger': AudioMergerClient,
+  'audio-compressor': AudioCompressorClient,
+  'audio-volume': AudioVolumeClient,
+  'audio-speed': AudioSpeedClient,
+  'audio-reverse': AudioReverseClient,
+  'noise-reducer': NoiseReducerClient,
+  'background-remover': BackgroundRemoverClient,
+  'image-upscaler': ImageUpscalerClient,
   'base64-to-image': Base64ToImageClient,
   'rotate-image': ImageRotateClient,
   'grayscale-image': ImageGrayscaleClient,

@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect } from 'react';
 import VideoUpload from '@/components/video/VideoUpload';
 import VideoPreview from '@/components/video/VideoPreview';
 import { getFFmpeg, loadVideoFile, readOutputFile, formatTime } from '@/lib/ffmpeg';
+import { secondsToHMS, hmsToSeconds } from '@/lib/timecode';
 
 export default function VideoThumbnailClient() {
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(0);
   const [timestamp, setTimestamp] = useState(1);
+  const [timestampDraft, setTimestampDraft] = useState('00:00:01');
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +51,21 @@ export default function VideoThumbnailClient() {
 
   const handleDurationChange = useCallback((dur: number) => {
     setDuration(dur);
-    setTimestamp(Math.min(1, dur / 2));
+    const ts = Math.min(1, dur / 2);
+    setTimestamp(ts);
+    setTimestampDraft(secondsToHMS(ts));
   }, []);
+
+  const commitTimestamp = useCallback(() => {
+    const parsed = hmsToSeconds(timestampDraft);
+    if (parsed === null) {
+      setTimestampDraft(secondsToHMS(timestamp));
+      return;
+    }
+    const val = Math.min(Math.max(0, parsed), duration || parsed);
+    setTimestamp(val);
+    setTimestampDraft(secondsToHMS(val));
+  }, [timestampDraft, timestamp, duration]);
 
   const extractThumbnail = useCallback(async () => {
     if (!file) return;
@@ -116,19 +131,20 @@ export default function VideoThumbnailClient() {
 
           <div className="bg-gray-50 rounded-lg p-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Timestamp (seconds)
+              Timestamp (hh:mm:ss)
             </label>
             <input
-              type="number"
-              min="0"
-              max={duration}
-              step="0.1"
-              value={timestamp}
-              onChange={(e) => setTimestamp(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              inputMode="numeric"
+              placeholder="hh:mm:ss"
+              value={timestampDraft}
+              onChange={(e) => setTimestampDraft(e.target.value)}
+              onBlur={commitTimestamp}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              className="w-full px-3 py-2 font-mono border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Current: {formatTime(timestamp)}
+              of {formatTime(duration)}
             </p>
           </div>
 

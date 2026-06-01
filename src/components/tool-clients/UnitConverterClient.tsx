@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
 
-type UnitCategory = 'length' | 'weight' | 'temperature' | 'volume' | 'area' | 'speed' | 'time' | 'data';
+type UnitCategory = 'length' | 'weight' | 'temperature' | 'volume' | 'area' | 'speed' | 'time' | 'data' | 'pressure' | 'energy' | 'frequency';
 
 const unitData: Record<UnitCategory, { name: string; units: { value: string; label: string; factor: number }[] }> = {
   length: {
@@ -98,7 +98,56 @@ const unitData: Record<UnitCategory, { name: string; units: { value: string; lab
       { value: 'TB', label: 'Terabyte', factor: 1099511627776 },
     ],
   },
+  pressure: {
+    name: 'Pressure',
+    units: [
+      // Base: Pascal (Pa). Factors convert each unit to Pascals.
+      { value: 'pa', label: 'Pascal', factor: 1 },
+      { value: 'kpa', label: 'Kilopascal', factor: 1000 },
+      { value: 'mpa', label: 'Megapascal', factor: 1000000 },
+      { value: 'bar', label: 'Bar', factor: 100000 },
+      { value: 'atm', label: 'Atmosphere', factor: 101325 },
+      { value: 'mmhg', label: 'mmHg (Torr)', factor: 133.322 },
+      { value: 'psi', label: 'PSI', factor: 6894.76 },
+    ],
+  },
+  energy: {
+    name: 'Energy',
+    units: [
+      // Base: Joule (J).
+      { value: 'j', label: 'Joule', factor: 1 },
+      { value: 'kj', label: 'Kilojoule', factor: 1000 },
+      { value: 'cal', label: 'Calorie', factor: 4.184 },
+      { value: 'kcal', label: 'Kilocalorie', factor: 4184 },
+      { value: 'wh', label: 'Watt-hour', factor: 3600 },
+      { value: 'kwh', label: 'Kilowatt-hour', factor: 3600000 },
+      { value: 'btu', label: 'BTU', factor: 1055.06 },
+      { value: 'ev', label: 'Electronvolt', factor: 1.602176634e-19 },
+    ],
+  },
+  frequency: {
+    name: 'Frequency',
+    units: [
+      // Base: Hertz (Hz).
+      { value: 'hz', label: 'Hertz', factor: 1 },
+      { value: 'khz', label: 'Kilohertz', factor: 1000 },
+      { value: 'mhz', label: 'Megahertz', factor: 1000000 },
+      { value: 'ghz', label: 'Gigahertz', factor: 1000000000 },
+      { value: 'thz', label: 'Terahertz', factor: 1000000000000 },
+      { value: 'rpm', label: 'RPM (Revolutions/min)', factor: 1 / 60 },
+    ],
+  },
 };
+
+// Trim trailing zeros and unnecessary scientific notation for normal-range
+// results. Falls back to toPrecision for extreme magnitudes.
+function formatResult(n: number): string {
+  if (!isFinite(n)) return 'Infinity';
+  const abs = Math.abs(n);
+  if (abs !== 0 && (abs < 1e-6 || abs >= 1e15)) return n.toPrecision(8);
+  // Up to 8 significant digits, then strip trailing zeros.
+  return parseFloat(n.toPrecision(10)).toString();
+}
 
 export default function UnitConverterClient() {
   const [category, setCategory] = useState<UnitCategory>('length');
@@ -107,50 +156,36 @@ export default function UnitConverterClient() {
   const [value, setValue] = useState('');
   const [result, setResult] = useState('');
 
-  const convert = () => {
+  // Real-time conversion: any input/unit change recomputes the result.
+  useEffect(() => {
     const numValue = parseFloat(value);
-    if (isNaN(numValue)) {
+    if (value === '' || isNaN(numValue)) {
       setResult('');
       return;
     }
-
     if (category === 'temperature') {
-      // Special handling for temperature
       let celsius: number;
-
-      // Convert to Celsius first
       if (fromUnit === 'c') celsius = numValue;
-      else if (fromUnit === 'f') celsius = (numValue - 32) * 5/9;
-      else celsius = numValue - 273.15; // Kelvin
-
-      // Convert from Celsius to target
+      else if (fromUnit === 'f') celsius = (numValue - 32) * 5 / 9;
+      else celsius = numValue - 273.15;
       let converted: number;
       if (toUnit === 'c') converted = celsius;
-      else if (toUnit === 'f') converted = celsius * 9/5 + 32;
-      else converted = celsius + 273.15; // Kelvin
-
-      setResult(converted.toFixed(4));
+      else if (toUnit === 'f') converted = celsius * 9 / 5 + 32;
+      else converted = celsius + 273.15;
+      setResult(formatResult(converted));
     } else {
-      // Standard factor-based conversion
       const units = unitData[category].units;
-      const fromFactor = units.find(u => u.value === fromUnit)?.factor || 1;
-      const toFactor = units.find(u => u.value === toUnit)?.factor || 1;
-
-      const baseValue = numValue * fromFactor;
-      const converted = baseValue / toFactor;
-
-      setResult(converted.toFixed(6));
+      const fromFactor = units.find((u) => u.value === fromUnit)?.factor ?? 1;
+      const toFactor = units.find((u) => u.value === toUnit)?.factor ?? 1;
+      setResult(formatResult((numValue * fromFactor) / toFactor));
     }
-  };
+  }, [value, fromUnit, toUnit, category]);
 
   const swap = () => {
-    const temp = fromUnit;
+    const tempUnit = fromUnit;
     setFromUnit(toUnit);
-    setToUnit(temp);
-    if (result) {
-      setValue(result);
-      setResult(value);
-    }
+    setToUnit(tempUnit);
+    if (result) setValue(result);
   };
 
   const handleCategoryChange = (newCategory: UnitCategory) => {
@@ -163,10 +198,11 @@ export default function UnitConverterClient() {
   };
 
   const currentUnits = unitData[category].units;
+  const fromLabel = currentUnits.find((u) => u.value === fromUnit)?.label ?? '';
+  const toLabel = currentUnits.find((u) => u.value === toUnit)?.label ?? '';
 
   return (
     <div className="space-y-6">
-      {/* Category Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
         <div className="flex flex-wrap gap-2">
@@ -175,9 +211,7 @@ export default function UnitConverterClient() {
               key={cat}
               onClick={() => handleCategoryChange(cat)}
               className={`px-3 py-1 text-sm rounded-full ${
-                category === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                category === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {unitData[cat].name}
@@ -186,8 +220,7 @@ export default function UnitConverterClient() {
         </div>
       </div>
 
-      {/* Converter */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-end">
         <div>
           <label className="block text-sm text-gray-600 mb-1">From</label>
           <select
@@ -208,6 +241,14 @@ export default function UnitConverterClient() {
           />
         </div>
 
+        <button
+          onClick={swap}
+          className="px-3 py-2 mb-0 sm:mb-[2.4rem] text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors self-center sm:self-end"
+          title="Swap units"
+        >
+          ⇄
+        </button>
+
         <div>
           <label className="block text-sm text-gray-600 mb-1">To</label>
           <select
@@ -224,26 +265,20 @@ export default function UnitConverterClient() {
             value={result}
             readOnly
             placeholder="Result"
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 font-mono"
           />
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-2">
-        <button onClick={convert} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Convert</button>
-        <button onClick={swap} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">Swap</button>
-      </div>
-
       {result && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-sm text-green-800">
-              {value} {currentUnits.find(u => u.value === fromUnit)?.label} = <strong>{result}</strong> {currentUnits.find(u => u.value === toUnit)?.label}
+              {value} {fromLabel} = <strong>{result}</strong> {toLabel}
             </span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <CopyButton text={result} />
-              <DownloadButton content={`${value} ${currentUnits.find(u => u.value === fromUnit)?.label} = ${result} ${currentUnits.find(u => u.value === toUnit)?.label}`} filename="unit-conversion.txt" />
+              <DownloadButton content={`${value} ${fromLabel} = ${result} ${toLabel}`} filename="unit-conversion.txt" />
             </div>
           </div>
         </div>

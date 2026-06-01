@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
+import { hexToRgb } from '@/lib/color';
 
 const tailwindColors: Record<string, Record<string, string>> = {
   slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
@@ -34,16 +35,7 @@ export default function TailwindColorConverterClient() {
   const [closestMatch, setClosestMatch] = useState<{ name: string; shade: string; hex: string; className: string } | null>(null);
   const [allMatches, setAllMatches] = useState<{ name: string; shade: string; hex: string; className: string; distance: number }[]>([]);
 
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    } : null;
-  };
-
-  const colorDistance = (c1: { r: number; g: number; b: number }, c2: { r: number; g: number; b: number }) => {
+  const colorDistance =(c1: { r: number; g: number; b: number }, c2: { r: number; g: number; b: number }) => {
     return Math.sqrt(
       Math.pow(c1.r - c2.r, 2) +
       Math.pow(c1.g - c2.g, 2) +

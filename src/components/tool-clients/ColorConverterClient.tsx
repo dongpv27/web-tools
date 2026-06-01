@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { colord, extend } from 'colord';
+import mixPlugin from 'colord/plugins/mix';
+
+// Register colord's mix plugin once (idempotent — extend dedupes internally).
+extend([mixPlugin]);
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
+import { hexToRgb } from '@/lib/color';
 
 interface ColorValues {
   hex: string;
@@ -18,15 +24,11 @@ export default function ColorConverterClient() {
   const [hslInput, setHslInput] = useState({ h: 217, s: 91, l: 60 });
   const [colorValues, setColorValues] = useState<ColorValues | null>(null);
   const [error, setError] = useState('');
-
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    } : null;
-  };
+  // Manipulation state — only meaningful once a valid colour has been parsed.
+  // Amount applies to lighten/darken/saturate/desaturate (0–50%). Mix color
+  // is the second color blended with the current one.
+  const [amount, setAmount] = useState(20);
+  const [mixColor, setMixColor] = useState('#ffffff');
 
   const rgbToHsl = (r: number, g: number, b: number) => {
     r /= 255; g /= 255; b /= 255;
@@ -262,6 +264,68 @@ export default function ColorConverterClient() {
             content={`Color Values\n------------\n\nHEX: ${colorValues.hex}\nRGB: rgb(${colorValues.rgb.r}, ${colorValues.rgb.g}, ${colorValues.rgb.b})\nHSL: hsl(${colorValues.hsl.h}, ${colorValues.hsl.s}%, ${colorValues.hsl.l}%)\nCMYK: cmyk(${colorValues.cmyk.c}%, ${colorValues.cmyk.m}%, ${colorValues.cmyk.y}%, ${colorValues.cmyk.k}%)`}
             filename="color-values.txt"
           />
+
+          {/* Manipulation — lighten / darken / saturate / desaturate / mix.
+              Built on colord, which works in HSL space so changes are
+              perceptually sensible (a 20% lighten on dark red doesn't blow
+              out to white). */}
+          <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-700">Color Manipulation</h4>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <label>Amount:</label>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  className="w-32"
+                />
+                <span className="font-mono w-10 text-right">{amount}%</span>
+              </div>
+            </div>
+
+            {(() => {
+              const c = colord(colorValues.hex);
+              const a = amount / 100;
+              const variants = [
+                { label: `Lighten ${amount}%`, hex: c.lighten(a).toHex().toUpperCase() },
+                { label: `Darken ${amount}%`, hex: c.darken(a).toHex().toUpperCase() },
+                { label: `Saturate ${amount}%`, hex: c.saturate(a).toHex().toUpperCase() },
+                { label: `Desaturate ${amount}%`, hex: c.desaturate(a).toHex().toUpperCase() },
+                { label: `Mix 50%`, hex: c.mix(mixColor, 0.5).toHex().toUpperCase() },
+              ];
+              return (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {variants.map((v) => (
+                      <div key={v.label} className="rounded-lg overflow-hidden border border-gray-200 bg-white">
+                        <div className="h-14" style={{ backgroundColor: v.hex }} />
+                        <div className="px-2 py-1.5 flex items-center justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[10px] text-gray-500 truncate">{v.label}</p>
+                            <code className="text-xs font-mono">{v.hex}</code>
+                          </div>
+                          <CopyButton text={v.hex} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <label>Mix with:</label>
+                    <input
+                      type="color"
+                      value={mixColor}
+                      onChange={(e) => setMixColor(e.target.value)}
+                      className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                    />
+                    <code className="font-mono text-xs">{mixColor.toUpperCase()}</code>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>

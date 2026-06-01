@@ -71,6 +71,36 @@ export default function ImageRotateClient() {
     img.src = originalImage;
   };
 
+  // Mirror the current preview around the chosen axis. Works on whatever
+  // image is currently shown so flipping after a rotation flips the result,
+  // matching what users see in most desktop editors.
+  const applyFlip = (axis: 'horizontal' | 'vertical') => {
+    if (!image || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (axis === 'horizontal') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      } else {
+        ctx.translate(0, canvas.height);
+        ctx.scale(1, -1);
+      }
+      ctx.drawImage(img, 0, 0);
+      ctx.restore();
+      setImage(canvas.toDataURL('image/png'));
+      setIsRotated(true);
+    };
+    img.src = image;
+  };
+
   const download = () => {
     if (!image) return;
     const link = document.createElement('a');
@@ -155,6 +185,24 @@ export default function ImageRotateClient() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Flip buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => applyFlip('horizontal')}
+              className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              title="Mirror left-right"
+            >
+              ⇋ Flip Horizontal
+            </button>
+            <button
+              onClick={() => applyFlip('vertical')}
+              className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              title="Mirror top-bottom"
+            >
+              ⇵ Flip Vertical
+            </button>
           </div>
 
           {/* Actions */}

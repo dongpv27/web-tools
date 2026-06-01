@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored worker bundles (ffmpeg, gif.js) — not our source, and their
+    // minified style trips thousands of no-unused-expressions false positives.
+    "public/**",
   ]),
 ]);
 

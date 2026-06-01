@@ -13,7 +13,7 @@ Hướng dẫn từng bước deploy site `lovewebtools.com` lên Vercel + Cloud
 7. Setup Google Analytics 4
 8. (Optional) Verify với Yandex Webmaster
 9. Kiểm tra cuối cùng
-10. Setup email `contact@lovewebtools.com` qua Cloudflare Email Routing
+10. Setup email `contact@lovewebtools.com` qua Cloudflare Email Routing 
 11. Setup contact form backend qua Resend
 
 **Thời gian dự kiến**: 2-3 giờ (chưa tính chờ DNS propagation lên đến 24h).
@@ -24,7 +24,7 @@ Hướng dẫn từng bước deploy site `lovewebtools.com` lên Vercel + Cloud
 
 ### Các bước đăng ký
 
-1. Truy cập https://tenten.vn
+1. Truy cập https://tenten.vn                                                                               
 2. Tìm kiếm `lovewebtools.com` → click **Mua ngay** nếu còn available
 3. Add to cart. Thông thường Tenten upsell các dịch vụ — **lưu ý**:
    - ✅ **Bảo vệ thông tin Whois** (Whois Privacy) — bật, miễn phí năm đầu, giúp ẩn thông tin cá nhân

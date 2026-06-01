@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
+import { hexToRgb } from '@/lib/color';
 
 export default function ColorPaletteGeneratorClient() {
   const [baseColor, setBaseColor] = useState('#3B82F6');
@@ -11,12 +12,12 @@ export default function ColorPaletteGeneratorClient() {
   const [copied, setCopied] = useState(false);
 
   const hexToHsl = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (!result) return { h: 0, s: 0, l: 0 };
+    const rgb = hexToRgb(hex);
+    if (!rgb) return { h: 0, s: 0, l: 0 };
 
-    let r = parseInt(result[1], 16) / 255;
-    let g = parseInt(result[2], 16) / 255;
-    let b = parseInt(result[3], 16) / 255;
+    const r = rgb.r / 255;
+    const g = rgb.g / 255;
+    const b = rgb.b / 255;
 
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h = 0, s = 0;

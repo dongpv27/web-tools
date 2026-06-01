@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { callConvert, downloadBlob } from '@/lib/convert-api';
 import { pdfjsLoadOptions } from '@/lib/pdfjs-options';
+import { ocrImage, pageLooksScanned, type OcrLang } from '@/lib/ocr';
 
 // Set up worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
@@ -16,6 +17,9 @@ export default function PdfToCsvClient() {
   const [progress, setProgress] = useState(0);
   const [csvPreview, setCsvPreview] = useState<string>('');
   const [error, setError] = useState('');
+  const [ocrEnabled, setOcrEnabled] = useState(true);
+  const [ocrLang, setOcrLang] = useState<OcrLang>('eng');
+  const [ocrPages, setOcrPages] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
@@ -45,6 +49,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setPageCount(pdf.numPages);
 
       const csvLines: string[] = ['Page,Line,Text'];
+      let ocrCount = 0;
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -68,11 +73,33 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Sort by y position
         lines.sort((a, b) => b.y - a.y);
 
-        // Add to CSV
-        lines.forEach((line, lineIndex) => {
-          const text = line.texts.join(' ').replace(/"/g, '""');
-          csvLines.push(`${i},${lineIndex + 1},"${text}"`);
-        });
+        // Total chars across the page → decide if OCR is needed.
+        const totalChars = lines.reduce((n, l) => n + l.texts.join('').length, 0);
+
+        if (ocrEnabled && pageLooksScanned(totalChars)) {
+          // Render the page and OCR it. Each OCR'd line becomes a CSV row.
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+            const ocrText = await ocrImage(canvas, ocrLang);
+            ocrText.split('\n').forEach((rawLine, idx) => {
+              const text = rawLine.trim();
+              if (!text) return;
+              csvLines.push(`${i},${idx + 1},"${text.replace(/"/g, '""')}"`);
+            });
+            ocrCount++;
+            setOcrPages(ocrCount);
+          }
+        } else {
+          lines.forEach((line, lineIndex) => {
+            const text = line.texts.join(' ').replace(/"/g, '""');
+            csvLines.push(`${i},${lineIndex + 1},"${text}"`);
+          });
+        }
 
         setProgress(Math.round((i / pdf.numPages) * 100));
       }
@@ -157,6 +184,42 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               Selected: <span className="font-medium">{fileName}</span>
             </p>
           )}
+
+          <div className="flex flex-wrap items-center gap-4 p-3 bg-gray-50 rounded-lg">
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={ocrEnabled}
+                onChange={(e) => setOcrEnabled(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded"
+              />
+              OCR scanned pages (slow)
+            </label>
+            {ocrEnabled && (
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-700">Language:</label>
+                <select
+                  value={ocrLang}
+                  onChange={(e) => setOcrLang(e.target.value as OcrLang)}
+                  className="px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                >
+                  <option value="eng">English</option>
+                  <option value="vie">Vietnamese</option>
+                  <option value="eng+vie">English + Vietnamese</option>
+                  <option value="chi_sim">Chinese</option>
+                  <option value="jpn">Japanese</option>
+                  <option value="kor">Korean</option>
+                  <option value="fra">French</option>
+                  <option value="spa">Spanish</option>
+                  <option value="deu">German</option>
+                  <option value="rus">Russian</option>
+                </select>
+              </div>
+            )}
+            {ocrPages > 0 && (
+              <span className="text-xs text-amber-700">{ocrPages} page(s) OCR&apos;d</span>
+            )}
+          </div>
 
           {converting && (
             <div className="space-y-2">

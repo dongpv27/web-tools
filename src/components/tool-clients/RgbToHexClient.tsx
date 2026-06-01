@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
+import { hexToRgb } from '@/lib/color';
 
 export default function RgbToHexClient() {
   const [r, setR] = useState(59);
@@ -25,11 +26,11 @@ export default function RgbToHexClient() {
     setHex(hex.toUpperCase());
 
     // Convert hex to RGB
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (result) {
-      setR(parseInt(result[1], 16));
-      setG(parseInt(result[2], 16));
-      setB(parseInt(result[3], 16));
+    const rgb = hexToRgb(hex);
+    if (rgb) {
+      setR(rgb.r);
+      setG(rgb.g);
+      setB(rgb.b);
     }
   };
 

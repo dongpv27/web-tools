@@ -1432,6 +1432,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['url-parser', 'http-status-codes', 'user-agent-parser'],
+    howToUse: [
+      'Paste an IP address (IPv4 like 192.168.1.1 or IPv6 like 2001:db8::1)',
+      'Read the verdict: valid/invalid + IPv4/IPv6 + public/private/loopback/multicast classification',
+      'Use the classification to debug firewall rules or document a network layout',
+    ],
+    exampleOutput: {
+      input: '10.0.0.1',
+      output: 'Valid IPv4 — Private (RFC 1918, class A)',
+      description: 'Recognises private vs public ranges so you can flag misconfigured ACLs.',
+    },
+    seoContent: {
+      intro:
+        'IP Address Validator confirms whether an address is well-formed IPv4 or IPv6 and classifies it (public/private/loopback/multicast/link-local). Useful when you\'re reading a log file and want to know "is this internal traffic or the open internet?" without firing up a CIDR calculator.',
+      examples: [
+        {
+          title: 'Private vs public',
+          body: '192.168.1.10 → Private (RFC 1918). 8.8.8.8 → Public (Google DNS). The classification helps spot misrouted requests in firewall logs.',
+        },
+        {
+          title: 'IPv6 shorthand',
+          body: '::1 → Valid IPv6 loopback. fe80::1 → Link-local. The tool expands and validates shorthand notations.',
+        },
+      ],
+      useCases: [
+        'Reading server / firewall logs and tagging internal vs external traffic',
+        'Validating user-entered IPs in admin tools or address-block configuration',
+        'Teaching networking — concrete examples of each address class',
+        'Verifying that a CIDR range was applied correctly by sampling addresses',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Address looks valid but rejected.',
+          solution: 'Trim whitespace and remove port numbers (192.168.1.1:8080 → enter only 192.168.1.1). IPv6 brackets [::1] need to be stripped too.',
+        },
+      ],
+    },
   },
   {
     id: 'cron-expression-parser',
@@ -1467,6 +1503,51 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['countdown-timer', 'time-converter', 'timestamp-converter'],
+    howToUse: [
+      'Paste a cron expression (5-field or with optional 6th seconds field)',
+      'Read the human-readable schedule description',
+      'Pick a timezone — the next 5 run times are computed using that zone\'s calendar',
+      'Use the quick samples for common patterns (every 5 min, weekdays 9 AM, etc.)',
+    ],
+    exampleOutput: {
+      input: '0 9 * * 1-5',
+      output: 'At 09:00 on Monday-Friday — next runs Mon, Tue, Wed, Thu, Fri at 09:00 (selected TZ)',
+      description: 'Classic "weekdays at 9 AM" rule, verified by seeing the actual next-run dates.',
+    },
+    seoContent: {
+      intro:
+        'Cron Expression Parser turns a 5- or 6-field cron line into plain English and lists the next 5 run times in your chosen timezone. Critically, it implements the POSIX day-of-month OR day-of-week semantics correctly — many tools get this wrong, which is how production cron jobs end up firing too often or not at all.',
+      examples: [
+        {
+          title: 'Day-of-month OR day-of-week',
+          body: '"0 12 1,15 * 1" fires at noon on the 1st OR 15th OR every Monday — not the intersection. Parser shows all the next runs so the OR semantics are immediately visible.',
+        },
+        {
+          title: 'Step + range combined',
+          body: '"0-30/5 * * * *" fires at minute 0, 5, 10, 15, 20, 25, 30 every hour. Useful when you want frequent runs only in the first half of each hour.',
+        },
+        {
+          title: 'Timezone-aware planning',
+          body: 'Server runs UTC but you live in Asia/Ho_Chi_Minh — pick the right TZ to see when "0 9 * * *" actually fires locally (16:00 the day after UTC midnight, etc.).',
+        },
+      ],
+      useCases: [
+        'Designing a new cron schedule and confirming it fires when intended',
+        'Debugging a job that ran too often / too rarely — verify DOM/DOW logic',
+        'Translating server-time crons to your local timezone for on-call planning',
+        'Onboarding new engineers who need to read existing crontab entries',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Cron expression must have 5 or 6 parts" error.',
+          solution: 'Strip extra whitespace and confirm you have exactly: minute hour day-of-month month day-of-week (and optionally seconds at the front for 6-field).',
+        },
+        {
+          problem: 'Next runs not in my expected timezone.',
+          solution: 'Open the timezone selector and pick the zone the cron server uses (often UTC for cloud cron). The page defaults to your browser locale, which may differ.',
+        },
+      ],
+    },
   },
   {
     id: 'json-minify',
@@ -1502,6 +1583,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['json-formatter', 'json-validator', 'json-diff'],
+    howToUse: [
+      'Paste your formatted (multi-line) JSON',
+      'Click Minify — the tool strips whitespace and re-serialises the value',
+      'Read the compression stats to see how many bytes you saved',
+      'Use JSON Formatter to expand it back when you need to read it again',
+    ],
+    exampleOutput: {
+      input: '{\n  "name": "Alice",\n  "age": 30\n}',
+      output: '{"name":"Alice","age":30}',
+      description: 'Identical semantics, just stripped of indentation and newlines — smaller payload.',
+    },
+    seoContent: {
+      intro:
+        'JSON Minify strips every byte of optional whitespace from a JSON document while preserving exact value semantics. The output is byte-equivalent to JSON.stringify(value) — drop it into an HTML data-* attribute, a URL fragment, or a network payload to reduce size. Round-trip safe: re-parsing produces the same value.',
+      examples: [
+        {
+          title: 'Embed in HTML attribute',
+          body: 'A 3 KB config blob shrinks to ~2 KB once whitespace is gone — small enough to safely live in a data-config attribute on a single element.',
+        },
+        {
+          title: 'Shrink an API payload for caching',
+          body: 'Minify before storing in localStorage to cram more cached responses into the 5MB quota.',
+        },
+      ],
+      useCases: [
+        'Reducing payload size before sending over the wire',
+        'Embedding JSON in HTML, URL params, or environment variables',
+        'Producing compact fixtures for tests and snapshots',
+        'Preparing JSON for one-line CLI consumption (jq, curl)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output not as small as expected.',
+          solution: 'Minify only removes whitespace, not redundancy. To go smaller, look at the structure (deduplicate repeated keys, shorten strings, choose smaller representations).',
+        },
+      ],
+    },
   },
   {
     id: 'json-diff',
@@ -1537,6 +1655,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['json-formatter', 'json-validator', 'json-minify'],
+    howToUse: [
+      'Paste your "before" JSON in the left textarea',
+      'Paste the "after" JSON in the right textarea',
+      'Click Compare — additions, removals, and value changes are highlighted',
+      'Use it during code review to spot semantic differences past whitespace',
+    ],
+    exampleOutput: {
+      input: '{"name":"A","age":30} vs {"name":"A","age":31}',
+      output: 'CHANGED age: 30 → 31 (1 difference)',
+      description: 'Field-level diff showing only what actually changed, ignoring formatting.',
+    },
+    seoContent: {
+      intro:
+        'JSON Diff compares two JSON documents at the value level and reports added, removed, and changed keys. Unlike a textual diff, it ignores whitespace and key order so reformatting doesn\'t produce false positives. Useful for API response comparisons, config audits, and quick spot-checks during pull-request review.',
+      examples: [
+        {
+          title: 'Spot a regression in an API',
+          body: 'Save the production response and the staging response into the two panes — the diff surfaces exactly which fields drifted.',
+        },
+        {
+          title: 'Config audit',
+          body: 'Compare old and new versions of a feature-flag config to confirm only intended keys changed.',
+        },
+      ],
+      useCases: [
+        'Comparing API responses across versions or environments',
+        'Reviewing JSON-based configuration changes in a PR',
+        'Validating data migrations by comparing pre/post snapshots',
+        'Debugging "why is the value different?" on near-identical payloads',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Diff reports a change but values look identical.',
+          solution: 'Look for type mismatches: "30" (string) vs 30 (number) is a real difference. Trailing whitespace inside strings also counts.',
+        },
+        {
+          problem: 'Diff says no change but I see one visually.',
+          solution: 'Whitespace and key order are ignored by design. To compare formatting, use a plain text diff tool instead.',
+        },
+      ],
+    },
   },
   {
     id: 'html-encode-decode',
@@ -1572,6 +1731,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['url-encode', 'base64-encode', 'rot13-encoder'],
+    howToUse: [
+      'Pick Encode or Decode',
+      'For Encode, select a mode: Basic (5 chars), Named + special (recommended), All non-ASCII, or Numeric-only',
+      'Paste text, click Process, copy the result',
+      'Decoder handles the full HTML5 entity set (~2000 entities including &euro;, &hearts;, hex/decimal numeric forms)',
+    ],
+    exampleOutput: {
+      input: 'Encode "<p>Café & 5 > 3</p>"',
+      output: '&lt;p&gt;Caf&eacute; &amp; 5 &gt; 3&lt;/p&gt;',
+      description: 'Named mode preserves readability while making the string safe for HTML.',
+    },
+    seoContent: {
+      intro:
+        'HTML Encode/Decode converts text to and from HTML-safe entities. Decode uses the browser\'s native parser so the full HTML5 entity set is supported (named like &iexcl;, numeric like &#x2603;, ~2000 entries in total). Encode offers four modes from minimal (only the 5 mandatory chars) to maximal (every non-ASCII becomes a numeric entity).',
+      examples: [
+        {
+          title: 'Make user text safe for HTML',
+          body: 'Encode "<script>alert(1)</script>" → "&lt;script&gt;alert(1)&lt;/script&gt;". Now safe to drop into innerHTML or a server-rendered template.',
+        },
+        {
+          title: 'Decode email snippets',
+          body: 'Email bodies often arrive with &nbsp;, &mdash;, &copy; etc. Paste them in, decoded version is the readable text.',
+        },
+        {
+          title: 'Round-trip non-ASCII',
+          body: 'Use Numeric mode to fully convert "Café 你好" into ASCII-safe entities for systems that choke on UTF-8.',
+        },
+      ],
+      useCases: [
+        'Escaping user input before injecting into HTML (XSS prevention)',
+        'Decoding entities found in scraped pages or email bodies',
+        'Preparing strings for systems that strip non-ASCII (legacy email, SMS gateways)',
+        'Learning what each named entity actually represents',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Decoded output looks identical to input.',
+          solution: 'The input contains no entities to decode. If you expected changes, double-check that & characters are followed by valid entity names.',
+        },
+      ],
+    },
   },
   {
     id: 'query-string-parser',
@@ -1607,6 +1807,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['url-parser', 'url-encode', 'url-decode'],
+    howToUse: [
+      'Paste a full URL or just the query-string portion (anything after the ?)',
+      'See the parameters listed as key/value pairs',
+      'Duplicate keys are grouped so you can spot repeated parameters',
+      'Copy individual values or the full JSON breakdown',
+    ],
+    exampleOutput: {
+      input: '?utm_source=newsletter&utm_campaign=launch&page=2',
+      output: '{ utm_source: "newsletter", utm_campaign: "launch", page: "2" }',
+      description: 'Each parameter decoded and presented as a clean key/value pair.',
+    },
+    seoContent: {
+      intro:
+        'Query String Parser splits a URL\'s ?key=value&key2=value2 portion into a clean key/value table. URL-decoding is handled automatically so percent-encoded characters appear readable. Useful when debugging tracking URLs, inspecting OAuth callbacks, or just trying to understand a complex link a tool generated.',
+      examples: [
+        {
+          title: 'Decode a marketing UTM',
+          body: '?utm_source=newsletter&utm_medium=email&utm_campaign=launch%202024 → values cleanly separated, with "launch%202024" decoded to "launch 2024".',
+        },
+        {
+          title: 'OAuth callback',
+          body: 'Paste the callback URL after a sign-in flow — code, state, and error parameters appear as a table you can copy individually.',
+        },
+        {
+          title: 'Duplicate keys',
+          body: '?tag=js&tag=react&tag=node — all three values listed under "tag" so you don\'t lose any.',
+        },
+      ],
+      useCases: [
+        'Debugging tracking and campaign URLs',
+        'Inspecting OAuth/SSO callbacks during integration',
+        'Extracting parameters from a generated share link',
+        'Verifying URL builders produced the expected output',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Value still looks encoded (e.g. %20 instead of space).',
+          solution: 'Some sources double-encode values (%2520). Run the value through URL Decode once or twice to fully restore it.',
+        },
+      ],
+    },
   },
   {
     id: 'url-parser',
@@ -1642,6 +1883,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['query-string-parser', 'url-encode', 'url-decode'],
+    howToUse: [
+      'Paste any URL (with or without scheme)',
+      'Read each component split out: protocol, host, port, path, query, hash',
+      'Copy any field individually, or export the full breakdown as JSON',
+      'Combine with Query String Parser to dive deeper into the ?... portion',
+    ],
+    exampleOutput: {
+      input: 'https://example.com:8080/path/to/page?id=42#section',
+      output: 'protocol https — host example.com — port 8080 — path /path/to/page — query ?id=42 — hash #section',
+      description: 'Every WHATWG URL component listed individually with per-field copy buttons.',
+    },
+    seoContent: {
+      intro:
+        'URL Parser splits a URL into its WHATWG-standard components (protocol, host, port, pathname, search, hash, plus username/password where present). Useful when debugging a tracking link, validating an OAuth redirect, or building tooling that needs to manipulate URL parts programmatically.',
+      examples: [
+        {
+          title: 'Inspect a tracking URL',
+          body: 'https://shop.com/p/widget?utm_source=email — instantly see host, pathname, and the UTM parameters separated out.',
+        },
+        {
+          title: 'Verify an OAuth redirect URI',
+          body: 'Paste the redirect URI registered with your auth provider — confirm the scheme is https, host matches, and the path is exactly what you registered (no trailing slashes).',
+        },
+        {
+          title: 'Catch encoding mistakes',
+          body: 'A literal space in the path will fail parsing — useful sanity check before sending a generated URL anywhere.',
+        },
+      ],
+      useCases: [
+        'Debugging redirect chains and tracking links',
+        'Verifying OAuth/SSO callback URLs before saving in admin consoles',
+        'Building tooling that needs to extract or rewrite URL parts',
+        'Teaching newcomers what each piece of a URL means',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid URL" error on input that "looks fine".',
+          solution: 'WHATWG URL parsing requires a scheme. Add http:// or https:// at the front and try again.',
+        },
+      ],
+    },
   },
   {
     id: 'http-status-codes',
@@ -1677,6 +1959,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['ip-address-validator', 'user-agent-parser', 'url-parser'],
+    howToUse: [
+      'Browse the full list grouped by class (1xx, 2xx, 3xx, 4xx, 5xx)',
+      'Type a code or keyword (e.g. "418", "redirect") to filter instantly',
+      'Click a code to see its description and a typical use case',
+    ],
+    exampleOutput: {
+      input: 'Search "429"',
+      output: '429 Too Many Requests — the user has sent too many requests in a given time (rate-limiting).',
+      description: 'Each code with a one-line meaning and the typical scenario where you\'d return it.',
+    },
+    seoContent: {
+      intro:
+        'HTTP Status Code Lookup is a quick-reference table for every standard HTTP status code, grouped by class with searchable descriptions. Use it when reading an API response and the code isn\'t one you remember by heart, or when picking the right code to return from your own endpoint.',
+      examples: [
+        {
+          title: 'Pick the right error code',
+          body: 'User submits an invalid form? 400 Bad Request. Not authenticated? 401. Authenticated but no permission? 403. Resource gone forever? 410, not 404.',
+        },
+        {
+          title: 'Recognise a 3xx redirect',
+          body: '301 = permanent (browsers cache), 302 = temporary, 307/308 = same as 302/301 but preserve method. Helpful when debugging redirect chains.',
+        },
+      ],
+      useCases: [
+        'Designing API responses with the correct semantic code',
+        'Debugging a 4xx/5xx response without leaving the page',
+        'Onboarding new engineers to HTTP semantics',
+        'Writing documentation that needs accurate code references',
+      ],
+      troubleshooting: [
+        {
+          problem: 'My code isn\'t in the list (e.g. 599).',
+          solution: 'The list covers the IANA-registered standard codes. Non-standard codes (520-599 used by some CDNs/proxies) are typically vendor-specific — check your provider\'s docs.',
+        },
+      ],
+    },
   },
   {
     id: 'user-agent-parser',
@@ -1712,6 +2030,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['http-status-codes', 'ip-address-validator', 'url-parser'],
+    howToUse: [
+      'Click "Use my User Agent" to load your browser\'s UA, or paste any UA string',
+      'See parsed fields: browser, version, OS, device type, engine',
+      'Use the breakdown to verify analytics tracking or feature detection logic',
+    ],
+    exampleOutput: {
+      input: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      output: 'Browser: Chrome 120 — OS: Windows 10 — Device: Desktop — Engine: Blink',
+      description: 'Concise breakdown matching what analytics and feature-flag tools would derive.',
+    },
+    seoContent: {
+      intro:
+        'User Agent Parser decodes the cryptic "Mozilla/5.0 (Windows NT 10.0...)" strings browsers send with every HTTP request. Extracts browser name + version, operating system, device class (desktop/tablet/mobile), and rendering engine — the fields most analytics and feature-detection tools care about.',
+      examples: [
+        {
+          title: 'Debug analytics',
+          body: 'Find a suspicious UA in your logs, paste it here — instantly see if it\'s a real Chrome on Windows or a headless browser pretending.',
+        },
+        {
+          title: 'Pre-flight feature detection',
+          body: 'Confirm what fields a target browser exposes (e.g. Safari 16 on iOS) before relying on a specific UA pattern in conditional code.',
+        },
+      ],
+      useCases: [
+        'Reading server logs and grouping requests by device class',
+        'Auditing UA-based feature detection in legacy code',
+        'Spotting bot traffic with malformed or generic UAs',
+        'QA testing: verifying spoofed UA strings parse as intended',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Reported browser is "Unknown" or vague.',
+          solution: 'Modern browsers are reducing UA detail (UA Client Hints replacing the legacy string). Some new UAs lack version info on purpose — fall back to JS feature-detection in your app.',
+        },
+      ],
+    },
   },
   {
     id: 'binary-converter',
@@ -1747,6 +2101,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-converter', 'ascii-converter', 'base64-encode'],
+    howToUse: [
+      'Pick direction: Text → Binary or Binary → Text',
+      'Enter text (any UTF-8) or binary (space-separated 8-bit bytes)',
+      'Click Convert — copy the result',
+      'Use it to inspect what bits a string actually occupies',
+    ],
+    exampleOutput: {
+      input: 'Text "Hi"',
+      output: '01001000 01101001',
+      description: 'Each character → 8-bit binary, space-separated for readability.',
+    },
+    seoContent: {
+      intro:
+        'Binary Converter goes between human text and 0/1 binary byte sequences using UTF-8. Useful for teaching how characters map to bits, for encoding demos, and for the occasional "decode this binary message" puzzle.',
+      examples: [
+        {
+          title: 'Text to binary',
+          body: '"A" → 01000001 (one byte). "你" → 11100100 10111101 10100000 (3 bytes UTF-8).',
+        },
+        {
+          title: 'Binary back to text',
+          body: '01001000 01101001 → "Hi". Spaces between bytes are required; partial bytes are rejected.',
+        },
+      ],
+      useCases: [
+        'CS class demos showing how characters map to bytes',
+        'Solving CTF or programming-puzzle decoding challenges',
+        'Inspecting byte counts of UTF-8 text (1 char ≠ 1 byte for non-ASCII)',
+        'Generating sample binary data for testing parsers',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Binary input rejected.',
+          solution: 'Each byte must be exactly 8 bits and bytes separated by single spaces. Strip stray characters and confirm each chunk is a multiple of 8 bits.',
+        },
+      ],
+    },
   },
   {
     id: 'hex-converter',
@@ -1782,6 +2173,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['binary-converter', 'ascii-converter', 'base64-encode'],
+    howToUse: [
+      'Pick direction: Text → Hex or Hex → Text',
+      'Type text (UTF-8) or paste hex bytes (with or without spaces)',
+      'Click Convert — output appears formatted with spacing between bytes',
+      'Useful for inspecting non-printable characters and Unicode byte sequences',
+    ],
+    exampleOutput: {
+      input: 'Text "Hi 🎉"',
+      output: '48 69 20 F0 9F 8E 89',
+      description: 'ASCII "Hi " (3 bytes) plus the party emoji (4 bytes in UTF-8).',
+    },
+    seoContent: {
+      intro:
+        'Hex Converter switches between text and the hexadecimal byte sequence that encodes it. Handles full UTF-8 so emoji and CJK characters work correctly — each character expands to the right number of bytes. Useful for debugging file headers, protocol analysis, and "what bytes does this actually contain?" investigations.',
+      examples: [
+        {
+          title: 'Inspect byte count of non-ASCII',
+          body: '"é" → C3 A9 (2 bytes UTF-8). "日" → E6 97 A5 (3 bytes). Helps size-budget when working with UTF-8-limited fields.',
+        },
+        {
+          title: 'Decode a hex dump',
+          body: '48 65 6C 6C 6F 20 57 6F 72 6C 64 → "Hello World". Strip any prefix like 0x or 0x00- from a debugger output first.',
+        },
+      ],
+      useCases: [
+        'Debugging text encoding issues (mojibake, double-encoded UTF-8)',
+        'Reading file headers and protocol-level hex dumps',
+        'Crafting test payloads with specific byte sequences',
+        'Verifying that special characters round-trip through your pipeline',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Decoded text shows unexpected characters.',
+          solution: 'Source might not be UTF-8. If the bytes come from an older system, the encoding could be Latin-1 or Windows-1252 — try a dedicated re-encoding tool first.',
+        },
+      ],
+    },
   },
   {
     id: 'bcrypt-hash-generator',
@@ -1816,12 +2244,38 @@ export const tools: Tool[] = [
         answer: 'Use the bcrypt.compare() function (in most libraries) with the plaintext password and the stored hash. It will return true if they match.',
       },
     ],
-    exampleOutput: {
-      input: 'mypassword123',
-      output: '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-      description: 'bcrypt hash with 10 salt rounds (hash will be different each time due to random salt)',
-    },
     relatedTools: ['sha256-hash-generator', 'md5-hash-generator', 'random-password-generator'],
+    howToUse: [
+      "Type or paste the password",
+      "Choose salt rounds (10-12 recommended for production)",
+      "Click Generate — hash appears with embedded salt",
+      "Copy the hash and store it in your user database",
+    ],
+    exampleOutput: {
+      input: "P@ssw0rd123! · 10 rounds",
+      output: "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+      description: "A bcrypt hash containing the algorithm version, cost factor, salt, and digest in a single string ready to store in a database.",
+    },
+    seoContent: {
+      intro: "Generate bcrypt password hashes entirely in your browser — the industry-standard way to store passwords safely. The cost factor (work factor) is configurable so you can tune the trade-off between security and login latency. Every hash includes a unique salt, so identical passwords produce different hashes.",
+      examples: [
+        { title: "Production user signup", body: "A new user signs up with `P@ssw0rd!` — generate a cost-12 hash on the server and store the full `$2b$12$…` string in the users table." },
+        { title: "Verify against a stored hash", body: "Compare a login attempt against the stored hash with the verify mode — only matching plaintext + hash returns true." },
+        { title: "Benchmark cost factor", body: "Try costs 10, 11, 12 in the browser to see how long each takes — pick the highest factor that finishes in <500ms on your slowest server." },
+      ],
+      useCases: [
+        "Hashing passwords before storing in a user database",
+        "Generating test fixtures for authentication code",
+        "Migrating from a weaker hash (MD5/SHA-1) to bcrypt",
+        "Benchmarking server-appropriate cost factor",
+        "Generating hashes for CTF / security training exercises",
+      ],
+      troubleshooting: [
+        { problem: "Hashing takes several seconds", solution: "Cost factor is too high. Each +1 doubles compute time. 10-12 is standard; 14+ becomes noticeable on every login." },
+        { problem: "Two hashes of the same password look different", solution: "That's correct — bcrypt uses a random salt per hash. Verification still works because the salt is embedded in the hash string." },
+        { problem: "Hash starts with `$2a$` instead of `$2b$`", solution: "Both are valid bcrypt prefixes. `$2b$` is the modern variant; `$2a$` is legacy but still verified by all major libraries." },
+      ],
+    },
   },
   {
     id: 'random-string-generator',
@@ -1856,11 +2310,38 @@ export const tools: Tool[] = [
         answer: 'Random strings are useful for generating API keys, session tokens, test data, unique identifiers, coupon codes, and one-time passwords.',
       },
     ],
-    exampleOutput: {
-      output: 'a7Xk9mP2qR5nL8j\nB4cF6hJ1dS3vY7w\nE9tN2bG5iK8oP0x',
-      description: 'Example of 3 generated random strings with mixed characters',
-    },
     relatedTools: ['random-password-generator', 'random-number-generator', 'uuid-generator'],
+    howToUse: [
+      "Pick length and character set (letters, digits, symbols)",
+      "Set how many strings to generate",
+      "Click Generate — copy individual or all at once",
+      "Use the CSPRNG toggle for crypto-grade randomness",
+    ],
+    exampleOutput: {
+      input: "Length: 16 · uppercase + lowercase + digits · count: 5",
+      output: "k7Hq2pXmYnRtVwE4\nP9mAj5GcDvNqXh2L\n...",
+      description: "Five 16-character random strings drawn from the chosen alphabet using the browser's crypto.getRandomValues (CSPRNG).",
+    },
+    seoContent: {
+      intro: "Generate random strings of any length and character composition — useful for test data, placeholder values, voucher codes, or one-off passwords. Defaults use the browser's CSPRNG (`crypto.getRandomValues`), so the output is cryptographically secure, not predictable.",
+      examples: [
+        { title: "Test-data filler", body: "Generate 100 random 12-character strings to seed a database with realistic-looking user IDs." },
+        { title: "Voucher codes", body: "Generate 1,000 uppercase-only 8-character codes for a one-time-use voucher campaign." },
+        { title: "Quick passwords", body: "Generate a single 20-character string with letters + digits + symbols as a strong one-off password." },
+      ],
+      useCases: [
+        "Seeding databases with realistic test data",
+        "Generating voucher / coupon codes",
+        "One-off password generation",
+        "API placeholder values",
+        "CTF / training challenge inputs",
+      ],
+      troubleshooting: [
+        { problem: "Strings look \"less random\" than expected", solution: "That's confirmation bias — random output often clusters. The CSPRNG is correct. Run a chi-square test if you need statistical proof." },
+        { problem: "Symbols cause issues when pasted into URLs/CSV", solution: "Disable symbols and stick to letters+digits. Or URL-encode the output. Some downstream systems can't handle special characters." },
+        { problem: "Need identical output to compare runs", solution: "Random by definition isn't reproducible. Use a seeded PRNG tool if you need deterministic \"random\" sequences." },
+      ],
+    },
   },
   {
     id: 'guid-generator',
@@ -1895,10 +2376,38 @@ export const tools: Tool[] = [
         answer: 'Yes! GUIDs are compatible with UUID systems. A GUID generated on Windows can be used in Linux, macOS, or any system that supports UUIDs—they follow the same 128-bit standard.',
       },
     ],
-    exampleOutput: {
-      output: '{550e8400-e29b-41d4-a716-446655440000}\n{6fa459ea-ee8a-3ca4-894e-db77e160355e}\n{3c4e5a6b-7c8d-4e9f-0a1b-2c3d4e5f6a7b}',      description: 'Example of 3 GUIDs with braces format',
-    },
     relatedTools: ['uuid-generator', 'uuid-bulk-generator', 'nano-id-generator'],
+    howToUse: [
+      "Choose UUID version (v4 random or v1 timestamp)",
+      "Set the count (1-1000+)",
+      "Click Generate — copy individual or all as JSON/CSV",
+      "Toggle case (upper/lower) and braces format",
+    ],
+    exampleOutput: {
+      input: "Version: 4 · count: 5",
+      output: "a3f8d2c1-9e7b-4f5a-8c1d-2b3e4f5a6c7d\n4e9c8b2a-5d1f-4e8b-9c3a-1f2d3e4b5c6a\n...",
+      description: "Five random v4 GUIDs (UUIDs) generated locally using crypto.randomUUID() — globally unique with vanishingly small collision probability.",
+    },
+    seoContent: {
+      intro: "Generate GUIDs (a.k.a. UUIDs) in your browser — v4 random (default) or v1 timestamp-based. The v4 generator uses `crypto.randomUUID()` for true cryptographic randomness, with collision probability so small that 1 billion GUIDs per second for 100 years still has near-zero collision risk.",
+      examples: [
+        { title: "Primary-key seed", body: "Generate 50 GUIDs for primary keys in a SQL Server table where IDs must be globally unique across servers." },
+        { title: "Microsoft-style braces", body: "Toggle braces on for `{a3f8d2c1-…}` format used in Windows registry and .NET configs." },
+        { title: "Idempotency keys", body: "Generate a single GUID to use as an idempotency key for a Stripe / payment API call." },
+      ],
+      useCases: [
+        "Database primary keys (SQL Server, .NET, Azure)",
+        "Idempotency keys for API requests",
+        "Distributed-system unique identifiers",
+        "Test fixture IDs",
+        "Registry / config-file unique tokens",
+      ],
+      troubleshooting: [
+        { problem: "Need exact UUID format with specific case", solution: "Use the case toggle (default lowercase). Some systems (.NET, COM) prefer uppercase; toggle on if needed." },
+        { problem: "Bulk-generated GUIDs include duplicates", solution: "Vanishingly unlikely with v4 (1 in 2^122). If you see duplicates, the generator is broken; the browser's native `crypto.randomUUID()` does not produce dupes in practice." },
+        { problem: "v1 includes the MAC address", solution: "Modern v1 generators (including this one) use random node IDs, not the real MAC — so you don't leak hardware fingerprints." },
+      ],
+    },
   },
   {
     id: 'uuid-bulk-generator',
@@ -1933,11 +2442,38 @@ export const tools: Tool[] = [
         answer: 'For performance reasons, we limit bulk generation to 1000 UUIDs at once. This ensures smooth browser performance while still meeting most use case needs.',
       },
     ],
-    exampleOutput: {
-      output: '0001. 550e8400-e29b-41d4-a716-446655440000\n0002. 6fa459ea-ee8a-3ca4-894e-db77e160355e\n0003. 3c4e5a6b-7c8d-4e9f-0a1b-2c3d4e5f6a7b\n...',
-      description: 'Example of bulk generated UUIDs with line numbers',
-    },
     relatedTools: ['uuid-generator', 'guid-generator', 'nano-id-generator'],
+    howToUse: [
+      "Set bulk count (1 - 100,000+)",
+      "Pick version (v4 random / v1 / v7 time-sortable)",
+      "Click Generate — download as TXT/CSV/JSON",
+      "Optional: include sequential index column",
+    ],
+    exampleOutput: {
+      input: "Count: 10,000 · v4 · CSV format",
+      output: "uuids.csv — 10,000 rows with index + uuid columns",
+      description: "Bulk UUID list with optional sequential index, downloadable as TXT, CSV, or JSON for seeding databases or fixtures.",
+    },
+    seoContent: {
+      intro: "Bulk-generate thousands or millions of UUIDs in one go — perfect for seeding databases, creating test fixtures, or pre-generating IDs for offline systems. v4 (random), v1 (timestamp), and v7 (time-sortable monotonic) supported. All generation happens locally with the browser's CSPRNG.",
+      examples: [
+        { title: "Database seed file", body: "Generate 100,000 v4 UUIDs as CSV and `LOAD DATA INFILE` them into a MySQL table for performance testing." },
+        { title: "v7 sortable IDs", body: "For a time-series table, v7 UUIDs sort by creation time naturally — better index locality than v4." },
+        { title: "JSON test fixtures", body: "Generate 1,000 UUIDs as a JSON array to drop straight into a Jest test file." },
+      ],
+      useCases: [
+        "Pre-generating IDs for offline / disconnected systems",
+        "Bulk database seeding (>10K rows)",
+        "Load-test fixture generation",
+        "v7 monotonic IDs for time-series tables",
+        "Reserving ID blocks for distributed services",
+      ],
+      troubleshooting: [
+        { problem: "Browser tab freezes generating millions", solution: "Generation runs in a Web Worker — but if you typed an unrealistic count (e.g. 100 million) memory will exhaust. Generate in chunks of 1 million." },
+        { problem: "v7 UUIDs don't look sequential", solution: "They're lexicographically sortable, not visually sequential — only the first 48 bits are time-based. Sort the list to see the order." },
+        { problem: "CSV download has Windows line endings on Mac", solution: "Toggle \"Unix line endings (LF)\" in advanced — default CRLF for Excel compatibility, LF for Unix tools." },
+      ],
+    },
   },
   {
     id: 'jwt-encoder',
@@ -1973,6 +2509,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['jwt-decoder', 'base64-encode', 'json-formatter'],
+    howToUse: [
+      'Pick an algorithm (HS256/HS384/HS512 for symmetric, RS256/ES256 for asymmetric)',
+      'Edit the header and payload JSON in the two text areas',
+      'Provide the signing key (secret for HS*, PEM private key for RS*/ES*)',
+      'Click Encode to produce the signed JWT — copy and use',
+    ],
+    exampleOutput: {
+      input: 'HS256, payload {"sub":"user-1","exp":1735689600}',
+      output: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjE3MzU2ODk2MDB9.signature...',
+      description: 'Standard 3-part JWT: base64url(header).base64url(payload).signature.',
+    },
+    seoContent: {
+      intro:
+        'JWT Encoder produces a signed JSON Web Token from your header, payload, and signing key. Supports HMAC (HS256/384/512) for symmetric keys and RSA/ECDSA (RS256, ES256) when you supply a PEM private key. Everything signs in your browser — keys never leave your machine.',
+      examples: [
+        {
+          title: 'Create a test access token',
+          body: 'Set algorithm HS256, payload {"sub": "test-user", "exp": <future timestamp>}, secret "dev-secret-do-not-ship" — token is ready for use in local API tests.',
+        },
+        {
+          title: 'Sign with RSA',
+          body: 'Choose RS256, paste the private key in PEM form, encode — useful for testing services that verify with your matching public key.',
+        },
+      ],
+      useCases: [
+        'Generating test JWTs for local API development',
+        'Crafting specific test cases (expired, malformed, wrong-issuer) to validate your verifier',
+        'Demos and presentations explaining JWT structure',
+        'CI scripts that need short-lived signed tokens',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid key" error on RS256.',
+          solution: 'Make sure you\'re pasting a PEM-formatted private key (begins with -----BEGIN RSA PRIVATE KEY----- or PRIVATE KEY-----). PKCS#1 and PKCS#8 are both accepted.',
+        },
+        {
+          problem: 'Generated token rejected by my server.',
+          solution: 'Most common causes: clock skew (exp/iat off by more than the server\'s tolerance), wrong audience/issuer claims, or signing with HS256 when the server expects RS256. JWT Decoder will help you inspect what the server received.',
+        },
+      ],
+    },
   },
   {
     id: 'curl-to-fetch',
@@ -2008,6 +2585,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['json-formatter', 'base64-encode', 'jwt-decoder'],
+    howToUse: [
+      'Paste a cURL command (single-line or multi-line with backslash continuations)',
+      'Click Convert — equivalent fetch() code appears below',
+      'Copy the snippet into your JavaScript/TypeScript file',
+      'Headers, method, body, query params, and basic auth are all preserved',
+    ],
+    exampleOutput: {
+      input: 'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Alice"}\'',
+      output: 'await fetch("https://api.example.com/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Alice" }) });',
+      description: 'Idiomatic async/await fetch call — drop straight into any modern JS/TS file.',
+    },
+    seoContent: {
+      intro:
+        'cURL to Fetch turns a cURL command (the format docs and Chrome\'s "Copy as cURL" produce) into equivalent modern JavaScript fetch() code with async/await. Saves the manual work of mapping -X/-H/-d flags and quoting payloads correctly when porting examples from Postman, docs, or a colleague\'s terminal.',
+      examples: [
+        {
+          title: 'Port API docs to your client',
+          body: 'Copy the cURL example from the docs, paste here, get ready-to-paste fetch() — start coding against the API faster.',
+        },
+        {
+          title: 'Convert Chrome DevTools output',
+          body: 'Right-click any request in the Network tab → Copy as cURL → paste here. Now you have the same request expressed as fetch() for use in your code.',
+        },
+      ],
+      useCases: [
+        'Porting cURL examples from API documentation into JS code',
+        'Replicating Chrome DevTools requests programmatically',
+        'Sharing reproducible API calls with frontend teammates who don\'t use cURL',
+        'Speed-bootstrapping API client code without manual flag mapping',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Multi-line cURL with backslash continuations failed to parse.',
+          solution: 'Either keep the backslashes (the parser handles them) or collapse to one line. Make sure there\'s no trailing space after the backslash on any line.',
+        },
+        {
+          problem: 'Some flags not converted.',
+          solution: 'Coverage focuses on the common flags: -X, -H, -d/--data, -u (basic auth), -k (ignore SSL). Less common ones like -F (form), --cookie, --resolve aren\'t mapped — adjust the output manually.',
+        },
+      ],
+    },
   },
 
   // ==================== TEXT TOOLS ====================
@@ -2118,6 +2736,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['word-counter', 'word-word-counter', 'text-case-converter'],
+    howToUse: [
+      'Paste or type your text into the input area',
+      'See live counts for characters (with/without spaces), words, sentences, paragraphs',
+      'Spot platform-specific limits at a glance (Twitter 280, SMS 160, meta description 160)',
+      'Clear the input to start a fresh count',
+    ],
+    exampleOutput: {
+      input: 'Hello world!',
+      output: '12 characters (10 without spaces), 2 words, 1 sentence',
+      description: 'Live count of every metric you typically need for short-form writing.',
+    },
+    seoContent: {
+      intro:
+        'Character Counter tracks character, word, sentence, and paragraph counts in real time as you type or paste. Useful for social media posts (Twitter 280, LinkedIn 3000), SEO meta tags (title ~60, description ~160), SMS messages (160 single, 70 with Unicode), and any other writing where the limit matters more than the content.',
+      examples: [
+        {
+          title: 'Stay inside the Twitter limit',
+          body: 'Paste a draft tweet — the count tells you whether you\'ve gone over 280 chars before you publish.',
+        },
+        {
+          title: 'SEO meta description',
+          body: 'Description should sit around 150-160 chars. The counter flags as you cross the line so you can trim without guesswork.',
+        },
+      ],
+      useCases: [
+        'Social media drafts (Twitter, LinkedIn, Bluesky character limits)',
+        'SEO meta titles and descriptions',
+        'SMS messages (160-char single-segment threshold)',
+        'Academic submissions with strict word counts',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Emoji counted as multiple characters.',
+          solution: 'Many emoji are multi-code-point sequences (e.g. 👨‍👩‍👧 is 5 code points). The counter reflects what Twitter and SMS gateways see, which is the same.',
+        },
+      ],
+    },
   },
   {
     id: 'text-case-converter',
@@ -2231,6 +2886,38 @@ export const tools: Tool[] = [
       description: 'Example of URL-friendly slug in lowercase with hyphens',
     },
     relatedTools: ['slug-generator-advanced', 'text-case-converter', 'url-encode'],
+    howToUse: [
+      'Paste a title or any heading text',
+      'Pick separator (default hyphen, optionally underscore)',
+      'Slug is generated live — lowercase, ASCII-safe, no special characters',
+      'Copy and use as the URL segment for blog posts, products, profiles',
+    ],
+    seoContent: {
+      intro:
+        'Slug Generator turns a human title like "My First Blog Post! (2024)" into a URL-safe slug like "my-first-blog-post-2024". Strips diacritics, removes punctuation, collapses whitespace, and lowercases everything so the result drops cleanly into a route or path segment.',
+      examples: [
+        {
+          title: 'Vietnamese title to ASCII slug',
+          body: '"Hướng dẫn JavaScript căn bản" → "huong-dan-javascript-can-ban". Diacritics removed, words hyphenated.',
+        },
+        {
+          title: 'Special characters stripped',
+          body: '"100% Free & Fast!" → "100-free-fast". %, &, ! and similar drop out cleanly.',
+        },
+      ],
+      useCases: [
+        'Blog post URLs (/blog/my-post-title)',
+        'Product page paths in e-commerce',
+        'User profile and team URLs',
+        'API resource identifiers that need to be readable',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Chinese / Japanese / Korean characters disappear.',
+          solution: 'The basic slugifier only keeps Latin characters after diacritic stripping. For multilingual slugs, use Advanced Slug Generator which preserves Unicode.',
+        },
+      ],
+    },
   },
   {
     id: 'remove-duplicate-lines',
@@ -2266,6 +2953,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['sort-lines-alphabetically', 'text-to-list', 'list-to-text'],
+    howToUse: [
+      'Paste your text — each line is one entry',
+      'Toggle case-sensitive matching if you want "Apple" and "apple" treated as different',
+      'Click Process — duplicates are removed, original order is preserved',
+      'Copy the cleaned list, or pair with Sort Alphabetically if order matters',
+    ],
+    exampleOutput: {
+      input: 'apple\nbanana\napple\ncherry\nbanana',
+      output: 'apple\nbanana\ncherry',
+      description: 'Second "apple" and "banana" removed; first occurrence kept.',
+    },
+    seoContent: {
+      intro:
+        'Remove Duplicate Lines deduplicates a list while preserving the order of first occurrence. Useful for cleaning email lists, deduplicating log entries, consolidating CSV rows, and producing unique-value reference lists from messy data.',
+      examples: [
+        {
+          title: 'Email list cleanup',
+          body: 'CSV export contained the same address multiple times. Paste, deduplicate, send to the email tool.',
+        },
+        {
+          title: 'Log file unique events',
+          body: 'Strip duplicate log lines to see distinct error types at a glance.',
+        },
+      ],
+      useCases: [
+        'Cleaning email or contact lists before import',
+        'Producing unique-value reports from log files',
+        'Deduplicating CSV row entries (one column at a time)',
+        'Removing repeated lines in copy-pasted documents',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Whitespace causes "duplicates" to slip through.',
+          solution: 'Trailing spaces make two visually-identical lines technically different. Run through Remove Extra Spaces first.',
+        },
+      ],
+    },
   },
   {
     id: 'sort-lines-alphabetically',
@@ -2301,6 +3025,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['remove-duplicate-lines', 'reverse-text', 'text-to-list'],
+    howToUse: [
+      'Paste your lines (one entry per line)',
+      'Pick ascending (A→Z) or descending (Z→A)',
+      'Optional: case-insensitive sort, natural sort for numbers',
+      'Copy the sorted output',
+    ],
+    exampleOutput: {
+      input: 'banana\napple\ncherry',
+      output: 'apple\nbanana\ncherry',
+      description: 'Standard ascending alphabetical sort.',
+    },
+    seoContent: {
+      intro:
+        'Sort Lines Alphabetically orders any list of lines A→Z or Z→A with optional case-insensitive matching. Useful for cleaning unsorted exports, preparing email lists, organising reading lists, or generating reference content where consistent order matters.',
+      examples: [
+        {
+          title: 'Reading list cleanup',
+          body: 'Paste a list of book titles, sort, and you have a tidy reference. Combine with Remove Duplicate Lines to also eliminate copies.',
+        },
+        {
+          title: 'CSV alphabetical sort by first column',
+          body: 'For full spreadsheet sorting use Excel, but a quick A-Z pass over a one-column list is one click here.',
+        },
+      ],
+      useCases: [
+        'Cleaning email/contact lists for alphabetical order',
+        'Sorting reading lists, vocabulary lists, name lists',
+        'Producing alphabetised reference content',
+        'Standardising CSV first-column ordering',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Numbers don\'t sort as expected (e.g. 10 before 2).',
+          solution: 'Default sort is lexical — "10" < "2" alphabetically. Use natural sort (if available) or pad numbers to equal width first.',
+        },
+        {
+          problem: 'Sort treats accented characters strangely.',
+          solution: 'JavaScript localeCompare-based sort handles most accents. For specialised locale ordering (German ä = a vs ä > z), use a dedicated tool.',
+        },
+      ],
+    },
   },
   {
     id: 'reverse-text',
@@ -2336,6 +3101,46 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['sort-lines-alphabetically', 'remove-line-breaks', 'text-case-converter'],
+    howToUse: [
+      'Paste your text',
+      'Pick a mode: reverse all characters, reverse each word, reverse each line',
+      'Copy the reversed result',
+    ],
+    exampleOutput: {
+      input: 'Hello World',
+      output: 'dlroW olleH',
+      description: 'Character-by-character reversal — useful for puzzles or testing right-to-left rendering.',
+    },
+    seoContent: {
+      intro:
+        'Reverse Text flips the order of characters, words, or lines depending on the mode you pick. Useful for puzzles, testing right-to-left text rendering, and generating challenge inputs for coding exercises.',
+      examples: [
+        {
+          title: 'Whole-string reversal',
+          body: '"hello" → "olleh". Classic FizzBuzz-adjacent puzzle input.',
+        },
+        {
+          title: 'Word-by-word',
+          body: '"hello world" → "olleh dlrow". Reverses each word but keeps word order.',
+        },
+        {
+          title: 'Line-by-line',
+          body: 'Reverses character order within each line but keeps line order — useful for visual puzzles.',
+        },
+      ],
+      useCases: [
+        'Coding puzzle inputs',
+        'Testing RTL text rendering',
+        'Word games and ciphers',
+        'Casual fun (palindrome checks)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Emoji reversed into broken sequences.',
+          solution: 'Some emoji are multi-codepoint joiners (👨‍👩‍👧). Reverse may split them; we use codepoint-aware splitting to minimise this, but not all sequences survive.',
+        },
+      ],
+    },
   },
   {
     id: 'remove-line-breaks',
@@ -2371,6 +3176,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['remove-extra-spaces', 'reverse-text', 'text-cleaner'],
+    howToUse: [
+      'Paste your multi-line text',
+      'Choose to replace breaks with a space, nothing, or a custom separator',
+      'Click Process — text becomes a single continuous line (or joined with your separator)',
+      'Copy for use in CSV cells, single-line config, or paragraph compaction',
+    ],
+    exampleOutput: {
+      input: 'Line 1\nLine 2\nLine 3',
+      output: 'Line 1 Line 2 Line 3',
+      description: 'Newlines replaced with spaces — typical "compact this paragraph" workflow.',
+    },
+    seoContent: {
+      intro:
+        'Remove Line Breaks collapses a multi-line text into a single line. Replace newlines with a space, nothing, or a custom separator. Useful for tidying copy that was hard-wrapped in an editor, fitting text into a single CSV cell, or reformatting prose for an HTML attribute.',
+      examples: [
+        {
+          title: 'Compact a hard-wrapped paragraph',
+          body: 'Text wrapped at 80 chars from an older email collapses into one flowing line, ready to paste anywhere modern.',
+        },
+        {
+          title: 'Build a CSV cell',
+          body: 'Replace newlines with " | " so the multi-line address fits in a single cell while still being readable.',
+        },
+      ],
+      useCases: [
+        'Fixing hard-wrapped text from emails or legacy editors',
+        'Packing multi-line content into a single CSV/JSON field',
+        'Preparing text for HTML attributes or URL parameters',
+        'One-line summarisation of bulleted notes',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Words run together with no space.',
+          solution: 'Default mode joins with empty string. Switch to "Replace with space" mode so words stay separated.',
+        },
+      ],
+    },
   },
   {
     id: 'lorem-ipsum',
@@ -2483,6 +3325,32 @@ export const tools: Tool[] = [
       description: 'Example of randomly generated text with 3 sentences',
     },
     relatedTools: ['lorem-ipsum', 'random-name-generator', 'word-counter'],
+    seoContent: {
+      intro:
+        'Random Text Generator produces realistic-looking but meaningless paragraphs of English text — different from Lorem Ipsum because it uses actual English words instead of pseudo-Latin. Useful when you need natural-looking placeholder content for UI demos, sentiment analysis testing, or sample writing prompts.',
+      examples: [
+        {
+          title: 'UI demo placeholder',
+          body: 'Designs reviewed with realistic English read better than the obvious "Lorem ipsum" — stakeholders focus on layout rather than asking why everything is Latin.',
+        },
+        {
+          title: 'Text-processing testbed',
+          body: 'Feed generated paragraphs into your tokeniser, sentiment classifier, or word-counter to see how it handles real-looking English.',
+        },
+      ],
+      useCases: [
+        'Realistic-looking placeholder text for design mockups',
+        'Test inputs for text-processing pipelines',
+        'Writing prompt seeds for creative exercises',
+        'Performance testing of text editors / rendering',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Generated text repeats words too obviously.',
+          solution: 'The vocabulary is finite — short generations tend to repeat. Generate a longer paragraph and trim to taste.',
+        },
+      ],
+    },
   },
   {
     id: 'text-difference-checker',
@@ -2518,6 +3386,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['find-and-replace', 'json-diff', 'word-counter'],
+    howToUse: [
+      'Paste your "before" text in the left pane',
+      'Paste the "after" text in the right pane',
+      'Click Compare — additions/removals/changes are highlighted line-by-line',
+      'Toggle word-level vs line-level diff depending on the granularity you need',
+    ],
+    exampleOutput: {
+      input: 'Old: "The quick brown fox"\nNew: "The slow brown fox"',
+      output: 'Diff: -quick +slow (1 word changed)',
+      description: 'Word-level diff highlights changes within otherwise-identical lines.',
+    },
+    seoContent: {
+      intro:
+        'Text Difference Checker compares two pieces of text and highlights what changed — added lines, removed lines, and modified content. Useful for proofreading revisions, checking AI-edited copy, comparing translations, and reviewing config drift between environments.',
+      examples: [
+        {
+          title: 'Proofread a revision',
+          body: 'Paste original draft + edited version. The tool surfaces every change so you can review them deliberately rather than re-reading the whole document.',
+        },
+        {
+          title: 'AI-assisted edit review',
+          body: 'When asking AI to "tighten this paragraph", paste the original and the rewrite side by side to verify nothing important was dropped.',
+        },
+      ],
+      useCases: [
+        'Proofreading multiple revisions of a document',
+        'Reviewing AI-edited or rewritten text',
+        'Comparing translations against the source',
+        'Spotting drift between two config files or specs',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Whitespace differences flood the diff.',
+          solution: 'Trailing spaces and different line endings appear as changes. Pre-process both inputs through Remove Extra Spaces if you only care about content.',
+        },
+      ],
+    },
   },
   {
     id: 'remove-html-tags',
@@ -2553,6 +3458,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['html-formatter', 'html-encode-decode', 'markdown-to-html'],
+    howToUse: [
+      'Paste your HTML (full document or fragment)',
+      'Click Strip — every <tag> is removed, leaving the readable text',
+      'Optional: collapse whitespace afterwards for clean output',
+      'Copy the plain text result',
+    ],
+    exampleOutput: {
+      input: '<p>Hello <strong>world</strong>!</p>',
+      output: 'Hello world!',
+      description: 'Tags removed, text content preserved.',
+    },
+    seoContent: {
+      intro:
+        'Remove HTML Tags strips every <tag> from a chunk of HTML, leaving just the readable text. Useful for extracting plain text from CMS exports, cleaning email bodies that arrived as HTML, prepping content for word counters or text analysis tools, and producing accessible text-only versions.',
+      examples: [
+        {
+          title: 'Strip a CMS export',
+          body: 'Paste the HTML version of a blog post — get the prose only, ready for translation tools or readability checkers.',
+        },
+        {
+          title: 'Clean a scraped page',
+          body: 'After scraping, remove all tags to focus on the textual content for downstream analysis.',
+        },
+      ],
+      useCases: [
+        'Extracting readable text from CMS or rich-text exports',
+        'Preparing text for word-counting and readability analysis',
+        'Cleaning scraped HTML for NLP pipelines',
+        'Stripping markup before pasting into plain-text editors',
+      ],
+      troubleshooting: [
+        {
+          problem: '<script> contents (JavaScript code) appears in output.',
+          solution: 'Pure tag-stripping leaves text content. Run output through a script/style block remover first, or use HTML to Markdown for smarter conversion.',
+        },
+      ],
+    },
   },
   {
     id: 'find-and-replace',
@@ -2588,6 +3530,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['text-difference-checker', 'remove-duplicate-lines', 'sort-lines-alphabetically'],
+    howToUse: [
+      'Paste your text in the input',
+      'Type the search pattern and the replacement',
+      'Toggle options: case-sensitive, whole-word, regex',
+      'Click Replace All — see the count of replacements made',
+    ],
+    exampleOutput: {
+      input: 'Find "cat" in "The cat sat on the mat" → replace with "dog"',
+      output: 'The dog sat on the mat (1 replacement)',
+      description: 'Simple search-and-replace with a count of how many matches changed.',
+    },
+    seoContent: {
+      intro:
+        'Find and Replace performs search-and-replace on any pasted text, with optional case sensitivity, whole-word matching, and full regex support. Useful for bulk text edits, log cleanup, batch URL substitutions, and any time you need to apply the same change everywhere without opening a heavyweight editor.',
+      examples: [
+        {
+          title: 'Bulk rename in logs',
+          body: 'Replace "user_id" with "userId" across a 5,000-line log dump in one click.',
+        },
+        {
+          title: 'Regex match',
+          body: 'Pattern \\d{4}-\\d{2}-\\d{2} → replace with REDACTED to strip dates from a paste before sharing.',
+        },
+        {
+          title: 'Case-insensitive cleanup',
+          body: 'Replace "JavaScript" / "javascript" / "JAVASCRIPT" all at once with consistent "JavaScript" using case-insensitive search.',
+        },
+      ],
+      useCases: [
+        'Bulk text edits in pasted content (logs, configs, drafts)',
+        'Regex-based redaction (dates, emails, IDs)',
+        'Case-insensitive normalisation of inconsistent spellings',
+        'Batch URL or domain substitution in migrated content',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Regex special chars treated literally.',
+          solution: 'Make sure the regex toggle is ON. Escape literal special chars (. * + ? etc.) with backslash if you want them treated as literal.',
+        },
+      ],
+    },
   },
   {
     id: 'text-to-list',
@@ -2623,6 +3606,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['list-to-text', 'remove-duplicate-lines', 'sort-lines-alphabetically'],
+    howToUse: [
+      'Paste text — sentences, words, or comma-separated items',
+      'Pick a separator (newline, comma, custom delimiter) for splitting',
+      'Choose list style: numbered, bulleted, or plain',
+      'Copy the formatted list',
+    ],
+    exampleOutput: {
+      input: 'apple, banana, cherry',
+      output: '- apple\n- banana\n- cherry',
+      description: 'Comma-separated input converted to a Markdown bullet list.',
+    },
+    seoContent: {
+      intro:
+        'Text to List Converter splits a paragraph or delimited string into a list with consistent formatting (bullets, numbers, or plain lines). Useful for turning notes into action items, transforming exported CSV rows into Markdown lists, or organising loosely-structured copy.',
+      examples: [
+        {
+          title: 'Comma list to bullets',
+          body: '"apples, bananas, cherries" → "- apples\\n- bananas\\n- cherries". Ready for a markdown doc or slide.',
+        },
+        {
+          title: 'Paragraph to action items',
+          body: 'Split a paragraph into sentences, render as a numbered checklist for a meeting follow-up.',
+        },
+      ],
+      useCases: [
+        'Converting paragraph notes to bullet lists for slides',
+        'Transforming CSV rows into Markdown lists',
+        'Building action-item checklists from prose',
+        'Organising freeform notes into structured lists',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Split into one giant line.',
+          solution: 'Check the separator setting — if input is comma-separated but tool is set to newline, no splits happen. Match the delimiter to your input.',
+        },
+      ],
+    },
   },
   {
     id: 'list-to-text',
@@ -2658,6 +3678,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['text-to-list', 'remove-line-breaks', 'text-cleaner'],
+    howToUse: [
+      'Paste your list (one item per line)',
+      'Pick a join separator (comma + space, semicolon, custom)',
+      'Optional: strip bullets / numbering before joining',
+      'Copy the resulting single-line text',
+    ],
+    exampleOutput: {
+      input: '- apple\n- banana\n- cherry',
+      output: 'apple, banana, cherry',
+      description: 'Markdown bullets stripped and items joined with comma-space — ready for prose.',
+    },
+    seoContent: {
+      intro:
+        'List to Text Converter joins a list of items back into a single-line or paragraph format. Reverse of "Text to List". Useful for pasting list contents into prose, building enum constants from a one-per-line list, or producing comma-separated CSV cells.',
+      examples: [
+        {
+          title: 'Bullets to prose',
+          body: '"- apple\\n- banana\\n- cherry" → "apple, banana, cherry". Strip bullets, join with comma-space.',
+        },
+        {
+          title: 'Build an enum list',
+          body: 'List of names becomes a TypeScript-friendly comma string for an enum or union type.',
+        },
+      ],
+      useCases: [
+        'Folding bullets back into a prose sentence',
+        'Joining items into comma/semicolon-separated strings',
+        'Building enum/option lists from one-per-line files',
+        'Producing CSV cell content from list data',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Bullets (- *) appear in output.',
+          solution: 'Enable "Strip bullets/numbering" or run input through Remove Extra Spaces first.',
+        },
+      ],
+    },
   },
   {
     id: 'random-name-generator',
@@ -2697,6 +3754,36 @@ export const tools: Tool[] = [
       description: 'Example of 5 randomly generated full names',
     },
     relatedTools: ['random-text-generator', 'lorem-ipsum', 'random-string-generator'],
+    seoContent: {
+      intro:
+        'Random Name Generator produces realistic first + last name combinations. Useful for character ideas in fiction, placeholder user data in mockups, synthetic test data for QA, and any time you need believable-looking names without using real ones.',
+      examples: [
+        {
+          title: 'Mockup user list',
+          body: 'Generate 20 names for a UI demo so the team focuses on the layout rather than asking "whose name is that?".',
+        },
+        {
+          title: 'NPC names for fiction',
+          body: 'Speed up worldbuilding by generating dozens of background-character names instead of staring at a blank page.',
+        },
+        {
+          title: 'Synthetic test data',
+          body: 'Seed a staging database with believable user names instead of "test1", "test2"...',
+        },
+      ],
+      useCases: [
+        'UI/UX mockup placeholder names',
+        'Synthetic test data for QA',
+        'Background-character names in fiction or games',
+        'Demo user profiles for presentations',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Same name appears twice in a large batch.',
+          solution: 'Combinations are random — duplicates are possible. Generate more and run through Remove Duplicate Lines if uniqueness matters.',
+        },
+      ],
+    },
   },
   {
     id: 'remove-extra-spaces',
@@ -2732,6 +3819,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['remove-line-breaks', 'text-cleaner', 'remove-html-tags'],
+    howToUse: [
+      'Paste your text',
+      'Click Process — multiple consecutive spaces collapse to single spaces, leading/trailing spaces trimmed',
+      'Optional: also strip non-breaking spaces, tabs',
+      'Copy clean output',
+    ],
+    exampleOutput: {
+      input: '  Hello    world   !  ',
+      output: 'Hello world !',
+      description: 'Multiple spaces collapsed, edges trimmed.',
+    },
+    seoContent: {
+      intro:
+        'Remove Extra Spaces collapses multiple consecutive spaces to single spaces and trims leading/trailing whitespace. Useful for cleaning up pasted text from OCR, badly-formatted exports, or content where copy-paste introduced stray whitespace.',
+      examples: [
+        {
+          title: 'OCR cleanup',
+          body: 'OCR often produces "h  ello   world" — one click and you have "hello world".',
+        },
+        {
+          title: 'PDF copy-paste',
+          body: 'Text copied from PDFs often has odd spacing. Normalise it before pasting into a doc.',
+        },
+      ],
+      useCases: [
+        'Cleaning up OCR output',
+        'Normalising whitespace in PDF copy-paste',
+        'Preparing text for word-counting or analysis',
+        'Removing inconsistent whitespace before publishing',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Non-breaking spaces still appear.',
+          solution: 'Some sources insert &nbsp; / U+00A0 characters that look like spaces. Enable "strip non-breaking spaces" to remove them too.',
+        },
+      ],
+    },
   },
   {
     id: 'capitalize-sentences',
@@ -2767,6 +3891,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['text-case-converter', 'text-cleaner', 'remove-extra-spaces'],
+    howToUse: [
+      'Paste your text with mixed-case or all-lowercase content',
+      'Click Process — the first letter of each sentence is capitalized',
+      'Sentence boundaries detected via . ! ? followed by space',
+      'Copy the result for use in formal writing',
+    ],
+    exampleOutput: {
+      input: 'hello. how are you? i am fine.',
+      output: 'Hello. How are you? I am fine.',
+      description: 'First letter after each . ! ? capitalized.',
+    },
+    seoContent: {
+      intro:
+        'Capitalize Sentences rewrites text so the first letter of every sentence is uppercase. Useful when you receive all-lowercase content (chat exports, voice-to-text transcripts) and need a properly-capitalised version for emails or documents.',
+      examples: [
+        {
+          title: 'Chat transcript cleanup',
+          body: 'Casual lowercase chat → properly capitalized sentences. Saves manual editing for everything except names.',
+        },
+        {
+          title: 'Voice-to-text fix',
+          body: 'Some speech-to-text engines skip capitalization. Pipe their output through this tool first.',
+        },
+      ],
+      useCases: [
+        'Cleaning casual all-lowercase writing',
+        'Post-processing speech-to-text output',
+        'Reformatting chat logs for documentation',
+        'Standardising tone for formal emails',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Proper nouns (names, places) not capitalised.',
+          solution: 'The tool only knows about sentence boundaries, not proper nouns. Capitalize "John", "Vietnam", etc. manually after running.',
+        },
+      ],
+    },
   },
   {
     id: 'text-cleaner',
@@ -2802,6 +3963,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['remove-extra-spaces', 'text-case-converter', 'remove-html-tags'],
+    howToUse: [
+      'Paste messy text',
+      'Toggle the cleaning rules: remove extra spaces, line breaks, special chars, emoji, etc.',
+      'Click Clean — all selected rules applied in one pass',
+      'Copy the normalised text',
+    ],
+    exampleOutput: {
+      input: '  Hello !!!!  \n\n\n  World 😀  ',
+      output: 'Hello! World',
+      description: 'Multiple cleaning rules applied in a single pass.',
+    },
+    seoContent: {
+      intro:
+        'Text Cleaner combines several common text-normalisation steps in one tool: collapse whitespace, strip line breaks, remove special characters, drop emoji, normalise quotes/dashes. Useful as a single-step pre-processor before sending text to analysis tools, importing into a database, or pasting into a constrained input field.',
+      examples: [
+        {
+          title: 'Pre-process for NLP',
+          body: 'Strip emoji, collapse whitespace, normalise quotes — produces a clean canonical form for downstream text analysis.',
+        },
+        {
+          title: 'Database import',
+          body: 'Remove special characters and emoji that some legacy databases choke on, before bulk-importing user-generated content.',
+        },
+      ],
+      useCases: [
+        'Pre-processing text for NLP / analytics pipelines',
+        'Cleaning user-generated content before database import',
+        'Normalising copy-pasted text from many sources to one consistent format',
+        'Producing safe inputs for ASCII-only legacy systems',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Cleaned too aggressively — lost meaningful punctuation.',
+          solution: 'Disable "Remove special characters" and keep only whitespace + emoji cleanup. Each rule is an independent toggle.',
+        },
+      ],
+    },
   },
   {
     id: 'rot13-encoder',
@@ -2837,6 +4035,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['rot13-decoder', 'morse-code-translator', 'base64-encode'],
+    howToUse: [
+      'Paste plain text',
+      'Click Encode — each letter rotates 13 positions in the alphabet',
+      'Copy the ROT13 result',
+      'Apply ROT13 again to decode (it\'s a symmetric cipher)',
+    ],
+    exampleOutput: {
+      input: 'Hello, World!',
+      output: 'Uryyb, Jbeyq!',
+      description: 'Each letter rotated 13 places; punctuation untouched.',
+    },
+    seoContent: {
+      intro:
+        'ROT13 Encoder shifts every letter by 13 positions in the alphabet — a classic ultra-simple cipher used to hide spoilers, puzzle answers, and joke punchlines in plain text. Not encryption; just obfuscation. Useful for forum posts, classroom puzzles, and quirky URL parameters.',
+      examples: [
+        {
+          title: 'Hide a movie spoiler',
+          body: 'Encode "the killer is the butler" → "gur xvyyre vf gur ohgyre". Readers can decode with one click if they\'re willing to be spoiled.',
+        },
+        {
+          title: 'Puzzle answer',
+          body: 'Provide the answer to a puzzle in ROT13 so players have to deliberately decode to see it.',
+        },
+      ],
+      useCases: [
+        'Hiding spoilers in forum/chat posts',
+        'Puzzle and ARG content',
+        'Quirky URL parameters in casual demos',
+        'Teaching basic substitution ciphers',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Numbers/symbols unchanged.',
+          solution: 'By design — ROT13 only rotates letters A-Z (case preserved). Numbers and punctuation pass through untouched.',
+        },
+      ],
+    },
   },
   {
     id: 'rot13-decoder',
@@ -2872,6 +4107,37 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['rot13-encoder', 'morse-code-translator', 'base64-decode'],
+    howToUse: [
+      'Paste ROT13-encoded text',
+      'Click Decode — letters rotate back 13 positions to restore the original',
+      'Copy the decoded text',
+    ],
+    exampleOutput: {
+      input: 'Uryyb, Jbeyq!',
+      output: 'Hello, World!',
+      description: 'Same operation as encoding — ROT13 is symmetric.',
+    },
+    seoContent: {
+      intro:
+        'ROT13 Decoder restores text that was encoded with ROT13. Since ROT13 is symmetric (apply it twice and you\'re back where you started), the decoder and encoder use the same operation — this tool is identical in behaviour to the encoder, just labelled for clarity.',
+      examples: [
+        {
+          title: 'Read a forum spoiler',
+          body: 'Spotted "gur xvyyre vf gur ohgyre" on a forum? Paste it here for the plain-text answer.',
+        },
+      ],
+      useCases: [
+        'Reading ROT13-encoded spoilers, jokes, and puzzle answers',
+        'Decoding casual obfuscation in URL parameters',
+        'Demonstrating that ROT13 is symmetric (encode-of-encode = original)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output identical to input.',
+          solution: 'Either the input wasn\'t ROT13-encoded, or it contained only non-alphabetic characters. ROT13 only transforms letters.',
+        },
+      ],
+    },
   },
   {
     id: 'morse-code-translator',
@@ -2907,6 +4173,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['ascii-converter', 'binary-converter', 'rot13-encoder'],
+    howToUse: [
+      'Pick direction: Text → Morse, or Morse → Text',
+      'Type your input (letters/numbers for text, dots/dashes for Morse)',
+      'Each character maps to its standard International Morse Code equivalent',
+      'Copy the translated output',
+    ],
+    exampleOutput: {
+      input: 'SOS',
+      output: '... --- ...',
+      description: 'The famous distress signal — three short, three long, three short.',
+    },
+    seoContent: {
+      intro:
+        'Morse Code Translator converts between English text and International Morse Code (dots and dashes). Useful for amateur radio practice, scout/cub-scout activities, geocache puzzles, escape rooms, and education about telecommunication history.',
+      examples: [
+        {
+          title: 'Encode "HELLO"',
+          body: '"HELLO" → ".... . .-.. .-.. ---". Letters separated by spaces, words by " / ".',
+        },
+        {
+          title: 'Decode a puzzle clue',
+          body: 'Paste ". . - .- ... - / -.-. --- -.. ." → "EAST CODE".',
+        },
+      ],
+      useCases: [
+        'Amateur radio (HAM) practice',
+        'Scouts/Cub Scouts merit badge requirements',
+        'Escape room / puzzle / geocache clues',
+        'Educational demos about telegraph history',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Decoded text has unexpected spaces.',
+          solution: 'Standard Morse uses single space between letters and " / " between words. Inputs with extra spaces may produce extra spaces in the decoded text.',
+        },
+      ],
+    },
   },
   {
     id: 'ascii-converter',
@@ -2942,6 +4245,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['binary-converter', 'hex-converter', 'morse-code-translator'],
+    howToUse: [
+      'Pick direction: Text → ASCII codes, or ASCII codes → Text',
+      'Enter text (single line) or comma/space-separated decimal codes',
+      'Each character converts to its decimal ASCII (or Unicode codepoint) value',
+      'Copy the result',
+    ],
+    exampleOutput: {
+      input: 'Hi',
+      output: '72 105',
+      description: 'H = 72, i = 105 (decimal ASCII codes).',
+    },
+    seoContent: {
+      intro:
+        'ASCII Converter switches between text and the decimal ASCII (or Unicode codepoint) values that represent each character. Useful for programming education, debugging character encoding issues, and decoding numeric ciphers used in puzzles.',
+      examples: [
+        {
+          title: 'Inspect codepoints',
+          body: '"A" → 65, "a" → 97, "0" → 48 — these constants come up in coding interviews and low-level string manipulation.',
+        },
+        {
+          title: 'Decode "65 66 67"',
+          body: 'Space-separated decimals → "ABC". Common in basic puzzles.',
+        },
+      ],
+      useCases: [
+        'Computer science education (showing character ↔ number mapping)',
+        'Debugging string-handling code that uses codepoints',
+        'Decoding/encoding number-based puzzles',
+        'Comparing ASCII vs Unicode behaviour for non-Latin characters',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Non-ASCII chars produce codes above 127.',
+          solution: 'The tool uses Unicode codepoints. "é" = 233, "日" = 26085, "🎉" = 127881. Strict ASCII is 0-127 only.',
+        },
+      ],
+    },
   },
 
   // ==================== IMAGE TOOLS ====================
@@ -3019,6 +4359,72 @@ export const tools: Tool[] = [
     },
   },
   {
+    id: 'image-to-text',
+    name: 'Image to Text (OCR)',
+    seoTitle: 'Image to Text OCR – Extract Text from Images Online (Free)',
+    description: 'Free online OCR tool to extract text from images (PNG, JPG, WebP, BMP). Supports English, Vietnamese, Chinese, Japanese, Korean, French, Spanish, German, Russian. Powered by Tesseract.js — runs locally in your browser, no upload required.',
+    shortDescription: 'Extract text from images with OCR',
+    category: 'image',
+    slug: 'image-to-text',
+    icon: 'ScanText',
+    keywords: ['ocr', 'image to text', 'extract text', 'tesseract', 'screenshot to text', 'photo to text'],
+    tags: ['image', 'ocr', 'text', 'extract', 'tesseract', 'scan'],
+    faq: [
+      {
+        question: 'How accurate is the OCR?',
+        answer: 'Powered by Tesseract.js (the same engine Google open-sourced from Tesseract). Accuracy is excellent for clean, high-resolution screenshots and printed text. Accuracy drops on handwriting, blurry photos, or text smaller than 12 pixels tall.',
+      },
+      {
+        question: 'Which languages are supported?',
+        answer: 'English, Vietnamese, Chinese (Simplified), Japanese, Korean, French, Spanish, German, Russian out of the box — plus 100+ others available via Tesseract. You can also combine languages (e.g. English + Vietnamese) for mixed-language documents.',
+      },
+      {
+        question: 'Is my image uploaded anywhere?',
+        answer: 'No. OCR runs entirely in your browser using WebAssembly. The image never leaves your device. Training data for each language is downloaded once (~5-15 MB) and cached locally.',
+      },
+      {
+        question: 'Why is the first OCR slow?',
+        answer: 'The first time you use a language, Tesseract downloads the trained model (~5-15 MB). Subsequent runs reuse the cached model and start instantly.',
+      },
+      {
+        question: 'Can I extract text from a scanned PDF?',
+        answer: 'For PDFs, use the Extract Text from PDF tool — it has built-in OCR with the same Tesseract engine and processes every page automatically.',
+      },
+    ],
+    relatedTools: ['extract-text-pdf', 'image-color-picker', 'image-to-base64'],
+    howToUse: [
+      'Pick the OCR language (or English + Vietnamese for mixed docs)',
+      'Drag-and-drop or upload an image (PNG, JPG, WebP, BMP)',
+      'Click Run OCR — first run downloads training data',
+      'Copy the extracted text or download as .txt',
+    ],
+    exampleOutput: {
+      input: 'screenshot.png (a screenshot of a Vietnamese product page)',
+      output: 'Plain UTF-8 text: full page contents transcribed line by line',
+      description: 'Tesseract OCR output preserves line breaks and Unicode diacritics — Vietnamese accents like ấ, ử, ợ come through correctly.',
+    },
+    seoContent: {
+      intro: 'Extract text from any image directly in your browser — screenshots, photos of receipts, scanned book pages, posters, presentation slides. The tool uses Tesseract.js, the de-facto open-source OCR engine, running in WebAssembly so nothing is uploaded. Supports 10+ built-in languages including English, Vietnamese (with full diacritic support), Chinese, Japanese, Korean, and major European languages.',
+      examples: [
+        { title: 'Screenshot to editable text', body: 'A screenshot of a forum post becomes editable plain text you can paste into a doc — no manual retyping.' },
+        { title: 'Receipt digitisation', body: 'A photo of a Vietnamese restaurant receipt is OCR\'d with the `vie` language pack — every diacritic preserved.' },
+        { title: 'Slide-deck text extraction', body: 'Screenshots from a teammate\'s slide deck become searchable text for grep/notes — useful when only PNGs are shared.' },
+      ],
+      useCases: [
+        'Digitising printed documents (books, receipts, contracts)',
+        'Extracting text from screenshots without retyping',
+        'Building searchable archives of image-based content',
+        'Pulling quotes from poster / signage photos',
+        'Preparing image text for LLM ingestion or translation',
+      ],
+      troubleshooting: [
+        { problem: 'OCR misses some Vietnamese diacritics', solution: 'Pick the `vie` language pack (or `eng+vie` for mixed-language docs). The default `eng` model doesn\'t know Vietnamese accent rules.' },
+        { problem: 'Output is gibberish for a clean photo', solution: 'The image is rotated or the text is too small. Rotate to upright orientation and upscale to at least 300 DPI / 1000 px wide before OCR.' },
+        { problem: 'First OCR takes 20+ seconds', solution: 'Training data is downloading on first use (~5-15 MB per language). Subsequent runs use the cached model and start instantly.' },
+      ],
+    },
+  },
+  {
     id: 'image-to-base64',
     name: 'Image to Base64',
     seoTitle: 'Image to Base64 – Free Online Tool',
@@ -3052,6 +4458,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['base64-to-image', 'base64-encode', 'image-resize'],
+    howToUse: [
+      'Drop or pick an image file (PNG, JPG, GIF, WebP, SVG)',
+      'The Base64 string and full data URI are generated locally',
+      'Copy the Base64 alone, or the data: URI ready for CSS background-image / <img src>',
+      'Use for inlining small images into stylesheets, emails, or HTML attributes',
+    ],
+    exampleOutput: {
+      input: 'logo.png (8 KB)',
+      output: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+      description: 'Full data URI you can paste into an <img src> or CSS url() without an extra HTTP request.',
+    },
+    seoContent: {
+      intro:
+        'Image to Base64 inlines a binary image as a Base64-encoded text string and matching data: URI. Best for small icons, logos, and SVG previews that you want embedded directly in CSS, HTML emails, or JSON payloads — avoiding an extra HTTP request at the cost of about 33% size overhead.',
+      examples: [
+        {
+          title: 'Inline a CSS background',
+          body: 'Convert a 4 KB icon → data URI → drop into background-image: url(data:image/png;base64,...) for zero-RTT loading.',
+        },
+        {
+          title: 'Embed in HTML email',
+          body: 'Many email clients block external images. Base64-inline a small logo so it always renders.',
+        },
+      ],
+      useCases: [
+        'Inlining small icons/logos in CSS to avoid extra requests',
+        'Embedding images in HTML emails that block external loads',
+        'Pasting images into JSON payloads (debug logs, test fixtures)',
+        'Data: URIs for one-off prototypes without an image server',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Resulting Base64 is huge for a small file.',
+          solution: 'Base64 adds ~33% overhead. For files >50 KB, normal image hosting is usually a better choice than inlining.',
+        },
+      ],
+    },
   },
   {
     id: 'base64-to-image',
@@ -3087,6 +4530,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-to-base64', 'base64-decode', 'image-resize'],
+    howToUse: [
+      'Paste a Base64 string or full data: URI',
+      'Image preview appears once decoded',
+      'Click Download to save as PNG/JPG/etc. (format auto-detected from signature)',
+      'Use to extract images from CSS, HTML emails, or JSON payloads',
+    ],
+    exampleOutput: {
+      input: 'data:image/png;base64,iVBORw0KGgo...',
+      output: 'Decoded PNG preview — ready to download',
+      description: 'Format auto-detected from the magic bytes after decoding.',
+    },
+    seoContent: {
+      intro:
+        'Base64 to Image decodes a Base64 string (with or without the data: URI prefix) back into a viewable, downloadable image. Format is auto-detected from the file signature — PNG, JPEG, GIF, WebP, SVG all supported.',
+      examples: [
+        {
+          title: 'Extract a CSS-inlined icon',
+          body: 'Copy the base64 string from a stylesheet, paste here, download the original PNG for editing.',
+        },
+        {
+          title: 'View a JSON-embedded image',
+          body: 'API response includes a base64 thumbnail? Paste to preview without writing a single line of code.',
+        },
+      ],
+      useCases: [
+        'Extracting images inlined in CSS/HTML',
+        'Previewing base64 images returned by APIs',
+        'Recovering icons embedded in old documents',
+        'Quick visual verification of base64 payloads',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid image" error.',
+          solution: 'Make sure the input is valid Base64 and the decoded bytes start with a known image signature. Strip wrapping quotes or HTML attributes before pasting.',
+        },
+      ],
+    },
   },
   {
     id: 'image-to-ico',
@@ -3122,6 +4602,38 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['favicon-generator', 'image-resize', 'svg-to-png'],
+    howToUse: [
+      'Drop a PNG/JPG/SVG (square works best)',
+      'Choose which sizes to include (16, 32, 48, 64, 128, 256 px)',
+      'Click Convert — multi-size .ico file is generated locally',
+      'Place at the root of your site as favicon.ico',
+    ],
+    exampleOutput: {
+      input: 'logo.png (512×512)',
+      output: 'favicon.ico (containing 16×16, 32×32, 48×48 entries)',
+      description: 'A proper multi-size ICO so each browser pulls the size it needs without downscaling.',
+    },
+    seoContent: {
+      intro:
+        'Image to ICO converts a source image into a Windows-format .ico file containing one or more sizes. Used for favicons (favicon.ico), Windows shortcuts, and legacy apps. Multi-size output ensures crisp rendering at every browser display size — no blurry downscales.',
+      examples: [
+        {
+          title: 'Generate favicon.ico',
+          body: 'Upload your square logo, include sizes 16, 32, 48 — drop the result at /favicon.ico and you\'re done.',
+        },
+      ],
+      useCases: [
+        'Generating favicons for legacy browser support',
+        'Creating icons for Windows desktop shortcuts',
+        'Producing multi-size icons for older apps',
+      ],
+      troubleshooting: [
+        {
+          problem: 'ICO file size larger than expected.',
+          solution: 'Each size adds bytes. Drop sizes you don\'t need (48 px is rarely required for web). For just web, 16 + 32 is enough; modern sites use PNG favicons instead.',
+        },
+      ],
+    },
   },
   {
     id: 'webp-to-png',
@@ -3157,6 +4669,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['png-to-webp', 'jpg-to-png', 'svg-to-png'],
+    howToUse: [
+      'Drop a .webp file (single or batch)',
+      'Conversion to PNG runs in the browser using canvas',
+      'Transparency is preserved if the source has alpha',
+      'Download individual PNGs or all as a ZIP',
+    ],
+    exampleOutput: {
+      input: 'photo.webp (120 KB)',
+      output: 'photo.png (lossless, typically 200-300 KB)',
+      description: 'Same image, PNG container — bigger file but universal compatibility.',
+    },
+    seoContent: {
+      intro:
+        'WebP to PNG converts WebP images to PNG with full transparency preserved. PNG is universally supported (every browser, every image viewer, every Office version) so this is the conversion you reach for when sharing images with someone whose tools don\'t accept WebP yet.',
+      examples: [
+        {
+          title: 'Share with legacy clients',
+          body: 'Recipient\'s old Outlook can\'t preview WebP — convert first, send PNG, they see the image.',
+        },
+        {
+          title: 'Insert into older Office docs',
+          body: 'PowerPoint 2016 and earlier struggle with WebP. PNG plays nice everywhere.',
+        },
+      ],
+      useCases: [
+        'Sharing images with users on older email clients',
+        'Inserting into pre-2019 Office documents',
+        'Compatibility with image viewers that don\'t support WebP',
+        'Producing PNG masters from a WebP-first asset pipeline',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output PNG much larger than source WebP.',
+          solution: 'Expected — WebP is more efficient. If size matters, keep WebP for serving and only convert on-demand for compatibility.',
+        },
+      ],
+    },
   },
   {
     id: 'png-to-webp',
@@ -3192,6 +4741,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['webp-to-png', 'png-to-jpg', 'image-compressor'],
+    howToUse: [
+      'Drop a PNG file (single or batch)',
+      'Optionally choose WebP quality (lossy 0-100; lossless if 100)',
+      'Conversion runs locally via canvas',
+      'Download as .webp — usually 25-50% smaller than the PNG',
+    ],
+    exampleOutput: {
+      input: 'screenshot.png (320 KB)',
+      output: 'screenshot.webp (~120 KB at quality 85)',
+      description: 'Same visual quality, much smaller file — ideal for web serving.',
+    },
+    seoContent: {
+      intro:
+        'PNG to WebP converts PNG images to WebP format, dramatically reducing file size while keeping transparency and visual quality. WebP is now supported in 97%+ of browsers — switching website images from PNG to WebP is one of the easiest perf wins available.',
+      examples: [
+        {
+          title: 'Website asset optimisation',
+          body: 'Bulk-convert your PNG hero/logo/icon assets to WebP — typically 30-50% smaller, faster page loads.',
+        },
+        {
+          title: 'Preserve transparency',
+          body: 'Logos with transparent backgrounds keep their alpha channel through the conversion.',
+        },
+      ],
+      useCases: [
+        'Web performance: shrinking PNG assets for production',
+        'Reducing bandwidth costs on image-heavy sites',
+        'Generating WebP variants for <picture> srcset',
+        'CDN-friendly modern image format',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Quality looks degraded.',
+          solution: 'Raise the quality slider to 90+ for graphics with sharp edges. Default 85 is a photo-friendly setting.',
+        },
+      ],
+    },
   },
   {
     id: 'jpg-to-png',
@@ -3227,6 +4813,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['png-to-jpg', 'webp-to-png', 'jpeg-compressor'],
+    howToUse: [
+      'Drop a JPG/JPEG file (single or batch)',
+      'Conversion to PNG runs locally',
+      'Output is lossless — every pixel of the JPG preserved',
+      'Useful when downstream tools require PNG specifically',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg (220 KB)',
+      output: 'photo.png (typically 400-800 KB)',
+      description: 'PNG is lossless so files are larger than the JPG source.',
+    },
+    seoContent: {
+      intro:
+        'JPG to PNG converts JPEG photos to PNG format. Useful when you need PNG specifically — design tools that don\'t accept JPG, transparent overlays planned later, or merging into a multi-layer pipeline that demands lossless input.',
+      examples: [
+        {
+          title: 'Move into a design tool',
+          body: 'Some older design tools only import PNG. Convert once, drop in the editor.',
+        },
+        {
+          title: 'Pre-process for editing',
+          body: 'Need to add transparency later? Start from PNG so each edit is lossless instead of re-compressing JPG.',
+        },
+      ],
+      useCases: [
+        'Importing JPGs into design tools that require PNG',
+        'Preparing source images for transparency edits',
+        'Lossless re-encoding before further pipeline steps',
+      ],
+      troubleshooting: [
+        {
+          problem: 'PNG is much larger than the JPG source.',
+          solution: 'Expected — PNG is lossless and JPG already discarded data. If size matters, keep the JPG or use PNG compressor afterwards.',
+        },
+      ],
+    },
   },
   {
     id: 'png-to-jpg',
@@ -3262,6 +4884,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['jpg-to-png', 'png-to-webp', 'jpeg-compressor'],
+    howToUse: [
+      'Drop a PNG file (single or batch)',
+      'Set JPG quality (0-100, default 90)',
+      'Transparent PNG areas become solid background (white by default; configurable)',
+      'Download the JPG — typically 4-8× smaller than the PNG',
+    ],
+    exampleOutput: {
+      input: 'photo.png (640 KB)',
+      output: 'photo.jpg (~110 KB at quality 90)',
+      description: 'Photographic content compresses dramatically as JPG.',
+    },
+    seoContent: {
+      intro:
+        'PNG to JPG converts PNG to JPEG format for big file-size savings on photographic content. Best for photos and screenshots that don\'t need transparency. Skip this for logos, line art, or anything with sharp edges — JPG produces visible artifacts on those.',
+      examples: [
+        {
+          title: 'Compress a photo screenshot',
+          body: 'Screenshot saved as PNG by default — 600 KB. Convert to JPG quality 90 → 100 KB without visible loss.',
+        },
+        {
+          title: 'Prepare batch for email',
+          body: 'Bulk-convert a folder of PNGs to fit in a 25 MB email attachment limit.',
+        },
+      ],
+      useCases: [
+        'Shrinking PNG screenshots for email or chat',
+        'Preparing photo libraries for size-limited storage',
+        'Web optimisation when transparency isn\'t needed',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Logo / icon looks worse after conversion.',
+          solution: 'JPG is bad for hard edges and flat colours. For graphics, use PNG to WebP instead — same size win without artifacts.',
+        },
+      ],
+    },
   },
   {
     id: 'resize-image-percentage',
@@ -3297,6 +4955,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-resize', 'crop-image'],
+    howToUse: [
+      'Drop an image (or batch)',
+      'Type a percentage: 50 to halve, 200 to double, 25 to quarter',
+      'Aspect ratio preserved automatically',
+      'Download the resized result',
+    ],
+    exampleOutput: {
+      input: '1920×1080 photo at 50%',
+      output: '960×540 image',
+      description: 'Proportional resize — half of each dimension, quarter of pixel count.',
+    },
+    seoContent: {
+      intro:
+        'Resize Image by Percentage shrinks (or enlarges) an image proportionally based on a percentage you pick. Useful for batch-resizing photos to a consistent fraction, generating thumbnails, or scaling down screenshots without working out exact pixel targets.',
+      examples: [
+        {
+          title: 'Half-size thumbnails',
+          body: 'Pass a folder of 2400 px photos through "50%" — all become 1200 px, aspect ratio intact, ready for a gallery.',
+        },
+        {
+          title: 'Quick-shrink screenshots',
+          body: '4K screenshots at 25% = 1080p, much friendlier to email or chat attachments.',
+        },
+      ],
+      useCases: [
+        'Batch thumbnail generation at a fixed ratio',
+        'Shrinking screenshots/photos by a known proportion',
+        'Producing retina/non-retina pairs (100% / 50%)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output is blurry after enlarging beyond 100%.',
+          solution: 'Browser canvas scales using bilinear interpolation — fine for downscaling, soft for upscaling. For sharp upscales, use a dedicated AI upscaler.',
+        },
+      ],
+    },
   },
 {
     id: 'rotate-image',
@@ -3332,6 +5026,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['flip-image-horizontal', 'flip-image-vertical', 'image-resize'],
+    howToUse: [
+      'Drop an image',
+      'Click 90°, 180°, 270° quick buttons or drag the slider for any angle',
+      'Use Flip H/V for mirroring',
+      'Download the rotated result',
+    ],
+    exampleOutput: {
+      input: 'Phone photo lying sideways',
+      output: 'Same photo rotated 90° clockwise — now upright',
+      description: 'Rotation bakes the orientation into the pixels (not just metadata) so it displays correctly everywhere.',
+    },
+    seoContent: {
+      intro:
+        'Rotate Image turns an image by any angle and bakes the rotation into the pixel data. Unlike EXIF orientation flags which some apps ignore, this guarantees the image displays correctly in every viewer. Includes quick 90°/180°/270° buttons and full free-angle slider, plus flip horizontal/vertical.',
+      examples: [
+        {
+          title: 'Fix a sideways phone photo',
+          body: 'Phone saved photo with rotation in EXIF only — older viewers ignore that. Rotate 90° here to bake it in.',
+        },
+        {
+          title: 'Mirror for design',
+          body: 'Flip horizontal to create a symmetric layout asset from a single source.',
+        },
+      ],
+      useCases: [
+        'Permanently fixing rotated phone photos',
+        'Mirroring assets for symmetric designs',
+        'Free-angle tilts for creative composition',
+        'Pre-processing before OCR (text-aligned correctly)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Free-angle rotation leaves blank corners.',
+          solution: 'Canvas is enlarged to fit the rotated image. The transparent corners can be filled by setting a background colour or by cropping afterwards.',
+        },
+      ],
+    },
   },
   {
     id: 'flip-image-horizontal',
@@ -3367,6 +5098,41 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['flip-image-vertical', 'rotate-image', 'crop-image'],
+    howToUse: [
+      'Drop an image',
+      'Click Flip — image mirrors left ↔ right',
+      'Download the flipped result',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg',
+      output: 'Horizontally mirrored copy',
+      description: 'Left and right sides swap; vertical orientation unchanged.',
+    },
+    seoContent: {
+      intro:
+        'Flip Image Horizontal mirrors an image left ↔ right. Useful for design symmetry, fixing selfies that look "backwards" because of front-camera mirroring, and creating mirror-image variants for layouts.',
+      examples: [
+        {
+          title: 'Fix mirrored selfie',
+          body: 'Front cameras often save a mirrored version. Flip once to restore the orientation people see in real life.',
+        },
+        {
+          title: 'Layout symmetry',
+          body: 'Need a profile photo facing the other way? Flip horizontal makes the subject look the opposite direction.',
+        },
+      ],
+      useCases: [
+        'Correcting front-camera mirrored selfies',
+        'Creating symmetric design assets',
+        'Producing left/right-facing variants of icons or avatars',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Text appears backwards after flipping.',
+          solution: 'Expected — flipping mirrors every pixel including text. If you want to keep text readable, mask the text region before flipping.',
+        },
+      ],
+    },
   },
   {
     id: 'flip-image-vertical',
@@ -3402,6 +5168,41 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['flip-image-horizontal', 'rotate-image', 'crop-image'],
+    howToUse: [
+      'Drop an image',
+      'Click Flip — image mirrors top ↔ bottom',
+      'Download the upside-down version',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg',
+      output: 'Vertically mirrored (upside-down) copy',
+      description: 'Top and bottom swap; left/right unchanged.',
+    },
+    seoContent: {
+      intro:
+        'Flip Image Vertical mirrors an image top ↔ bottom — creates a reflection effect like a still pond. Useful for design composition, reflection effects, and texture mirroring.',
+      examples: [
+        {
+          title: 'Reflection effect',
+          body: 'Flip vertically and overlay below the original to fake a water-reflection composite.',
+        },
+        {
+          title: 'Tiling textures',
+          body: 'Some textures need mirroring at top/bottom edges to tile seamlessly.',
+        },
+      ],
+      useCases: [
+        'Reflection effects in designs',
+        'Texture preparation for seamless tiling',
+        'Upside-down variants for creative composition',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Want both axes flipped — like a 180° rotation.',
+          solution: 'Use Rotate Image at 180° (it flips both H and V at once). Vertical-only flip is one of two axes.',
+        },
+      ],
+    },
   },
   {
     id: 'blur-image',
@@ -3437,6 +5238,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['pixelate-image', 'grayscale-image', 'adjust-brightness'],
+    howToUse: [
+      'Drop an image',
+      'Adjust blur radius (0-20 px) — see the preview update live',
+      'Combine with brightness/contrast/saturation/grayscale in the same panel',
+      'Download the filtered result',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg with blur 8px',
+      output: 'Same photo with Gaussian blur applied uniformly',
+      description: 'Standard CSS-filter blur, baked into PNG output.',
+    },
+    seoContent: {
+      intro:
+        'Blur Image applies a Gaussian blur effect with adjustable intensity. Combined with brightness, contrast, saturation, and grayscale sliders so you can apply multiple filters in one pass. Useful for privacy redaction, artistic effects, and background blur for portraits.',
+      examples: [
+        {
+          title: 'Privacy redaction',
+          body: 'Blur faces or license plates before sharing a screenshot. Use 15+ px radius for strong obfuscation.',
+        },
+        {
+          title: 'Subtle artistic effect',
+          body: '2-3 px blur softens harsh edges without making the image unrecognisable.',
+        },
+        {
+          title: 'Multi-filter pipeline',
+          body: 'Brighten +20%, desaturate -30%, blur 4 px — produces a moody, washed-out look in one export.',
+        },
+      ],
+      useCases: [
+        'Privacy redaction of faces, plates, ID numbers',
+        'Artistic depth-of-field effects',
+        'Background processing for portrait isolation',
+        'Quick multi-filter colour grading',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Sensitive content still recognisable after blur.',
+          solution: 'For high-security redaction, use a solid-colour block instead. Mild blur can sometimes be partially reversed by AI tools.',
+        },
+      ],
+    },
   },
   {
     id: 'pixelate-image',
@@ -3472,6 +5314,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-border'],
+    howToUse: [
+      'Drop an image',
+      'Slide pixel-size (5-50 px) to control how chunky the mosaic looks',
+      'Preview updates live',
+      'Download — useful for privacy and retro effects',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg, pixel size 20',
+      output: 'Mosaic-style version where each 20×20 block becomes a single colour',
+      description: 'Classic mosaic effect — block size controls obscurity.',
+    },
+    seoContent: {
+      intro:
+        'Pixelate Image creates a chunky mosaic effect by averaging each NxN block into a single colour. Useful for privacy (faces, plates, sensitive document regions) and for nostalgic 8-bit / retro aesthetic effects.',
+      examples: [
+        {
+          title: 'Redact a face',
+          body: 'Pixel size 25+ obscures faces while keeping the rest of the image intact. Combine with crop for tight redaction.',
+        },
+        {
+          title: '8-bit retro aesthetic',
+          body: 'Pixel size 8-12 produces the chunky look of early video-game graphics.',
+        },
+      ],
+      useCases: [
+        'Privacy redaction (faces, plates, IDs)',
+        'Retro/8-bit aesthetic effects',
+        'Censoring sensitive regions in screenshots',
+        'Creative posterising of photos',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Pixelation reversible by AI super-resolution?',
+          solution: 'Mild pixelation (size <15) on faces can be partially reversed. For high-stakes privacy, use heavy pixelation, strong blur, or a solid block.',
+        },
+      ],
+    },
   },
   {
     id: 'grayscale-image',
@@ -3507,6 +5386,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['blur-image', 'pixelate-image', 'adjust-brightness'],
+    howToUse: [
+      'Drop an image',
+      'Click Convert — image becomes black-and-white',
+      'Download the monochrome result',
+    ],
+    exampleOutput: {
+      input: 'colour photo.jpg',
+      output: 'Same photo with all colour removed (luminance-only)',
+      description: 'Standard luminance-based grayscale conversion.',
+    },
+    seoContent: {
+      intro:
+        'Grayscale Image strips colour from a photo, leaving only luminance — a classic black-and-white look. Useful for artistic effect, accessibility testing (does the design read in monochrome?), printing on B&W laser printers, and minimalist design.',
+      examples: [
+        {
+          title: 'Artistic B&W photo',
+          body: 'Classic monochrome portrait look — one click, no editor needed.',
+        },
+        {
+          title: 'Print-ready monochrome',
+          body: 'B&W laser printers handle grayscale better than auto-converting colour images.',
+        },
+      ],
+      useCases: [
+        'Artistic monochrome photo edits',
+        'Accessibility tests — does the layout work without colour?',
+        'B&W printing preparation',
+        'Mood/atmosphere shifts in social media posts',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Some areas look too dark or washed out.',
+          solution: 'Run through Adjust Brightness / Contrast afterwards to restore tonal balance.',
+        },
+      ],
+    },
   },
   {
     id: 'adjust-brightness',
@@ -3542,6 +5457,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['grayscale-image', 'blur-image', 'image-border'],
+    howToUse: [
+      'Drop an image',
+      'Drag brightness slider (-100% to +100%)',
+      'Preview updates live',
+      'Combine with contrast/saturation sliders for full tone control',
+    ],
+    exampleOutput: {
+      input: 'Underexposed photo, brightness +30%',
+      output: 'Visibly lighter photo with restored midtones',
+      description: 'Pixel-by-pixel brightness adjustment via CSS filter.',
+    },
+    seoContent: {
+      intro:
+        'Adjust Image Brightness lifts shadows or pulls down highlights with a simple slider. Combined with contrast for two-axis tonal control. Useful for rescuing underexposed photos, prepping screenshots for print, and normalising image batches that vary in lighting.',
+      examples: [
+        {
+          title: 'Rescue an underexposed photo',
+          body: 'Indoor photo too dark — brightness +25% restores the subject without specialised software.',
+        },
+        {
+          title: 'Print prep',
+          body: 'Print output is often darker than screen. Boost brightness +10-15% before printing.',
+        },
+      ],
+      useCases: [
+        'Fixing underexposed or overexposed photos',
+        'Preparing screenshots for print (which renders darker)',
+        'Normalising batch images for a uniform look',
+        'Subtle mood/tone adjustments',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Image looks washed out after boosting brightness.',
+          solution: 'Lower contrast or saturation got skewed. Pair brightness with contrast adjustment for natural results.',
+        },
+      ],
+    },
   },
   {
     id: 'image-color-picker',
@@ -3577,6 +5529,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['color-picker', 'extract-colors', 'image-border'],
+    howToUse: [
+      'Drop an image',
+      'Click anywhere on the image to pick that pixel\'s colour',
+      'See HEX, RGB and HSL values for the clicked pixel',
+      'Copy whichever format you need',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg → click on the sky',
+      output: '#7AB8E0 — rgb(122, 184, 224)',
+      description: 'Exact pixel sample at the click point.',
+    },
+    seoContent: {
+      intro:
+        'Image Color Picker reads the exact colour value of any pixel you click on. Useful for matching design colours to a reference photo, sampling brand colours from logos, and quickly grabbing colour codes without opening Photoshop.',
+      examples: [
+        {
+          title: 'Match a reference photo',
+          body: 'Click on the dominant background colour to grab its HEX — drop straight into your stylesheet.',
+        },
+        {
+          title: 'Brand colour extraction',
+          body: 'Pick the exact red from a logo to use elsewhere in the brand kit.',
+        },
+      ],
+      useCases: [
+        'Sampling exact colours from reference photos',
+        'Brand kit extraction from logos',
+        'Designing palettes from inspiration images',
+        'Reverse-engineering colour choices in screenshots',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Click samples a different shade than expected.',
+          solution: 'Many photos have subtle gradients — adjacent pixels can vary. Click multiple nearby points to average or use Extract Colors for the overall palette.',
+        },
+      ],
+    },
   },
   {
     id: 'extract-colors',
@@ -3612,6 +5601,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['color-palette-generator', 'image-color-picker', 'color-picker'],
+    howToUse: [
+      'Drop an image',
+      'The tool analyses dominant colours via clustering',
+      'See 5-10 swatches with their HEX values and proportional weight',
+      'Copy individual swatches or download the full palette',
+    ],
+    exampleOutput: {
+      input: 'sunset-photo.jpg',
+      output: '5 swatches: #FF8C42, #FF5733, #FFC857, #4A4E69, #22223B',
+      description: 'Dominant colours discovered via k-means clustering on the image pixels.',
+    },
+    seoContent: {
+      intro:
+        'Extract Colors discovers the dominant colours in an image using clustering. Returns a palette of 5-10 swatches with HEX codes — useful for building brand colour schemes from inspiration photos, themes for slide decks, and design systems anchored to a reference image.',
+      examples: [
+        {
+          title: 'Build a brand palette from a photo',
+          body: 'Drop your favourite "vibe" photo, get a 5-colour palette that captures its mood, refine in Color Palette Generator.',
+        },
+        {
+          title: 'Match a slide deck to a hero image',
+          body: 'Extract palette from the title slide\'s photo, apply those colours throughout for visual cohesion.',
+        },
+      ],
+      useCases: [
+        'Brand palette inspiration from photos',
+        'Slide deck colour cohesion',
+        'Theme creation from album covers, posters',
+        'Identifying dominant colours in product photos for e-commerce',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Palette doesn\'t include a colour I expected to see.',
+          solution: 'The algorithm picks dominant clusters by pixel count. A small but visually striking accent might be too few pixels to cluster — use Image Color Picker to grab it manually.',
+        },
+      ],
+    },
   },
   {
     id: 'image-border',
@@ -3647,6 +5673,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['blur-image', 'grayscale-image', 'image-color-picker'],
+    howToUse: [
+      'Drop an image',
+      'Set border width (px) and colour',
+      'Optional: rounded corners',
+      'Download the bordered image',
+    ],
+    exampleOutput: {
+      input: 'avatar.jpg with 20px white border',
+      output: 'Avatar with a clean white frame and total dimensions = original + 40px each axis',
+      description: 'Border added outside the original — canvas grows to fit.',
+    },
+    seoContent: {
+      intro:
+        'Add Image Border wraps an image in a coloured frame. Useful for Polaroid-style framing, separating images from text in posts, branding consistency, and prepping thumbnails that need visual distinction from the page background.',
+      examples: [
+        {
+          title: 'Polaroid frame',
+          body: 'White border 30 px + a bit extra at the bottom for caption space.',
+        },
+        {
+          title: 'Card-style thumbnail',
+          body: 'Light grey border 4 px + rounded corners produces a clean modern card look.',
+        },
+      ],
+      useCases: [
+        'Framing avatars and product thumbnails',
+        'Polaroid-style photo edits',
+        'Adding visual separation from page backgrounds',
+        'Consistent branding around inline images',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Borders make image too big.',
+          solution: 'Canvas grows by border width × 2 on each axis. To keep dimensions, crop the image first then add the border inset.',
+        },
+      ],
+    },
   },
   {
     id: 'favicon-generator',
@@ -3682,6 +5745,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-to-ico', 'image-resize', 'svg-to-png'],
+    howToUse: [
+      'Drop a square image (ideally 512×512 or larger)',
+      'The tool generates favicons in standard sizes: 16, 32, 48, 64, 128, 192, 256, 512',
+      'Download the bundle: favicon.ico, PNG variants, Apple touch icon, and the HTML snippet',
+      'Paste the <link> tags into your site\'s <head>',
+    ],
+    exampleOutput: {
+      input: 'logo.png (1024×1024)',
+      output: 'favicon.ico + 8 PNG sizes + apple-touch-icon.png + HTML snippet',
+      description: 'Complete favicon set with the HTML you need to wire it up.',
+    },
+    seoContent: {
+      intro:
+        'Favicon Generator produces a complete favicon set from a single source image — favicon.ico, the PNG variants modern browsers prefer, the Apple Touch icon for iOS bookmarks, and the matching HTML <link> tags. One upload, full coverage across desktop, mobile, and pinned tabs.',
+      examples: [
+        {
+          title: 'Bootstrap a new site\'s favicons',
+          body: 'Drop your logo PNG, download the bundle, copy the HTML snippet into <head>. Done in under a minute.',
+        },
+        {
+          title: 'Update favicon when rebranding',
+          body: 'Regenerate with the new logo, replace files at site root, bump the cache-buster (?v=2) on the <link> hrefs.',
+        },
+      ],
+      useCases: [
+        'New site favicons from scratch',
+        'Refreshing favicons after rebrand',
+        'PWA icon generation',
+        'Consistent favicon assets for all device types',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Browser still shows old favicon after replacing files.',
+          solution: 'Browsers aggressively cache favicons. Force-refresh with Ctrl+F5, or append ?v=2 to the favicon hrefs to bust the cache.',
+        },
+      ],
+    },
   },
   {
     id: 'image-compressor',
@@ -3790,6 +5890,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-resize', 'rotate-image', 'blur-image'],
+    howToUse: [
+      'Drop an image',
+      'Drag the crop region or pick an aspect-ratio preset (1:1, 16:9, 4:3, etc.)',
+      'Rule-of-thirds grid overlay helps composition',
+      'Click Crop — download the cropped result',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg, crop region 1:1 centered',
+      output: 'Square crop with subject centred',
+      description: 'Aspect-ratio-locked crop with composition grid for clean framing.',
+    },
+    seoContent: {
+      intro:
+        'Crop Image lets you trim away unwanted regions with drag handles and optional aspect-ratio locks. Includes a rule-of-thirds overlay for composition. Useful for social media aspect ratios (1:1 Instagram, 16:9 YouTube thumbnail, 9:16 TikTok), avatar creation, and removing dead space.',
+      examples: [
+        {
+          title: 'Instagram square',
+          body: 'Lock 1:1, drag to centre the subject, crop. Output is ready for upload.',
+        },
+        {
+          title: 'YouTube thumbnail',
+          body: '16:9 lock at 1280×720 region. Compose with rule-of-thirds for visual punch.',
+        },
+        {
+          title: 'Profile avatar',
+          body: '1:1 square focused tightly on the face — most platforms then auto-circle it.',
+        },
+      ],
+      useCases: [
+        'Social media aspect-ratio crops (1:1, 16:9, 9:16, 4:5)',
+        'Avatar creation from full photos',
+        'Removing irrelevant edges from screenshots',
+        'Tight focus on a subject within a larger composition',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Crop region too small to drag precisely.',
+          solution: 'Zoom in (Ctrl + scroll) to enlarge the canvas before adjusting handles.',
+        },
+      ],
+    },
   },
   {
     id: 'gif-maker',
@@ -3825,6 +5966,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['video-to-gif', 'gif-compressor', 'image-resize'],
+    howToUse: [
+      'Drop multiple images (up to 50 frames) in the order you want them',
+      'Adjust frame delay (ms) — controls animation speed',
+      'Set quality (1=best, 30=fastest)',
+      'Click Create GIF — encoding runs in a Web Worker; download when finished',
+    ],
+    exampleOutput: {
+      input: '6 images at 200ms delay, quality 10',
+      output: 'animation.gif (~150-400 KB, plays at 5 fps)',
+      description: 'A real .gif file (encoded via gif.js) — opens in any image viewer and plays automatically.',
+    },
+    seoContent: {
+      intro:
+        'GIF Maker assembles a sequence of images into an animated GIF that plays in every browser and image viewer. Encoding runs in a Web Worker so the UI stays responsive even for long animations. Frames are letterboxed onto a uniform canvas so mixed sizes still produce a clean result.',
+      examples: [
+        {
+          title: 'Tutorial step-through GIF',
+          body: 'Screenshot each step of a UI flow, drop into the tool, set 800ms delay — viewers see each step long enough to read.',
+        },
+        {
+          title: 'Slideshow GIF for email',
+          body: 'Four product photos at 1500ms delay — animation embeds in email and auto-plays without video support.',
+        },
+      ],
+      useCases: [
+        'Tutorial and screencast GIFs',
+        'Product showcase animations',
+        'Memes and reaction images',
+        'Email-safe animations (every client renders GIF)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'GIF file too large.',
+          solution: 'Reduce dimensions (max-side capped automatically), drop quality to 20+, or remove frames. Run through GIF Compressor afterwards.',
+        },
+      ],
+    },
   },
   {
     id: 'png-compressor',
@@ -3860,6 +6038,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-compressor', 'jpeg-compressor', 'png-to-webp'],
+    howToUse: [
+      'Drop one or more PNG files',
+      'Compression analyses the image — transparent PNGs preserved',
+      'See before/after sizes side by side',
+      'Download individual files or all as a ZIP',
+    ],
+    exampleOutput: {
+      input: 'logo.png (180 KB)',
+      output: 'logo.png (~120 KB) — 33% smaller, identical to the eye',
+      description: 'Lossless PNG re-encoding plus palette optimisation where possible.',
+    },
+    seoContent: {
+      intro:
+        'PNG Compressor shrinks PNG file size while preserving transparency and visual quality. Uses lossless re-encoding for true PNG fidelity, plus optional palette reduction for images with few colours. Useful for web optimisation, email attachments, and reducing asset sizes in production builds.',
+      examples: [
+        {
+          title: 'Bulk-optimise web assets',
+          body: 'Drop a folder of UI PNGs — typically saves 20-40% with no quality loss.',
+        },
+        {
+          title: 'Shrink an icon set',
+          body: 'Few-colour icons benefit most from palette reduction — sometimes 60%+ smaller.',
+        },
+      ],
+      useCases: [
+        'Web asset optimisation for faster page loads',
+        'Reducing PNG sizes before email attachment',
+        'Shrinking icon sets in production builds',
+        'Cutting bandwidth costs on PNG-heavy sites',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Compression savings minimal on photos.',
+          solution: 'PNG is lossless and inefficient for photos. Convert to JPG or WebP instead — much bigger savings.',
+        },
+      ],
+    },
   },
   {
     id: 'jpeg-compressor',
@@ -3895,6 +6110,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-compressor', 'png-compressor', 'jpg-to-png'],
+    howToUse: [
+      'Drop JPEG/JPG files (single or batch)',
+      'Adjust quality slider (0-100, default 80)',
+      'Side-by-side preview shows visual quality',
+      'Download compressed result — usually 30-70% smaller',
+    ],
+    exampleOutput: {
+      input: 'photo.jpg (2.4 MB) at quality 75',
+      output: 'photo.jpg (~600 KB) — 75% smaller, visually identical',
+      description: 'Lossy re-encoding at chosen quality. Quality 75-85 is the sweet spot for web photos.',
+    },
+    seoContent: {
+      intro:
+        'JPEG Compressor reduces JPEG file size by re-encoding at a target quality level. Compression runs in the browser using canvas re-encoding — your image stays local. Side-by-side preview lets you verify quality before downloading.',
+      examples: [
+        {
+          title: 'Web photo optimisation',
+          body: 'A 3 MB camera JPG drops to ~700 KB at quality 80 with no visible difference at typical viewing sizes.',
+        },
+        {
+          title: 'Email attachment fit',
+          body: 'Squeeze a folder of photos under a 25 MB email limit by batch-compressing at quality 70.',
+        },
+      ],
+      useCases: [
+        'Compressing photo galleries for the web',
+        'Fitting attachments under email size limits',
+        'Reducing storage in personal photo backups',
+        'Preparing JPGs for production deployment',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Visible artifacts (blockiness, ringing) at lower quality.',
+          solution: 'JPEG produces these by design at low quality. Sweet spot is 75-85. Below 50 introduces obvious degradation; consider WebP at low bitrates instead.',
+        },
+      ],
+    },
   },
   {
     id: 'gif-compressor',
@@ -3930,6 +6182,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['image-compressor', 'gif-maker', 'video-to-gif'],
+    howToUse: [
+      'Drop a .gif file',
+      'Choose compression options: drop frames, resize, palette reduction',
+      'Before/after sizes shown',
+      'Download the smaller GIF',
+    ],
+    exampleOutput: {
+      input: 'reaction.gif (4 MB)',
+      output: 'reaction.gif (~1.2 MB) after halving dimensions + dropping every other frame',
+      description: 'Big GIF savings come from dimensions + frame count, not palette alone.',
+    },
+    seoContent: {
+      intro:
+        'GIF Compressor reduces GIF file size through resizing, frame skipping, and palette reduction. GIFs are bloated by design (every frame stored uncompressed in the palette) — meaningful savings usually require dropping dimensions and/or frame rate, not just colours.',
+      examples: [
+        {
+          title: 'Shrink for Slack/Discord',
+          body: 'Chat platforms reject GIFs over 8-25 MB. Halve dimensions + drop alternate frames typically gets a 4 MB GIF under 1 MB.',
+        },
+        {
+          title: 'Reduce frames in a slow animation',
+          body: 'Slow tutorial GIF at 30 fps is wasteful — drop to 10 fps for similar visual quality at 1/3 the size.',
+        },
+      ],
+      useCases: [
+        'Fitting GIFs under chat platform size limits',
+        'Email-friendly animation sizes',
+        'Reducing bandwidth on GIF-heavy pages',
+        'Mobile-friendly versions of desktop-sized GIFs',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Animation looks choppy after frame reduction.',
+          solution: 'Frame-drop is the biggest size-saver but most visible. Consider converting to MP4 (10-50× smaller for the same visual quality) — most platforms accept it.',
+        },
+      ],
+    },
   },
   {
     id: 'svg-to-png',
@@ -3965,6 +6254,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['webp-to-png', 'image-resize', 'image-to-ico'],
+    howToUse: [
+      'Drop an SVG file or paste SVG source code',
+      'Set output dimensions (any size — vectors render crisply at any scale)',
+      'Optional: transparent background or solid colour fill',
+      'Download as PNG',
+    ],
+    exampleOutput: {
+      input: 'logo.svg → 512×512 PNG',
+      output: 'logo.png — vector rendered at chosen resolution, no quality loss',
+      description: 'PNG raster at exactly the size you request, generated from the original vector data.',
+    },
+    seoContent: {
+      intro:
+        'SVG to PNG converts vector SVG files to PNG raster format at any chosen resolution. Vectors render crisply at every size — useful when downstream tools need raster (most image editors, OG images, OS icons) but you have the SVG source.',
+      examples: [
+        {
+          title: 'Generate retina assets',
+          body: 'One SVG → 100% / 200% / 300% PNG variants for retina-aware deployment.',
+        },
+        {
+          title: 'OG image / social preview',
+          body: 'Social platforms need PNG/JPG for preview images. Render your SVG logo at 1200×630 directly.',
+        },
+        {
+          title: 'OS icon generation',
+          body: 'Some OS icon formats need PNG at specific resolutions. Render once per target size.',
+        },
+      ],
+      useCases: [
+        'Generating raster variants of SVG assets',
+        'Producing OG/social-preview images from SVG sources',
+        'Multi-resolution icon sets',
+        'Compatibility with image editors that don\'t accept SVG',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Text in SVG looks different from source.',
+          solution: 'SVG text rendering depends on installed fonts. Convert text to outlines/paths in your design tool first for pixel-identical output everywhere.',
+        },
+      ],
+    },
   },
 
   // ==================== COLOR TOOLS ====================
@@ -4002,6 +6332,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'color-palette-generator', 'image-color-picker'],
+    howToUse: [
+      'Click the color swatch to open the native color picker, or type a HEX code directly',
+      'Watch HEX, RGB and HSL values update in real time',
+      'Use the copy button next to each format to grab the value',
+      'Combine with the Color Palette Generator to build a full scheme around your pick',
+    ],
+    exampleOutput: {
+      input: '#3B82F6',
+      output: 'rgb(59, 130, 246) — hsl(217, 91%, 60%)',
+      description: 'Tailwind\'s default blue-500 expressed in three common formats.',
+    },
+    seoContent: {
+      intro:
+        'Color Picker lets you pick a colour visually and instantly read it as HEX, RGB and HSL. No installs, no sign-in — every conversion runs in the browser. Useful when you copy a colour from a design file and need to drop the equivalent CSS into your stylesheet, or when you want to see what a hand-typed HEX looks like alongside its RGB/HSL breakdown.',
+      examples: [
+        {
+          title: 'Grab the CSS value for a brand colour',
+          body: 'Paste #FF5733 into the input — the tool returns rgb(255, 87, 51) and hsl(11, 100%, 60%) so you can drop whichever variant your design system uses.',
+        },
+        {
+          title: 'Pick a shade visually then tweak',
+          body: 'Open the native picker, choose a colour, then copy the HSL output and tweak lightness in your stylesheet without re-picking.',
+        },
+      ],
+      useCases: [
+        'Translating a Figma/Sketch swatch into CSS-ready values',
+        'Sampling a colour for a Tailwind config or custom CSS variable',
+        'Confirming the RGB breakdown of a colour referenced by name in a brand guide',
+        'Generating HSL values to feed into a darken/lighten function',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Typed HEX shows an error or no preview.',
+          solution: 'Accepted forms are #RGB (3 digits) and #RRGGBB (6 digits). Anything else (alpha, named colours like "red") needs the Color Converter instead.',
+        },
+        {
+          problem: 'HSL values look slightly different from another tool.',
+          solution: 'Some tools round HSL components differently. Our rounding matches the CSS spec: hue 0-360, saturation/lightness 0-100, no decimals.',
+        },
+      ],
+    },
   },
   {
     id: 'hex-to-rgb',
@@ -4037,6 +6408,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['rgb-to-hex', 'color-picker', 'rgba-to-hex'],
+    howToUse: [
+      'Type or paste a HEX code (3-digit shorthand like #fff works too)',
+      'Click Convert to see RGB and HSL output alongside individual R, G, B values',
+      'Click any value to copy it to the clipboard',
+      'Tweak the colour with the native picker to compare adjacent shades',
+    ],
+    exampleOutput: {
+      input: '#3B82F6',
+      output: 'rgb(59, 130, 246) — Red 59, Green 130, Blue 246',
+      description: 'Useful when you need each channel separately, e.g. for a canvas drawText fill or a JS colour interpolation.',
+    },
+    seoContent: {
+      intro:
+        'HEX to RGB converts a 3- or 6-digit hex colour into rgb() and hsl() values. Built for the everyday case where a designer hands you a HEX, you paste it once and copy the format your stack actually expects — JS canvas APIs and many older CSS examples use rgb(), while design tokens often prefer HSL.',
+      examples: [
+        {
+          title: 'Shorthand HEX works',
+          body: 'Input #fff returns rgb(255, 255, 255). #f00 returns rgb(255, 0, 0). No need to expand them manually first.',
+        },
+        {
+          title: 'Drop into a CSS variable',
+          body: 'Paste #1F2937, copy the rgb(...) result, and use it inside a CSS variable so you can later add alpha via rgba(var(--c), 0.6).',
+        },
+      ],
+      useCases: [
+        'Converting brand colours from a HEX-only style guide into rgb()/hsl() variants',
+        'Feeding RGB channels into JS Canvas, WebGL or D3 colour scales',
+        'Building a colour-token system that needs both notations',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid HEX color format".',
+          solution: 'The tool accepts 3 or 6 hex digits with optional leading #. Alpha hex (8 digits) is not supported — use RGBA to HEX or the Color Converter for those.',
+        },
+      ],
+    },
   },
   {
     id: 'rgb-to-hex',
@@ -4072,6 +6479,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-to-rgb', 'color-picker', 'rgba-to-hex'],
+    howToUse: [
+      'Enter R, G, B values (0-255 each) or use the native colour picker',
+      'The HEX result updates live as you change channels',
+      'Click the colour preview to confirm visually',
+      'Copy the HEX string with one click',
+    ],
+    exampleOutput: {
+      input: 'rgb(59, 130, 246)',
+      output: '#3B82F6',
+      description: 'Standard 6-digit HEX, uppercased — drop directly into CSS or any design tool.',
+    },
+    seoContent: {
+      intro:
+        'RGB to HEX converts the three channel values most APIs and design tools emit (rgb(r, g, b)) into the shorter HEX form that fits cleanly into CSS files, design tokens, and brand guidelines. Conversion is instant and clipped to the valid 0-255 range so out-of-range typos don\'t produce malformed output.',
+      examples: [
+        {
+          title: 'From canvas getImageData()',
+          body: 'A pixel returned as (59, 130, 246) becomes #3B82F6 — paste it into a CSS variable to match the rendered shade.',
+        },
+        {
+          title: 'From a JS colour function',
+          body: 'Computed rgb(247, 121, 33) becomes #F77921 — short enough to include inline in a Tailwind config.',
+        },
+      ],
+      useCases: [
+        'Translating a screenshot-sampled RGB into CSS-ready HEX',
+        'Converting tool output (chart libraries, canvas reads) into design tokens',
+        'Migrating an older rgb()-heavy stylesheet to consistent HEX',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Channel value outside 0-255 silently clamps.',
+          solution: 'Out-of-range inputs are clipped to the nearest valid byte (0 or 255). Double-check the source RGB if the output colour looks wrong.',
+        },
+      ],
+    },
   },
   {
     id: 'color-palette-generator',
@@ -4106,11 +6549,38 @@ export const tools: Tool[] = [
         answer: 'Yes, you can copy individual color codes or export your palette in various formats. You can also copy CSS variables or array formats to use directly in your web development projects.',
       },
     ],
-    exampleOutput: {
-      output: '#3B82F6 (Base)\n#F97316 (Complementary)\n#22C55E (Triadic 1)\n#A855F7 (Triadic 2)',
-      description: 'Example of a triadic color palette based on blue',
-    },
     relatedTools: ['gradient-generator', 'color-picker', 'random-color-generator'],
+    howToUse: [
+      "Pick a base colour (or click \"random\")",
+      "Choose harmony rule (complementary, triadic, analogous, etc.)",
+      "Adjust palette size (3-10)",
+      "Copy as HEX list, CSS variables, Tailwind config, or Figma tokens",
+    ],
+    exampleOutput: {
+      input: "Base: #2563eb · Harmony: triadic · 5 colours",
+      output: "#2563eb · #eb2563 · #63eb25 · #1e3a8a · #be123c",
+      description: "Five harmonious colours generated by rotating hue around the colour wheel and adjusting lightness — ready for use in UI, branding, or illustration.",
+    },
+    seoContent: {
+      intro: "Generate a balanced, harmonious colour palette from any base colour using colour-theory rules (complementary, triadic, tetradic, analogous, monochromatic, split-complementary). Export as HEX, CSS custom properties, Tailwind config, or Figma design tokens — instantly drop into your design system.",
+      examples: [
+        { title: "Brand palette from a logo colour", body: "Sample the brand blue from a logo and generate a 5-colour triadic palette for the rest of the site (primary, secondary, accent, neutral, danger)." },
+        { title: "Dark + light mode siblings", body: "For each generated colour, the tool also gives you a darker and lighter variant — instant dark-mode pairs." },
+        { title: "Tailwind theme.colors export", body: "Export the palette as a `tailwind.config.js` snippet you can paste straight into the project." },
+      ],
+      useCases: [
+        "Building a brand colour system from one base colour",
+        "Generating illustration / data-viz palettes",
+        "Creating Tailwind / design-token configs",
+        "Quick mood-board palettes for client presentations",
+        "Accessibility-aware palette exploration (with contrast checks)",
+      ],
+      troubleshooting: [
+        { problem: "Generated colours look muddy", solution: "The base colour was already desaturated. Pick a more saturated base, or toggle \"boost saturation\" so derived colours stay vibrant." },
+        { problem: "Some pairs fail WCAG contrast", solution: "Run each pair through the Color Contrast Checker tool. Harmony ≠ accessibility — adjust lightness manually for critical text/background pairs." },
+        { problem: "Triadic palette looks gaudy", solution: "Triadic = 120° hue spacing — vivid by design. Try split-complementary or analogous for more subtle palettes." },
+      ],
+    },
   },
   {
     id: 'gradient-generator',
@@ -4145,11 +6615,38 @@ export const tools: Tool[] = [
         answer: 'Use `repeating-linear-gradient()` or `repeating-radial-gradient()` functions. These repeat the gradient pattern infinitely. For example, `repeating-linear-gradient(45deg, red, red 10px, blue 10px, blue 20px)` creates stripes.',
       },
     ],
-    exampleOutput: {
-      output: 'background: linear-gradient(90deg, #3B82F6, #8B5CF6);',
-      description: 'Example of a linear gradient from blue to purple at 90 degrees',
-    },
     relatedTools: ['css-gradient-generator', 'color-palette-generator', 'random-color-generator'],
+    howToUse: [
+      "Pick 2-5 colour stops",
+      "Choose direction (linear angle / radial / conic)",
+      "Drag stops on the gradient bar to adjust position",
+      "Copy as CSS, SVG, or PNG export",
+    ],
+    exampleOutput: {
+      input: "#667eea → #764ba2 · linear 135°",
+      output: "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);",
+      description: "A CSS gradient ready to paste, plus PNG export for use in non-CSS contexts (PowerPoint, social media graphics, hero sections).",
+    },
+    seoContent: {
+      intro: "Build linear, radial, or conic CSS gradients visually — drag colour stops, set angles, preview live, then copy production-ready CSS. Or export as a PNG for use in Figma, slides, or anywhere you can't use CSS. Supports up to 5 stops with precise position control.",
+      examples: [
+        { title: "Hero-section background", body: "A 135° linear gradient from indigo to purple becomes the dramatic background of a landing-page hero." },
+        { title: "Button glow", body: "A subtle radial gradient at 50% 0% lights a button from the top, mimicking a soft top-down light." },
+        { title: "Conic loading indicator", body: "A conic gradient produces a circular hue-wheel loader for a creative spinner." },
+      ],
+      useCases: [
+        "Landing-page hero backgrounds",
+        "Button and card surface treatments",
+        "Decorative dividers and section breaks",
+        "Data-visualisation colour scales",
+        "Avatar / placeholder backgrounds",
+      ],
+      troubleshooting: [
+        { problem: "Gradient has visible banding", solution: "Two stops are too close in hue/luminance. Add an intermediate stop, or use a wider colour range. Browser anti-aliasing helps but can't hide extreme banding." },
+        { problem: "Gradient looks different across browsers", solution: "Modern browsers all support the standard syntax — but old Safari needed `-webkit-` prefix. Enable \"vendor prefixes\" if you target legacy browsers." },
+        { problem: "PNG export looks blocky", solution: "Default export is 1920×1080. Bump to 4K (3840×2160) for hero use, or pick the exact pixel size you need." },
+      ],
+    },
   },
   {
     id: 'color-contrast-checker',
@@ -4185,6 +6682,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['color-picker', 'color-palette-generator', 'random-color-generator'],
+    howToUse: [
+      'Set the foreground (text) and background colours via picker or HEX',
+      'Read the contrast ratio (1:1 to 21:1) and the AA/AAA verdict for both normal and large text',
+      'Tweak either colour until the badge turns green to pass WCAG',
+      'Copy the final HEX pair into your design system',
+    ],
+    exampleOutput: {
+      input: 'Foreground #FFFFFF, Background #3B82F6',
+      output: 'Ratio 4.56 — AA Pass (Normal), AAA Fail (Normal), AA/AAA Pass (Large)',
+      description: 'White on Tailwind blue-500: enough contrast for body text under WCAG AA, but not strict enough for AAA body text.',
+    },
+    seoContent: {
+      intro:
+        'Color Contrast Checker computes the WCAG 2.1 contrast ratio between two colours and tells you whether the pair clears AA and AAA thresholds for both normal and large text. Run it before shipping a design to catch low-contrast typography that hurts readers with low vision — and to defend your colour choices in design review.',
+      examples: [
+        {
+          title: 'Verify a brand button',
+          body: 'White text on #0066CC scores ~4.9:1 — AA Pass for normal text. Switch to #004999 and you cross the AAA threshold at 7.1:1.',
+        },
+        {
+          title: 'Fail-fast a low-contrast pair',
+          body: '#888888 on #FFFFFF is only 3.5:1. The badge flags AA Fail for body text — bump the foreground to #595959 to hit 7:1 AAA.',
+        },
+      ],
+      useCases: [
+        'Auditing a design system for AA/AAA compliance before launch',
+        'Picking accessible link/button colour pairs against a brand background',
+        'Spot-checking generated palette swatches against neutral backgrounds',
+        'Documenting contrast scores in an accessibility review',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Large text" passes but "Normal text" fails.',
+          solution: 'WCAG defines large text as 18pt+ (or 14pt+ bold) — about 24px regular / 18.66px bold. If your headline qualifies as large, the lower 3:1 threshold applies and you may already be fine. Body copy needs 4.5:1.',
+        },
+        {
+          problem: 'Ratio differs slightly from another contrast tool.',
+          solution: 'We use the WCAG sRGB-relative-luminance formula. Some tools use perceptual contrast (APCA) which is a newer model — both can be correct depending on the spec you target.',
+        },
+      ],
+    },
   },
   {
     id: 'css-gradient-generator',
@@ -4223,11 +6761,38 @@ export const tools: Tool[] = [
         answer: 'Linear and radial gradients have full support in every modern browser. Conic gradients have 95%+ support but require a fallback for very old browsers. Add a solid `background-color` first as a graceful fallback.',
       },
     ],
-    exampleOutput: {
-      output: 'background: linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);',
-      description: 'Example of a 3-color linear gradient with color stop positions',
-    },
     relatedTools: ['gradient-generator', 'css-formatter', 'color-palette-generator'],
+    howToUse: [
+      "Pick gradient type (linear / radial / conic)",
+      "Add colour stops with precise % positions",
+      "Set angle / shape / origin point",
+      "Copy CSS — includes vendor prefixes if needed",
+    ],
+    exampleOutput: {
+      input: "linear · 90° · #ff6b6b 0%, #4ecdc4 100%",
+      output: "background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 100%);",
+      description: "Production-ready CSS gradient with browser-prefixed fallbacks for older Safari/iOS if requested.",
+    },
+    seoContent: {
+      intro: "A focused CSS-gradient generator — visual editor for `linear-gradient()`, `radial-gradient()`, and `conic-gradient()` with precise stop positions, angle control, and clean copy-paste CSS output. Optional vendor prefixes for legacy browser support.",
+      examples: [
+        { title: "Card surface", body: "A subtle 180° linear gradient from white to #f7f7f7 gives a card a slight \"lifted\" feel without using shadows." },
+        { title: "Animated background", body: "Generate a 4-stop gradient and animate the `background-position` for the popular \"moving gradient\" hero effect." },
+        { title: "Text gradient", body: "Combine the generated gradient with `background-clip: text; color: transparent;` for gradient-coloured headings." },
+      ],
+      useCases: [
+        "Backgrounds for landing pages and dashboards",
+        "Subtle surface treatments on cards and panels",
+        "Animated gradient backgrounds",
+        "Gradient text effects",
+        "SVG fills for icons and illustrations",
+      ],
+      troubleshooting: [
+        { problem: "Gradient direction looks \"off\"", solution: "CSS angle 0° points UP (12 o'clock), 90° RIGHT, 180° DOWN — opposite of math convention. The visual preview is the source of truth." },
+        { problem: "Stops at 50% don't look centred", solution: "CSS distributes evenly only when stops are explicit. Set positions like `0%, 50%, 100%` instead of letting the browser auto-space." },
+        { problem: "Radial gradient looks elliptical, not circular", solution: "Default shape is `ellipse` (matches container aspect). Switch to `circle` for a true round gradient regardless of container shape." },
+      ],
+    },
   },
   {
     id: 'random-color-generator',
@@ -4263,6 +6828,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['color-palette-generator', 'color-picker', 'hex-to-rgb'],
+    howToUse: [
+      'Click Generate to roll a new random colour',
+      'Copy the HEX, RGB, or HSL value with a single click',
+      'Keep generating until you find something you like — every roll is independent',
+      'Drop the favourite into Color Palette Generator to build a full scheme',
+    ],
+    exampleOutput: {
+      input: '(click Generate)',
+      output: '#7A3FE0 — rgb(122, 63, 224) — hsl(263, 75%, 56%)',
+      description: 'Random colour shown in all three formats so you can copy whichever you need.',
+    },
+    seoContent: {
+      intro:
+        'Random Color Generator produces a fresh colour at every click — useful when you\'re stuck on what to paint a button, need a placeholder swatch for a wireframe, or want a starting point for a palette. Output is shown as HEX, RGB and HSL so you can paste directly into whichever stylesheet or design tool you\'re using.',
+      examples: [
+        {
+          title: 'Brainstorm a brand colour',
+          body: 'Roll a few dozen colours, keep the three that feel right, and feed each into the Color Palette Generator to compare full schemes side-by-side.',
+        },
+        {
+          title: 'Fill out a wireframe',
+          body: 'Generate fast placeholder swatches for cards and sections so the layout stops feeling monochrome while you focus on structure.',
+        },
+      ],
+      useCases: [
+        'Sparking ideas during early-stage brand exploration',
+        'Generating placeholder colours for prototypes and wireframes',
+        'Seeding test data that needs a colour field',
+        'Picking a colour for casual personal projects (avatars, tags, calendar events)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Generated colours look too similar / too saturated.',
+          solution: 'The generator samples uniformly across the RGB cube. If you need a curated palette (pastels, earth tones), use Color Palette Generator with a base colour instead.',
+        },
+      ],
+    },
   },
   {
     id: 'tailwind-color-converter',
@@ -4298,6 +6900,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['color-converter', 'color-picker', 'css-formatter'],
+    howToUse: [
+      'Paste a HEX colour or pick one visually',
+      'See the closest Tailwind class (e.g. bg-blue-500) along with a similarity score',
+      'Browse the next best matches if the closest one isn\'t a perfect fit',
+      'Copy the class name or stay with the arbitrary-value syntax bg-[#hex] for one-offs',
+    ],
+    exampleOutput: {
+      input: '#3B82F6',
+      output: 'bg-blue-500 — exact match (Tailwind default palette)',
+      description: 'Drop-in replacement for an arbitrary value, keeping your code on the palette.',
+    },
+    seoContent: {
+      intro:
+        'Tailwind Color Converter snaps any HEX to the nearest Tailwind palette class. Useful when you\'ve been handed a brand HEX and want to keep your stylesheet on-token instead of scattering arbitrary `bg-[#hex]` values that diverge from your design system.',
+      examples: [
+        {
+          title: 'Find the closest Tailwind blue',
+          body: 'Designer hands you #3B82F6 — converter returns bg-blue-500. Now your codebase keeps a consistent token even after Tailwind palette updates.',
+        },
+        {
+          title: 'Tune a near-match',
+          body: '#7B61FF returns bg-violet-500 as the closest match with a small distance. Decide if the small visual drift is worth the consistency win.',
+        },
+      ],
+      useCases: [
+        'Migrating CSS or Figma exports onto Tailwind palette tokens',
+        'Reviewing a PR that uses arbitrary HEX values and proposing palette equivalents',
+        'Picking utility classes for ad-hoc UI quickly without consulting the docs',
+      ],
+      troubleshooting: [
+        {
+          problem: 'The closest match is visibly different from my colour.',
+          solution: 'Tailwind\'s default palette has finite steps. If the distance is large, your brand colour likely sits between palette stops — either extend the palette in your tailwind.config or accept an arbitrary value.',
+        },
+      ],
+    },
   },
   {
     id: 'color-converter',
@@ -4333,6 +6971,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'rgba-to-hex'],
+    howToUse: [
+      'Choose an input type (HEX, RGB or HSL) and enter the value',
+      'Click Convert to get HEX, RGB, HSL and CMYK all at once',
+      'Use the Color Manipulation panel to lighten/darken/saturate/mix and copy the resulting shade',
+      'Download the full result as a .txt file if you need to share',
+    ],
+    exampleOutput: {
+      input: '#3B82F6',
+      output: 'rgb(59, 130, 246) — hsl(217, 91%, 60%) — cmyk(76%, 47%, 0%, 4%)',
+      description: 'Single colour expressed in every common screen + print format.',
+    },
+    seoContent: {
+      intro:
+        'Color Converter takes one colour and gives you HEX, RGB, HSL and CMYK simultaneously. The built-in manipulation panel also generates lighter, darker, more saturated and mixed variants in HSL space — useful for building a small palette around a brand colour without leaving the page.',
+      examples: [
+        {
+          title: 'Get print-ready CMYK',
+          body: 'Paste your brand HEX and read the CMYK percentages straight from the result card. Note CMYK is an approximation — pre-press still wants Pantone or a soft-proof, but this is enough for first drafts.',
+        },
+        {
+          title: 'Generate UI states',
+          body: 'Set the base button colour, slide the Amount to 10%, copy the Lighten swatch for hover and the Darken swatch for active state.',
+        },
+      ],
+      useCases: [
+        'Producing hover/active variants from a single brand colour',
+        'Estimating CMYK for marketing prints from a digital HEX',
+        'Bridging design tools that prefer different colour notations',
+        'Mixing two brand colours to find an in-between accent',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid HEX color" on input.',
+          solution: 'Use 3 or 6 hex digits with optional leading #. Alpha hex needs RGBA to HEX instead.',
+        },
+        {
+          problem: 'CMYK percentages look slightly different from Photoshop.',
+          solution: 'CMYK has no single canonical conversion — different colour profiles produce different numbers. The result here uses the simple subtractive formula from sRGB; expect a small drift vs profile-based converters.',
+        },
+      ],
+    },
   },
   {
     id: 'rgb-color-picker',
@@ -4368,6 +7047,37 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-color-picker', 'color-picker', 'rgb-to-hex'],
+    howToUse: [
+      'Use the colour palette or drag the R/G/B sliders to dial in a shade',
+      'Read the RGB triplet alongside the matching HEX equivalent',
+      'Copy whichever notation suits your stack',
+    ],
+    exampleOutput: {
+      input: 'Drag R=59, G=130, B=246',
+      output: 'rgb(59, 130, 246) — also #3B82F6',
+      description: 'Same colour expressed in both notations side-by-side.',
+    },
+    seoContent: {
+      intro:
+        'RGB Color Picker is the RGB-first counterpart to the standard colour picker. Use it when you think in channels (e.g. tweaking a single dimension to test contrast) and want the HEX form available as a fallback. Everything runs locally — no uploads, no tracking.',
+      examples: [
+        {
+          title: 'Tune one channel at a time',
+          body: 'Start with rgb(100, 150, 200), drop Green to 100 to make it cooler, watch the HEX equivalent update live so you can copy it once you\'re happy.',
+        },
+      ],
+      useCases: [
+        'Designers more comfortable in RGB than HEX',
+        'Iterating individual channels for accessibility experiments',
+        'Quickly converting a colour you sampled in an image editor (most show RGB by default)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output looks slightly off when typing values manually.',
+          solution: 'Each channel must be 0-255. Decimals are rounded, negatives clamp to 0, values >255 clamp to 255.',
+        },
+      ],
+    },
   },
   {
     id: 'hex-color-picker',
@@ -4403,6 +7113,41 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['rgb-color-picker', 'color-picker', 'hex-to-rgb'],
+    howToUse: [
+      'Pick a colour with the native picker or paste a HEX code (3 or 6 digits)',
+      'Read the equivalent RGB triplet displayed live',
+      'Copy the HEX value (uppercased) when you\'re ready',
+    ],
+    exampleOutput: {
+      input: '#FF5733',
+      output: 'rgb(255, 87, 51)',
+      description: '6-digit HEX with its decoded RGB channels.',
+    },
+    seoContent: {
+      intro:
+        'HEX Color Picker is a minimal swatch + HEX input combo. Pick visually, type a HEX directly, or paste a 3-digit shorthand — the RGB equivalent updates in real time. Best for designers who want the simplest possible "give me the HEX" workflow.',
+      examples: [
+        {
+          title: 'Paste a shorthand HEX',
+          body: 'Type #f00 and the tool expands it to #FF0000 with rgb(255, 0, 0) shown beneath.',
+        },
+        {
+          title: 'Sample from the native picker',
+          body: 'Open the colour swatch in your OS picker, drag to taste, and copy the HEX result for your stylesheet.',
+        },
+      ],
+      useCases: [
+        'Quickly grabbing a HEX for CSS without the noise of HSL/CMYK fields',
+        'Validating a HEX from a brand guide (catches typos like #GG0000)',
+        'Educational demos showing how HEX maps to RGB channels',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Native picker shows a colour but my typed HEX is rejected.',
+          solution: 'Manual input must be exactly 3 or 6 hex digits with optional #. Trailing whitespace or non-hex characters cause the field to fall back to the last valid swatch.',
+        },
+      ],
+    },
   },
   {
     id: 'rgba-to-hex',
@@ -4438,6 +7183,46 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['hex-to-rgb', 'rgb-to-hex', 'color-converter'],
+    howToUse: [
+      'Set R, G, B channels (0-255) and the Alpha channel (0-1, where 1 is fully opaque)',
+      'Read the 8-digit HEX result — last two digits are the alpha byte',
+      'Toggle a checkered background to see the transparency visually',
+      'Copy the HEX8 or fall back to rgba() if your target needs broader support',
+    ],
+    exampleOutput: {
+      input: 'rgba(255, 87, 51, 0.5)',
+      output: '#FF573380',
+      description: '50% opacity becomes alpha byte 0x80 in the 8-digit HEX form.',
+    },
+    seoContent: {
+      intro:
+        'RGBA to HEX converts a colour with an alpha channel into the 8-digit HEX form (#RRGGBBAA) supported by every modern browser. Use it when your design tool spits out rgba() and your stylesheet uses HEX, or when you want a single token for a brand colour at multiple opacities.',
+      examples: [
+        {
+          title: 'Translate a 50% overlay',
+          body: 'rgba(0, 0, 0, 0.5) becomes #00000080 — drop into a CSS variable so you can reuse it as a backdrop everywhere.',
+        },
+        {
+          title: 'Match a Figma colour token',
+          body: 'Figma exports `rgba(59, 130, 246, 0.25)`. The tool returns #3B82F640 so your stylesheet matches the design source.',
+        },
+      ],
+      useCases: [
+        'Migrating an rgba()-heavy stylesheet to HEX tokens',
+        'Generating a HEX8 design token for a colour family at multiple opacities',
+        'Sanity-checking exported design tool values when implementing a UI',
+      ],
+      troubleshooting: [
+        {
+          problem: 'HEX8 not rendering correctly in an email client or older browser.',
+          solution: 'Some email clients and a few legacy environments don\'t accept the 8-digit form. Fall back to rgba() — the conversion is the same colour, just the longer notation.',
+        },
+        {
+          problem: 'Alpha shows as a strange byte value (e.g. 1A for "0.1").',
+          solution: 'Alpha is multiplied by 255 and rounded — 0.1 ≈ 0x1A (26/255). Use 0.1 as the rgba alpha and the byte will be correct; don\'t try to pass percentages directly.',
+        },
+      ],
+    },
   },
 
   // ==================== CONVERTER TOOLS ====================
@@ -4694,6 +7479,51 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['markdown-to-html', 'remove-html-tags', 'markdown-to-pdf'],
+    howToUse: [
+      'Paste HTML — full document or just a fragment',
+      'Markdown is produced as you type, with headings, links, lists, code, tables and inline formatting preserved',
+      'Copy the Markdown output to use in a README, blog post, or wiki page',
+      'Switch tab to view the raw Markdown source vs the rendered preview',
+    ],
+    exampleOutput: {
+      input: '<h1>Title</h1><p>Body with <strong>bold</strong> and <a href="https://x.com">link</a>.</p>',
+      output: '# Title\n\nBody with **bold** and [link](https://x.com).',
+      description: 'Common HTML constructs map cleanly to Markdown equivalents.',
+    },
+    seoContent: {
+      intro:
+        'HTML to Markdown converts HTML markup back into Markdown, preserving headings, links, lists, inline formatting, code blocks, and tables. Useful when you receive content as rendered HTML (CMS export, scraped page, rich-text editor output) and want it in a version-control-friendly Markdown source.',
+      examples: [
+        {
+          title: 'Move a blog post off a CMS',
+          body: 'Export the post as HTML, paste here, and commit the resulting Markdown to your static-site generator (Hugo, Next.js, Astro).',
+        },
+        {
+          title: 'Convert rich-text editor output',
+          body: 'Many WYSIWYG editors output HTML. Pass it through to get Markdown that\'s easier to diff in a PR.',
+        },
+        {
+          title: 'Clean up scraped content',
+          body: 'Strip away unnecessary tags and keep only the meaningful structure — paragraphs, links, lists.',
+        },
+      ],
+      useCases: [
+        'Migrating content from a CMS to a static-site generator',
+        'Converting rich-text editor HTML to wiki-friendly Markdown',
+        'Cleaning scraped HTML into a tidy source format',
+        'Importing existing HTML docs into a Markdown-native knowledge base',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Some inline styles or classes are dropped.',
+          solution: 'Markdown doesn\'t carry CSS — only semantic structure survives. If you need exact visual fidelity, keep the HTML source.',
+        },
+        {
+          problem: 'Tables look misaligned.',
+          solution: 'Markdown tables are pipe-delimited and rely on monospace fonts for alignment. The output is valid — most renderers (GitHub, GitLab) display them correctly.',
+        },
+      ],
+    },
   },
   {
     id: 'qr-code-generator',
@@ -4802,6 +7632,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['base64-to-text', 'base64-encode', 'base64-decode'],
+    howToUse: [
+      'Paste any plain text — UTF-8 (CJK, emoji, diacritics) is fully supported',
+      'Click Encode — the Base64 result appears below',
+      'Copy the output to embed in URL params, JSON strings, or HTML data attributes',
+      'For binary files, use a dedicated file encoder instead',
+    ],
+    exampleOutput: {
+      input: 'Hello 你好',
+      output: 'SGVsbG8g5L2g5aW9',
+      description: 'UTF-8 bytes (ASCII + 3-byte CJK) encoded into 8 Base64 characters.',
+    },
+    seoContent: {
+      intro:
+        'Text to Base64 encodes plain text as a Base64 string using UTF-8 byte representation. Useful for safely embedding text containing special characters or Unicode in URLs, JSON payloads, HTML data attributes, or anywhere only ASCII is welcome.',
+      examples: [
+        {
+          title: 'Embed Unicode in a URL',
+          body: 'Base64 the text first so percent-encoding doesn\'t double-escape the characters — common pattern for stateful share links.',
+        },
+        {
+          title: 'Inline a small text payload in HTML',
+          body: 'data-config="eyJrZXkiOiJ2YWx1ZSJ9" is HTML-safe and roundtrips back to JSON server-side.',
+        },
+      ],
+      useCases: [
+        'Safe transport of Unicode text through ASCII-only channels',
+        'Encoding short payloads for URL parameters or HTML data-* attributes',
+        'Email subjects/bodies that mix scripts (Latin + CJK)',
+        'Quick obfuscation for non-sensitive demo strings (not security!)',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output is longer than expected.',
+          solution: 'Base64 has a 4:3 size ratio — every 3 source bytes become 4 output characters. A 100-byte input produces about 134 characters.',
+        },
+      ],
+    },
   },
   {
     id: 'base64-to-text',
@@ -4837,6 +7704,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['text-to-base64', 'base64-decode', 'base64-encode'],
+    howToUse: [
+      'Paste any Base64-encoded text (with or without padding)',
+      'Click Decode — UTF-8 text appears below',
+      'Use Copy to grab the plain text',
+      'Padding is handled automatically — strings missing trailing = signs still decode',
+    ],
+    exampleOutput: {
+      input: 'SGVsbG8g5L2g5aW9',
+      output: 'Hello 你好',
+      description: 'Round-trip with the encoder — UTF-8 bytes restored correctly.',
+    },
+    seoContent: {
+      intro:
+        'Base64 to Text decodes a Base64 string back into the original UTF-8 text. Tolerant of whitespace and missing padding (=) so you don\'t have to clean inputs by hand. Useful for inspecting JWT payload chunks, email-encoded subject lines, and data-URI text fragments.',
+      examples: [
+        {
+          title: 'Decode a JWT payload',
+          body: 'The middle segment of a JWT is base64url-encoded JSON. Paste it here to read the claims — exp, iss, sub, etc.',
+        },
+        {
+          title: 'Read an email Subject',
+          body: 'Subjects with non-ASCII often arrive as "=?UTF-8?B?...?=" — extract the Base64 part and decode to read the original.',
+        },
+      ],
+      useCases: [
+        'Inspecting Base64-encoded headers or tokens',
+        'Reverse-engineering API payloads',
+        'Debugging encoding pipelines that should round-trip cleanly',
+        'Extracting text from data: URIs',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Invalid Base64 string" error.',
+          solution: 'Strip non-Base64 characters (only A-Z, a-z, 0-9, +, /, =, and base64url variants - and _ are valid). Newlines and spaces are tolerated.',
+        },
+      ],
+    },
   },
   {
     id: 'url-to-qr-code',
@@ -4872,6 +7776,51 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['qr-code-generator', 'barcode-generator', 'url-parser'],
+    howToUse: [
+      'Paste a URL (https://, mailto:, tel:, ftp:, etc.)',
+      'QR code renders instantly with the URL embedded',
+      'Adjust size and error-correction level if needed',
+      'Download as PNG or SVG — scan with any phone camera to verify',
+    ],
+    exampleOutput: {
+      input: 'https://example.com/share?ref=qr',
+      output: 'Scannable QR code (PNG or SVG) — phone camera opens the URL on scan',
+      description: 'Optimised for the URL use case, with high error correction for damage tolerance.',
+    },
+    seoContent: {
+      intro:
+        'URL to QR Code is the streamlined QR generator focused on links. Paste a URL, get a scannable code — perfect for posters, packaging, business cards, and presentations where you want users to land on a webpage without typing. Includes higher default error correction so a slight smudge or logo overlay still scans.',
+      examples: [
+        {
+          title: 'Event ticket QR',
+          body: 'Generate a code that points to the ticket URL. Print on a flyer and let attendees scan straight in.',
+        },
+        {
+          title: 'Wi-Fi sharing (custom URL scheme)',
+          body: 'WIFI:S:MyNetwork;T:WPA;P:password;; is technically a URI — drop it in to make a Wi-Fi-join QR.',
+        },
+        {
+          title: 'Restaurant menu',
+          body: 'Stick a QR on each table pointing to the menu URL. Customers scan, you skip printing menus.',
+        },
+      ],
+      useCases: [
+        'Posters, flyers, business cards linking to a webpage',
+        'Restaurant menus and product information pages',
+        'Event check-in URLs',
+        'Linking from physical signage to a digital landing page',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Phone won\'t scan the code.',
+          solution: 'Try increasing the size, raising error correction to H (high), and making sure print contrast is good (true black on true white). Avoid placing in glossy lamination.',
+        },
+        {
+          problem: 'URL too long, QR looks dense.',
+          solution: 'Long URLs produce dense, hard-to-scan codes. Use a URL shortener first, then QR the short link.',
+        },
+      ],
+    },
   },
   {
     id: 'unix-time-to-date',
@@ -4907,6 +7856,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['date-to-unix-time', 'timestamp-converter', 'time-converter'],
+    howToUse: [
+      'Paste a Unix timestamp (10-digit seconds or 13-digit milliseconds — auto-detected)',
+      'Read the date in ISO 8601, UTC, local timezone, and relative ("3 hours ago") forms',
+      'Copy the format that matches your downstream use',
+    ],
+    exampleOutput: {
+      input: '1735689600',
+      output: 'ISO: 2025-01-01T00:00:00.000Z — UTC: Wed, 01 Jan 2025 00:00:00 GMT — relative: 5 months ago',
+      description: 'Same instant in three commonly-needed formats.',
+    },
+    seoContent: {
+      intro:
+        'Unix Time to Date converts seconds-since-epoch into human-readable dates. Auto-detects whether your value is in seconds (10 digits) or milliseconds (13 digits) so you don\'t have to remember the order of magnitude. Useful when reading logs, debugging timestamps stored in databases, or translating API responses.',
+      examples: [
+        {
+          title: 'Decode a log timestamp',
+          body: '1735689600 → 2025-01-01T00:00:00Z. The 10-digit format is standard for Unix logs.',
+        },
+        {
+          title: 'JavaScript Date.now() output',
+          body: '1735689600000 (13 digits) → same instant. JS uses milliseconds; many backends use seconds.',
+        },
+      ],
+      useCases: [
+        'Reading timestamps from server logs and databases',
+        'Inspecting JWT exp/iat/nbf claims',
+        'Debugging cache TTLs and expiry calculations',
+        'Translating API response timestamps for analytics',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Result is far in the future or past.',
+          solution: 'The value might be in microseconds or nanoseconds. 16+ digits — divide by 1000 (μs) or 1,000,000 (ns) before pasting.',
+        },
+      ],
+    },
   },
   {
     id: 'date-to-unix-time',
@@ -4942,6 +7927,43 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['unix-time-to-date', 'timestamp-converter', 'time-converter'],
+    howToUse: [
+      'Pick a date and time using the date-time input',
+      'Choose seconds (10-digit) or milliseconds (13-digit) for the output',
+      'Copy the Unix timestamp into your code, database, or API call',
+      'Use "Now" to quickly grab the current timestamp',
+    ],
+    exampleOutput: {
+      input: '2025-01-01 00:00:00 UTC',
+      output: '1735689600 (seconds) or 1735689600000 (milliseconds)',
+      description: 'The same instant in both common Unix timestamp resolutions.',
+    },
+    seoContent: {
+      intro:
+        'Date to Unix Time produces the seconds-or-milliseconds-since-epoch integer for any date you pick. Useful when seeding test data, building cache keys, or computing expiry times for tokens and signed URLs.',
+      examples: [
+        {
+          title: 'Token expiry',
+          body: 'Need a JWT to expire 1 hour from now? Pick the future time, grab the seconds timestamp, put it in the `exp` claim.',
+        },
+        {
+          title: 'Database seed data',
+          body: 'Create test records with predictable created_at values by computing fixed timestamps for known dates.',
+        },
+      ],
+      useCases: [
+        'Computing token / session expiry timestamps',
+        'Seeding test data with controlled timestamps',
+        'Building cache keys or signed-URL signatures',
+        'Bridging human-readable dates to systems that store ints',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Output off by my timezone.',
+          solution: 'The input is interpreted in your local timezone. To enter a UTC time, set your input to the UTC value or use a timezone-aware date string.',
+        },
+      ],
+    },
   },
   {
     id: 'time-converter',
@@ -4977,6 +7999,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['timestamp-converter', 'countdown-timer', 'cron-expression-parser'],
+    howToUse: [
+      'Enter a value and pick the source unit (ms, sec, min, hour, day, week, month, year)',
+      'Pick the target unit — result appears in real time',
+      'Use it for quick duration math without spreadsheet formulas',
+    ],
+    exampleOutput: {
+      input: '7200 seconds → hours',
+      output: '2 hours',
+      description: 'Straight unit conversion using standard factors.',
+    },
+    seoContent: {
+      intro:
+        'Time Converter switches duration values between common units — milliseconds, seconds, minutes, hours, days, weeks, months (30d), years (365d). Useful for cache TTL conversions, timeout calculations, and quick "how many seconds in 3 days?" lookups.',
+      examples: [
+        {
+          title: 'Cache TTL planning',
+          body: 'Library expects TTL in seconds: 1 day → 86,400 seconds. 1 week → 604,800. 1 hour → 3,600.',
+        },
+        {
+          title: 'Sprint planning',
+          body: '2 weeks = 14 days = 336 hours = 1,209,600 seconds. Useful for capacity math at hourly billing.',
+        },
+      ],
+      useCases: [
+        'TTL/timeout/expiry math in app configuration',
+        'Sprint or project duration breakdowns',
+        'Server uptime conversions (seconds → human-readable)',
+        'Comparing rate limits expressed in different units',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Month/year conversion off vs my calendar.',
+          solution: 'The tool uses fixed-length months (30 days) and years (365 days) — close enough for back-of-the-envelope math. For calendar-accurate work, use Age Calculator instead.',
+        },
+      ],
+    },
   },
   {
     id: 'temperature-converter',
@@ -5012,6 +8070,46 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['weight-converter', 'length-converter', 'unit-converter'],
+    howToUse: [
+      'Enter a temperature value',
+      'Pick from-unit (°C / °F / K) and to-unit',
+      'Result updates as you type — no Convert button',
+    ],
+    exampleOutput: {
+      input: '100°C → °F',
+      output: '212°F (boiling point of water)',
+      description: 'F = C × 9/5 + 32, validated against the textbook boiling point.',
+    },
+    seoContent: {
+      intro:
+        'Temperature Converter handles the three common scales: Celsius, Fahrenheit, and Kelvin. Unlike most unit conversions which use a simple factor, temperature uses offsets — the tool applies the right formula automatically. Live conversion as you type.',
+      examples: [
+        {
+          title: 'Recipe — oven temperature',
+          body: '350°F (US recipe) → 176.7°C. Round to 175°C for most ovens with 25° increments.',
+        },
+        {
+          title: 'Weather conversion',
+          body: '-10°C → 14°F. Quick mental rule: F ≈ 2×C + 30 is close enough for weather small-talk.',
+        },
+        {
+          title: 'Scientific use',
+          body: '20°C → 293.15 K. Kelvin is offset by 273.15 from Celsius (same scale size, different zero).',
+        },
+      ],
+      useCases: [
+        'Recipe conversions when oven uses one scale and recipe another',
+        'Weather small-talk across regions',
+        'Science class / physics homework',
+        'Travel planning between metric and US locations',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Negative Kelvin shown.',
+          solution: 'Kelvin is absolute — there is no negative temperature. If you see one, your Celsius input is below -273.15°C (below absolute zero), which is physically impossible.',
+        },
+      ],
+    },
   },
   {
     id: 'weight-converter',
@@ -5047,6 +8145,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['temperature-converter', 'length-converter', 'unit-converter'],
+    howToUse: [
+      'Type a weight value',
+      'Pick from and to units (mg, g, kg, t, oz, lb)',
+      'Result updates live; swap units with one click',
+    ],
+    exampleOutput: {
+      input: '5 kg → lb',
+      output: '11.0231 lb',
+      description: '1 kg ≈ 2.20462 lb, applied with full precision.',
+    },
+    seoContent: {
+      intro:
+        'Weight Converter switches between metric (mg/g/kg/tonne) and imperial (oz/lb) units. Live conversion as you type — useful for cooking, shipping, and fitness logging where one source uses one system and the next uses the other.',
+      examples: [
+        {
+          title: 'Recipe scale',
+          body: '8 oz of flour ≈ 226.8 g. US recipes use volume + ounces; metric cooks need grams.',
+        },
+        {
+          title: 'Shipping weight',
+          body: '2.5 kg package ≈ 5.51 lb. Useful when comparing carrier rates priced in different units.',
+        },
+      ],
+      useCases: [
+        'Cooking with cross-system recipes',
+        'Shipping/parcel weight conversions',
+        'Fitness tracking when scale shows kg but plan uses lb',
+        'Travel: airline luggage allowances in unfamiliar units',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Decimal places truncated.',
+          solution: 'The display trims trailing zeros for readability. Internally the precision is preserved — copy the value if you need it to feed another calculation.',
+        },
+      ],
+    },
   },
   {
     id: 'length-converter',
@@ -5082,6 +8216,42 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['weight-converter', 'temperature-converter', 'unit-converter'],
+    howToUse: [
+      'Enter a length value',
+      'Pick from and to units (mm, cm, m, km, in, ft, yd, mi)',
+      'Result updates as you type',
+    ],
+    exampleOutput: {
+      input: '5 mi → km',
+      output: '8.0467 km',
+      description: '1 mile = 1.609344 km, applied at full precision.',
+    },
+    seoContent: {
+      intro:
+        'Length Converter switches between metric (mm, cm, m, km) and imperial (inch, foot, yard, mile) units. Live conversion as you type — useful for cross-border travel, DIY projects with mixed-unit instructions, and quick reference for school work.',
+      examples: [
+        {
+          title: 'Travel distance',
+          body: 'Hotel says "3 km from beach" — that\'s about 1.86 mi. Marathon = 42.195 km = 26.219 mi.',
+        },
+        {
+          title: 'DIY measurements',
+          body: 'Hardware sold in inches but plans in centimeters? 6 in = 15.24 cm — straight conversion, no rounding loss.',
+        },
+      ],
+      useCases: [
+        'Travel and tourism planning',
+        'DIY projects with mixed-system instructions',
+        'School/homework reference',
+        'Construction and architecture cross-checks',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Result shown in scientific notation.',
+          solution: 'Triggered when result is extremely small or large. Use mm or km on the input side to keep numbers in a comfortable range.',
+        },
+      ],
+    },
   },
   {
     id: 'markdown-to-pdf',
@@ -5117,6 +8287,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['word-to-pdf', 'html-to-markdown', 'merge-pdf'],
+    howToUse: [
+      'Paste Markdown — headings, lists, code blocks, tables, blockquotes all supported',
+      'Watch the live preview update as you type',
+      'Click Download PDF — the rendered preview is exported as a PDF file',
+      'Pages are A4 with consistent margins',
+    ],
+    exampleOutput: {
+      input: '# Report\n## Summary\nMonthly metrics...',
+      output: 'rendered-report.pdf (A4, with headings and styled content)',
+      description: 'Markdown structure preserved as proper PDF text — copyable, searchable.',
+    },
+    seoContent: {
+      intro:
+        'Markdown to PDF turns a Markdown document into a printable PDF, rendering in your browser so no upload is needed. Output uses A4 pages with sensible margins. Best for short technical docs, meeting notes, or quick reports you want to send to non-technical readers without sharing the raw .md file.',
+      examples: [
+        {
+          title: 'Meeting notes',
+          body: 'Type notes in Markdown during the meeting, export as PDF, attach to the calendar event — no separate doc app needed.',
+        },
+        {
+          title: 'Short technical report',
+          body: 'Use ## subheadings and code blocks for the technical sections — PDF preserves both for review by stakeholders.',
+        },
+      ],
+      useCases: [
+        'Sharing meeting notes or short reports as PDF',
+        'Converting README files to printable docs',
+        'Producing handouts for workshops',
+        'Quick PDF generation without firing up Office',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Long lines/code blocks get cut off.',
+          solution: 'PDF page width is fixed. Break long code lines manually, or use a shorter line length in your editor before exporting.',
+        },
+        {
+          problem: 'Custom CSS / images not rendering as expected.',
+          solution: 'The tool uses default Markdown styling for predictability. For brand-styled PDFs, use a dedicated typesetter (Pandoc + LaTeX, Typst).',
+        },
+      ],
+    },
   },
   {
     id: 'json-to-xml',
@@ -5152,6 +8363,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['xml-to-json', 'json-formatter', 'json-to-csv'],
+    howToUse: [
+      'Paste JSON in the input',
+      'Click Convert — equivalent XML appears below',
+      'Choose root-element and indentation options',
+      'Use it when integrating with legacy systems that only consume XML',
+    ],
+    exampleOutput: {
+      input: '{"user":{"name":"Alice","age":30}}',
+      output: '<user>\n  <name>Alice</name>\n  <age>30</age>\n</user>',
+      description: 'Each JSON key becomes an XML element, with arrays handled as repeated child tags.',
+    },
+    seoContent: {
+      intro:
+        'JSON to XML converts a JSON document into an equivalent XML representation. Useful when you\'re integrating with a legacy SOAP service, an XML-only API, or generating an XML config from a JSON source of truth.',
+      examples: [
+        {
+          title: 'SOAP request body',
+          body: 'Build the payload as JSON for readability, then convert to XML at the last step — your code keeps the modern format.',
+        },
+        {
+          title: 'XML config from JSON spec',
+          body: 'Keep tool configs in version-friendly JSON; export to XML during build for tools that demand the older format.',
+        },
+      ],
+      useCases: [
+        'Producing XML payloads for legacy SOAP services',
+        'Generating XML configs from JSON sources',
+        'Converting JSON exports for systems with XML-only import paths',
+        'Educational comparisons of JSON vs XML structure',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Arrays produce repeated tags — is that right?',
+          solution: 'Yes — XML has no native array; arrays map to repeated elements with the same tag name. Some readers expect a wrapper element; adjust the structure or use a transform afterwards.',
+        },
+        {
+          problem: 'Numbers / booleans become strings.',
+          solution: 'XML doesn\'t track types — every value is text. If the downstream consumer needs typed values, it must apply its own schema.',
+        },
+      ],
+    },
   },
   {
     id: 'xml-to-json',
@@ -5187,6 +8439,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['json-to-xml', 'json-formatter', 'csv-to-json'],
+    howToUse: [
+      'Paste XML in the input',
+      'Click Convert — equivalent JSON appears below',
+      'Repeated tags become arrays automatically',
+      'Use it when modernising legacy XML responses for a JS-first stack',
+    ],
+    exampleOutput: {
+      input: '<user><name>Alice</name><age>30</age></user>',
+      output: '{ "user": { "name": "Alice", "age": "30" } }',
+      description: 'XML structure mirrored as JSON. Numbers are quoted because XML has no native type.',
+    },
+    seoContent: {
+      intro:
+        'XML to JSON parses an XML document into an equivalent JSON object structure. Handy when wrapping legacy SOAP services, parsing RSS/Atom feeds, or consuming XML configuration files in a JavaScript codebase. Output preserves nesting and repeated tags become arrays.',
+      examples: [
+        {
+          title: 'Parse an RSS feed',
+          body: 'Most RSS readers expose XML — convert to JSON to filter items with familiar array operations like .filter() and .map().',
+        },
+        {
+          title: 'Migrate an XML config',
+          body: 'Move a legacy config.xml to config.json without manual rewriting; tweak the JSON in your editor afterwards.',
+        },
+      ],
+      useCases: [
+        'Modernising legacy SOAP/XML APIs in a JS codebase',
+        'Parsing RSS/Atom/OPML feeds',
+        'One-off conversion of XML config files to JSON',
+        'Quick inspection of XML data structure',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Numbers and booleans come out as strings.',
+          solution: 'XML has no type system — every leaf value is text. If you need real types, post-process the JSON with a schema mapper or selective JSON.parse calls.',
+        },
+        {
+          problem: 'Attributes (e.g. <node id="1">) are missing or merged.',
+          solution: 'The default mapping nests attributes under a special key (often _attributes or @). Check the output — if the format doesn\'t match your downstream consumer, restructure with a small transformer.',
+        },
+      ],
+    },
   },
 
   // ==================== MISC TOOLS ====================
@@ -5223,11 +8516,38 @@ export const tools: Tool[] = [
         answer: 'Practically, any integer the browser can represent — up to 2^53 - 1. For most use cases (lottery picks, IDs, simulation), a range of 1 to 1 million covers everything.',
       },
     ],
-    exampleOutput: {
-      output: '42, 87, 15, 93, 28',
-      description: 'Example of 5 random numbers between 1-100 with no duplicates',
-    },
     relatedTools: ['random-string-generator', 'dice-roll-simulator', 'coin-flip'],
+    howToUse: [
+      "Set min and max range",
+      "Set how many numbers to generate",
+      "Toggle \"unique numbers\" if you need no duplicates (e.g. lottery)",
+      "Choose CSPRNG or seeded mode",
+    ],
+    exampleOutput: {
+      input: "Range: 1-49 · 6 unique numbers · CSPRNG",
+      output: "7 · 14 · 23 · 31 · 38 · 42",
+      description: "Six unique random integers in the 1-49 lottery range, generated by crypto.getRandomValues for cryptographic-quality randomness.",
+    },
+    seoContent: {
+      intro: "Generate random numbers in any range — integers or decimals, with or without duplicates, optionally seeded for reproducibility. Uses the browser's CSPRNG by default so output is cryptographically secure. Handy for lotteries, raffles, dice simulations, sampling, and test-data generation.",
+      examples: [
+        { title: "Lottery picks", body: "Six unique numbers in 1-49 — exactly what UK National Lottery needs." },
+        { title: "Statistical sampling", body: "Pick 100 unique IDs from a range of 1-10,000 for a random sample of survey participants." },
+        { title: "Dice rolls", body: "Generate 20 numbers in 1-6 with duplicates allowed to simulate 20 dice rolls." },
+      ],
+      useCases: [
+        "Lottery / raffle / giveaway draws",
+        "Statistical sampling from populations",
+        "Game simulations (dice, cards, RNG mechanics)",
+        "A/B test cohort assignment",
+        "Test-data range generation",
+      ],
+      troubleshooting: [
+        { problem: "Same number appears twice when \"unique\" is off", solution: "That's expected — duplicates can occur in random sampling. Toggle \"unique numbers\" to force no repeats (requires range ≥ count)." },
+        { problem: "\"Unique\" mode fails with error", solution: "You asked for more unique numbers than the range allows (e.g. 10 unique in 1-5). Widen the range or reduce count." },
+        { problem: "Need reproducible sequence", solution: "Switch to seeded mode and enter the same seed — same seed always produces the same sequence (uses xoshiro256** PRNG, not CSPRNG)." },
+      ],
+    },
   },
   {
     id: 'dice-roll-simulator',
@@ -5263,6 +8583,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['coin-flip', 'random-number-generator', 'random-password-generator'],
+    howToUse: [
+      'Pick the dice type (d4, d6, d8, d10, d12, d20, d100) and how many to roll',
+      'Click Roll to see each die\'s face and the total',
+      'Keep rolling to gather statistics over many trials',
+      'Use the history list to record results during a tabletop session',
+    ],
+    exampleOutput: {
+      input: '3 × d6',
+      output: '[4, 2, 6] — total 12',
+      description: 'Each die shown individually plus the sum, like an in-person roll.',
+    },
+    seoContent: {
+      intro:
+        'Dice Roll Simulator rolls virtual dice using the Web Crypto API so results are cryptographically unbiased. Supports the full RPG set (d4, d6, d8, d10, d12, d20, d100) and multi-die pools. Useful when you forgot your dice bag, want to roll d100 without two d10s, or need a quick random integer in a specific range.',
+      examples: [
+        {
+          title: 'D&D combat roll',
+          body: 'Roll 1d20 + see the natural result before applying modifiers, then 2d6 for damage on a hit.',
+        },
+        {
+          title: 'Roll for stats',
+          body: '4d6 drop the lowest is the classic D&D 5e ability-score method — roll, glance at the highest three, and note the sum.',
+        },
+        {
+          title: 'Resolve a casual decision',
+          body: 'Three options? Roll 1d3. Six? 1d6. Faster than a coin flip when there are more than two choices.',
+        },
+      ],
+      useCases: [
+        'Tabletop RPGs (D&D, Pathfinder, etc.) when physical dice aren\'t at hand',
+        'Probability demonstrations and statistics class examples',
+        'Generating random integers within bounded ranges (1-100 via d100)',
+        'Quick decision tools when picking between several options',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Results feel "non-random" (lots of the same number in a row).',
+          solution: 'Streaks are normal in true randomness — humans expect more alternation than chance produces. The generator uses crypto.getRandomValues which is genuinely unbiased.',
+        },
+      ],
+    },
   },
   {
     id: 'coin-flip',
@@ -5298,6 +8659,41 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['dice-roll-simulator', 'random-number-generator', 'random-password-generator'],
+    howToUse: [
+      'Click the coin to flip — heads or tails appears with a brief animation',
+      'Watch the running tally to see your heads/tails ratio over many flips',
+      'Reset the count when starting a new experiment',
+    ],
+    exampleOutput: {
+      input: '(click Flip)',
+      output: 'Heads — current ratio: 5H / 3T',
+      description: 'Single flip result plus a running tally to demonstrate convergence over many trials.',
+    },
+    seoContent: {
+      intro:
+        'Coin Flip Simulator gives you an unbiased 50/50 result instantly — no coin to find, no thumb-flick to fumble. Useful for quick yes/no decisions, settling a friendly disagreement, or showing how flip ratios converge to 50/50 only over many trials (not three in a row).',
+      examples: [
+        {
+          title: 'Settle a decision',
+          body: 'Two equally appealing options, can\'t decide — flip once, accept the result.',
+        },
+        {
+          title: 'Classroom probability demo',
+          body: 'Flip 100 times. Heads count will land somewhere around 50 but rarely exactly — a useful tangible intro to variance.',
+        },
+      ],
+      useCases: [
+        'Quick binary decisions (go/stay, this/that)',
+        'Stats class demos of probability vs experimental frequency',
+        'Game tiebreakers when physical coins aren\'t handy',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Got 7 heads in a row — is it broken?',
+          solution: 'Seven heads in a row happens about 1 in 128 sessions even with a perfectly fair coin. Independence means each flip ignores the previous results.',
+        },
+      ],
+    },
   },
   {
     id: 'countdown-timer',
@@ -5333,6 +8729,51 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['time-converter', 'cron-expression-parser', 'timestamp-converter'],
+    howToUse: [
+      'Enter hours, minutes, and seconds — or pick a quick preset (5min, 25min Pomodoro, 1h)',
+      'Click Start to begin counting down',
+      'Pause/resume as needed — Reset clears back to the original duration',
+      'An audible alert plays when the timer hits zero',
+    ],
+    exampleOutput: {
+      input: '25 minutes',
+      output: '00:25:00 → counts down to 00:00:00 with audio alert',
+      description: 'Classic Pomodoro session — start, focus, and the page tells you when time\'s up.',
+    },
+    seoContent: {
+      intro:
+        'Countdown Timer runs a simple in-browser timer with start, pause, reset and an audible alert when it finishes. No accounts, no installs — just open the page and set the duration. Useful for focus sessions, recipe steps, workout intervals, or any short fixed duration where you want hands-off notification.',
+      examples: [
+        {
+          title: 'Pomodoro focus block',
+          body: 'Set 25:00, click Start, mute notifications elsewhere, and let the timer ping you when the block ends.',
+        },
+        {
+          title: 'Recipe step',
+          body: 'Cooking pasta for 8 minutes? Set 8:00 and walk away — when the alert plays, drain the pot.',
+        },
+        {
+          title: 'Time-boxed meeting',
+          body: 'Project the timer in a stand-up to keep updates to 2 minutes each. The visible countdown nudges people to wrap.',
+        },
+      ],
+      useCases: [
+        'Pomodoro and time-boxed focus sessions',
+        'Cooking and recipe step timers',
+        'Workout intervals (HIIT, Tabata)',
+        'Time-boxed meeting segments and presentations',
+      ],
+      troubleshooting: [
+        {
+          problem: 'No sound when timer ends.',
+          solution: 'Most browsers block audio until you\'ve interacted with the page. Click anywhere on the page first, then start the timer.',
+        },
+        {
+          problem: 'Timer pauses when tab is hidden.',
+          solution: 'Browsers throttle background tabs. Keep the tab visible, or use a dedicated OS-level timer for long durations where exact second-counting matters.',
+        },
+      ],
+    },
   },
   {
     id: 'barcode-generator',
@@ -5368,6 +8809,55 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['qr-code-generator', 'url-to-qr-code', 'url-encode'],
+    howToUse: [
+      'Type the text/number you want to encode',
+      'Pick the format: Code 128 (full ASCII), EAN-13 (12-13 digits), or Code 39 (uppercase + few symbols)',
+      'Preview the rendered barcode and download as PNG',
+      'For EAN-13 with 12 digits, the check digit is computed and appended automatically',
+    ],
+    exampleOutput: {
+      input: '5901234123457 (EAN-13)',
+      output: 'Rendered with valid check digit and clear text label',
+      description: 'Standard retail barcode ready to drop into a product label or label-printer template.',
+    },
+    seoContent: {
+      intro:
+        'Barcode Generator renders Code 128, EAN-13, and Code 39 barcodes from your text. Code 128 is the dense choice for arbitrary ASCII (SKUs, IDs); EAN-13 is the retail standard for products; Code 39 is the simple uppercase-only format common on shipping labels. Output is a crisp PNG you can paste into a label sheet or print directly.',
+      examples: [
+        {
+          title: 'Print SKU labels',
+          body: 'Generate Code 128 from your internal SKU "PRD-2024-A1" and paste the PNG into a label-printer template.',
+        },
+        {
+          title: 'EAN-13 with auto check digit',
+          body: 'Enter 12 digits and the tool appends the correct check digit to produce a scannable 13-digit barcode.',
+        },
+        {
+          title: 'Asset tags with Code 39',
+          body: 'Code 39 is widely supported by basic scanners and only needs A-Z 0-9 + few symbols. Ideal for low-density asset tags.',
+        },
+      ],
+      useCases: [
+        'Generating product or SKU barcodes for small retail/inventory',
+        'Creating EAN-13 barcodes for product catalogues and POS systems',
+        'Printing asset tags for equipment tracking',
+        'Embedding barcodes in shipping labels, receipts, or warehouse pick lists',
+      ],
+      troubleshooting: [
+        {
+          problem: '"Code 39 doesn\'t support character" error.',
+          solution: 'Code 39 only encodes 0-9, A-Z (uppercase), space, and "-.$/+%". Use Code 128 instead for lowercase or extended characters.',
+        },
+        {
+          problem: '"EAN-13 requires 12 or 13 digits".',
+          solution: 'Only digits, exactly 12 (auto-compute) or 13 (we validate the check digit). Hyphens and spaces are not allowed in the input.',
+        },
+        {
+          problem: 'Scanner reads my Code 128 but not my Code 39.',
+          solution: 'Make sure the scanner is configured to read Code 39. Some retail scanners only enable EAN/UPC and Code 128 by default.',
+        },
+      ],
+    },
   },
   {
     id: 'unit-converter',
@@ -5403,6 +8893,52 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['temperature-converter', 'weight-converter', 'length-converter'],
+    howToUse: [
+      'Pick a category (Length, Weight, Temperature, Volume, Area, Speed, Time, Data, Pressure, Energy, Frequency)',
+      'Choose the From and To units, type a value',
+      'Result updates in real time — no Convert button needed',
+      'Use the swap arrow to flip From/To, or change the category for an entirely different conversion',
+    ],
+    exampleOutput: {
+      input: '5 miles',
+      output: '8.04672 kilometers',
+      description: 'Real-time, factor-based conversion with full precision (trailing zeros trimmed).',
+    },
+    seoContent: {
+      intro:
+        'Unit Converter handles 11 categories of measurement in one place: length, weight, temperature, volume, area, speed, time, data, plus pressure, energy and frequency for engineering work. Conversion is real-time — no Convert button — so iterating through values feels natural. All factors are stored locally so the page works offline once it\'s loaded.',
+      examples: [
+        {
+          title: 'Recipe metric ↔ imperial',
+          body: '350°F → 176.7°C for a US recipe in a metric kitchen, or 1 cup → 236.6 ml when scaling.',
+        },
+        {
+          title: 'Engineering: pressure conversion',
+          body: '100 PSI → 689,476 Pa or ~6.89 bar — useful for spec sheets that mix US and SI units.',
+        },
+        {
+          title: 'Data size sanity check',
+          body: '1024 MB → 1 GB, 1 TB → 1,048,576 MB — confirm storage quotas without doing math in your head.',
+        },
+      ],
+      useCases: [
+        'Recipe conversions between metric and imperial systems',
+        'Engineering spec checks (pressure, energy, frequency)',
+        'Travel: km/miles, °C/°F when crossing regions',
+        'Data sizing: bytes ↔ KB ↔ MB ↔ GB ↔ TB',
+        'School homework and quick reference for physics/chemistry units',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Result shows in scientific notation (e.g. 1.5e-19).',
+          solution: 'Used for very small or very large numbers. Electronvolt energy values, for example, are tiny in joules — scientific notation prevents truncation.',
+        },
+        {
+          problem: 'Temperature converts oddly (e.g. 0°C → 32°F but 100°C → 212°F isn\'t simple).',
+          solution: 'Temperature uses offsets, not pure factors. The math is correct — F = C × 9/5 + 32. Kelvin is offset by 273.15 from Celsius.',
+        },
+      ],
+    },
   },
   {
     id: 'age-calculator',
@@ -5438,6 +8974,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['bmi-calculator', 'percentage-calculator', 'date-to-unix-time'],
+    howToUse: [
+      'Pick your birthdate using the date input',
+      'See your exact age in years, months, weeks, days, hours, and minutes',
+      'Check the countdown to your next birthday',
+      'Browse the fun stats (estimated breaths, heartbeats) at the bottom',
+    ],
+    exampleOutput: {
+      input: 'Birthdate 1990-05-15 (today 2026-06-01)',
+      output: '36 years, 0 months, 17 days — also 13,166 days total — next birthday in 348 days',
+      description: 'Multi-unit breakdown plus the running countdown to the next birthday.',
+    },
+    seoContent: {
+      intro:
+        'Age Calculator works out your exact age from a single date input. Most calculators give "36 years" — this one breaks it into years/months/weeks/days/hours/minutes, shows the total days lived, and adds a countdown to your next birthday. Nothing leaves your browser; refresh the tab and the date is gone.',
+      examples: [
+        {
+          title: 'Exact age for legal/medical form',
+          body: '"36 years, 0 months, 17 days" is more precise than "36" when a form asks for current age and you\'re close to your birthday.',
+        },
+        {
+          title: 'Plan a milestone',
+          body: 'Find out exactly how many days until your 40th birthday so you can lock in travel dates well ahead.',
+        },
+        {
+          title: 'Quirky stats',
+          body: 'Estimated breaths and heartbeats are calculated from average rates — handy for conversation starters or biology class examples.',
+        },
+      ],
+      useCases: [
+        'Filling out forms that ask for age in years + months',
+        'Counting days to/from a birthday for planning purposes',
+        'Calculating age difference between two dates (input both birthdates)',
+        'Fun stats for personal websites or biology demos',
+      ],
+      troubleshooting: [
+        {
+          problem: 'Wrong age shown after entering a future date.',
+          solution: 'The calculator only handles past birthdates. For future dates use a countdown timer or date difference tool.',
+        },
+      ],
+    },
   },
   {
     id: 'bmi-calculator',
@@ -5473,6 +9050,47 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['age-calculator', 'percentage-calculator', 'weight-converter'],
+    howToUse: [
+      'Choose metric (cm/kg) or imperial (ft-in/lb) units',
+      'Enter your height and weight',
+      'Read the BMI value and category (Underweight / Normal / Overweight / Obese)',
+      'Compare against the WHO ranges shown below the result',
+    ],
+    exampleOutput: {
+      input: 'Height 175 cm, Weight 70 kg',
+      output: 'BMI 22.86 — Normal weight',
+      description: 'BMI = weight / height² (in metres) — 70 / 1.75² ≈ 22.86, comfortably in the Normal range.',
+    },
+    seoContent: {
+      intro:
+        'BMI Calculator computes Body Mass Index from your height and weight and tells you which WHO category it lands in. Supports metric (cm/kg) and imperial (ft-in/lb) inputs so you don\'t need to convert first. BMI is a screening number — it doesn\'t measure body composition — but it remains a quick, widely-used reference for general weight ranges.',
+      examples: [
+        {
+          title: 'Metric input',
+          body: '180 cm, 75 kg → BMI 23.15 (Normal). The formula is kg / m²: 75 / (1.8 × 1.8) = 23.15.',
+        },
+        {
+          title: 'Imperial input',
+          body: '5\'10" (70 in), 165 lb → BMI 23.67 (Normal). Formula: 703 × lb / in² = 703 × 165 / 4900 ≈ 23.67.',
+        },
+      ],
+      useCases: [
+        'Quick health screening for adults',
+        'Tracking your trend over time as part of a health journal',
+        'School/PE class demonstrations',
+        'Pre-doctor-visit reference before discussing weight management',
+      ],
+      troubleshooting: [
+        {
+          problem: 'BMI seems high but I\'m very muscular.',
+          solution: 'BMI doesn\'t distinguish muscle from fat. Athletes and bodybuilders routinely score "Overweight" or "Obese" while being lean. Use body-fat percentage or waist-to-hip ratio instead for that case.',
+        },
+        {
+          problem: 'Different result than my doctor\'s scale.',
+          solution: 'Different scales use slightly different formulas (some use waist circumference, age, etc.). Our calculator uses the standard WHO BMI formula. If they differ, ask your doctor what scale they use.',
+        },
+      ],
+    },
   },
   {
     id: 'percentage-calculator',
@@ -5508,6 +9126,46 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['bmi-calculator', 'age-calculator', 'unit-converter'],
+    howToUse: [
+      'Pick a mode: "X% of Y", "X is what % of Y", or "% change from X to Y"',
+      'Enter the two numbers — the result updates instantly',
+      'Copy the result or use it as the input for another calculation',
+    ],
+    exampleOutput: {
+      input: 'Mode "X% of Y" — 20% of 150',
+      output: '30',
+      description: 'Tax, tip, discount, and commission math all collapse to "X% of Y".',
+    },
+    seoContent: {
+      intro:
+        'Percentage Calculator covers the three percentage operations that come up daily: "what is X% of Y", "X is what percent of Y", and "% change from X to Y". Each mode has clearly labelled fields so you don\'t have to think about which formula applies — pick the question you\'re asking and the answer appears.',
+      examples: [
+        {
+          title: 'Discount math',
+          body: 'Item costs $80, store offers 25% off → "25% of 80" = $20 saving, final price $60.',
+        },
+        {
+          title: 'Test score',
+          body: 'Scored 38 out of 50 → "38 is what % of 50" = 76%.',
+        },
+        {
+          title: 'Salary change',
+          body: 'Old salary 50k, new 57.5k → "% change from 50000 to 57500" = +15%.',
+        },
+      ],
+      useCases: [
+        'Tax, tip, and discount math at the checkout',
+        'Test scores and grading conversions',
+        'Sales growth, revenue change, and KPI deltas',
+        'Quick stats for reports without firing up a spreadsheet',
+      ],
+      troubleshooting: [
+        {
+          problem: '% change shows a huge number when starting from a small base.',
+          solution: 'Small denominators amplify percentage changes (e.g. 1 → 10 is +900%). Mathematically correct — interpret with care when base values are small.',
+        },
+      ],
+    },
   },
   {
     id: 'password-strength-checker',
@@ -5543,6 +9201,51 @@ export const tools: Tool[] = [
       },
     ],
     relatedTools: ['random-password-generator', 'secure-token-generator', 'bcrypt-hash-generator'],
+    howToUse: [
+      'Type a password into the input — the strength score updates live',
+      'Read the verdict (Weak / Fair / Good / Strong) and the underlying score breakdown',
+      'Look at the recommendations below for what to add (length, mixed case, symbols)',
+      'When you\'re done, pair with a password manager for storage',
+    ],
+    exampleOutput: {
+      input: 'Tr0ub4dor&3',
+      output: 'Score: Good — length 11, mixed case, digit, symbol present',
+      description: 'XKCD\'s favourite scapegoat — common substitutions don\'t dramatically help; length matters more.',
+    },
+    seoContent: {
+      intro:
+        'Password Strength Checker scores your password on length, character variety, and pattern detection without sending it anywhere. The strength label maps to "Weak → Strong" with explicit feedback on what to improve. Useful when teaching new users about passwords or pre-checking a candidate password before committing it to a vault.',
+      examples: [
+        {
+          title: '"password123" → Weak',
+          body: 'Dictionary word + obvious trailing digits is the most common pattern guessers try first. Score reflects that.',
+        },
+        {
+          title: '"correcthorsebatterystaple" → Strong',
+          body: 'Four random words pass the length threshold and are far harder to brute-force than short complex passwords.',
+        },
+        {
+          title: '"P@ssw0rd!" → Fair',
+          body: 'Looks "complex" but the base word "password" is still recognised — common substitution doesn\'t earn many extra points.',
+        },
+      ],
+      useCases: [
+        'Teaching colleagues / students why length beats complexity',
+        'Sanity-checking a candidate password before saving in a password manager',
+        'Auditing service password policies during a security review',
+        'Pairing with random-password-generator to verify generated output is genuinely strong',
+      ],
+      troubleshooting: [
+        {
+          problem: 'My password tested "Strong" but a real check flags it.',
+          solution: 'Length + variety screening can\'t spot every leaked password. Cross-check against a breach database (HaveIBeenPwned API) for the highest confidence.',
+        },
+        {
+          problem: 'Password not stored — does that mean it\'s safe to paste here?',
+          solution: 'The analysis runs entirely in your browser. Nothing is sent over the network. As a habit, only paste passwords you\'re still actively choosing, not ones already in use.',
+        },
+      ],
+    },
   },
   {
     id: 'secure-token-generator',
@@ -5577,11 +9280,38 @@ export const tools: Tool[] = [
         answer: 'Yes — tokens come from `crypto.getRandomValues()`, the browser\'s CSPRNG. This is suitable for authentication tokens, API keys, and any security-sensitive use. Not the same as `Math.random()`, which is predictable.',
       },
     ],
-    exampleOutput: {
-      output: 'a1b2c3d4e5f6789012345678901234567890abcd\nefghijklmnopqrstuvwxyz1234567890ABCD\n789012345678901234567890123456789012',
-      description: 'Example of 3 secure hex tokens (32 characters each)',
-    },
     relatedTools: ['random-password-generator', 'uuid-generator', 'nano-id-generator'],
+    howToUse: [
+      "Pick token length (32 / 48 / 64 bytes recommended)",
+      "Choose encoding (hex / base64 / base64url)",
+      "Click Generate — token uses crypto.getRandomValues",
+      "Copy or download for storage",
+    ],
+    exampleOutput: {
+      input: "Length: 32 bytes · base64url encoding",
+      output: "k7Hq2pXmYnRtVwE4P9mAj5GcDvNqXh2LkRpVwEsxYmZb",
+      description: "A 256-bit cryptographic token encoded as URL-safe base64 — suitable for session tokens, API keys, password-reset links.",
+    },
+    seoContent: {
+      intro: "Generate cryptographically secure tokens for session IDs, API keys, password-reset links, CSRF tokens, or webhook signing secrets. Uses `crypto.getRandomValues()` — the same primitive Node.js, Python, and OpenSSL use for security-critical randomness. Output in hex, base64, or URL-safe base64.",
+      examples: [
+        { title: "Password-reset link token", body: "Generate a 32-byte (256-bit) base64url token, store its hash, and email the plaintext as part of the reset URL." },
+        { title: "Webhook signing secret", body: "Generate a 48-byte hex token to share with a webhook consumer — use as HMAC-SHA256 key to sign payloads." },
+        { title: "API key for a service", body: "A 32-byte base64url token is plenty for an API key — short enough to fit in headers, long enough that brute-force is impossible." },
+      ],
+      useCases: [
+        "Session ID generation",
+        "API key creation",
+        "Password-reset / email-verification tokens",
+        "CSRF tokens",
+        "Webhook / HMAC signing secrets",
+      ],
+      troubleshooting: [
+        { problem: "Token contains characters like `+` `/` `=` that break URLs", solution: "Switch to base64url encoding — URL-safe variant uses `-` and `_` instead and omits padding." },
+        { problem: "Token is shorter than expected", solution: "Length is in raw bytes; the encoded string is longer (hex = 2x, base64 = ~1.35x). 32 bytes hex = 64 characters; 32 bytes base64 ≈ 43 characters." },
+        { problem: "Need to use the same token in multiple systems", solution: "Generate once and copy/distribute. Don't regenerate — random output isn't reproducible by design." },
+      ],
+    },
   },
   {
     id: 'nano-id-generator',
@@ -5616,11 +9346,38 @@ export const tools: Tool[] = [
         answer: 'Yes, but shorter IDs collide more easily. For ~1 million IDs, 10 characters is safe. For ~1 billion, use 14+. The tool lets you set any length 4–36.',
       },
     ],
-    exampleOutput: {
-      output: 'V1StGXR8_Z5jdHi6B-myT\nJ6N3kqW7xR9mP2vL8hT5c\nA4bC7dE9fG1hI3jK5lM7n',
-      description: 'Example of 3 Nano IDs with URL-safe characters (21 characters default length)',
-    },
     relatedTools: ['uuid-generator', 'secure-token-generator', 'random-string-generator'],
+    howToUse: [
+      "Set length (default 21 — same as nanoid lib)",
+      "Optional: customise alphabet (URL-safe by default)",
+      "Set count for bulk generation",
+      "Copy individual or download list",
+    ],
+    exampleOutput: {
+      input: "Length: 21 · default URL-safe alphabet · count: 5",
+      output: "V1StGXR8_Z5jdHi6B-myT\nU9XmcF7-bGq3KhrPj2W_a\n...",
+      description: "Five 21-character Nano IDs — URL-safe, collision-resistant, and shorter than UUIDs for the same uniqueness guarantee.",
+    },
+    seoContent: {
+      intro: "Generate Nano IDs — modern, URL-safe, collision-resistant unique identifiers shorter than UUIDs. A 21-character Nano ID has the same collision odds as a UUID v4 but is 40% shorter and URL-friendly (no `-` separators, no special characters). Drop-in replacement for UUIDs in modern apps.",
+      examples: [
+        { title: "Short URL IDs", body: "Replace `/posts/550e8400-e29b-41d4-a716-446655440000` with `/posts/V1StGXR8_Z5jdHi6B-myT` — same uniqueness, half the length." },
+        { title: "React component keys", body: "Generate a list of Nano IDs to use as keys in React lists where you have no natural unique field." },
+        { title: "Custom alphabet", body: "For only-digits IDs, pass `0123456789` as alphabet — useful for friendly numeric IDs." },
+      ],
+      useCases: [
+        "Short URL slugs / short links",
+        "Database primary keys (alternative to UUID)",
+        "React / Vue list keys",
+        "Document IDs in MongoDB / Firestore",
+        "Anywhere a short, opaque ID is preferable to UUID",
+      ],
+      troubleshooting: [
+        { problem: "Two Nano IDs collided in production", solution: "Vanishingly unlikely at length 21 (similar to UUID v4). If real, you probably shortened to 8-10 chars — bump back to 21 or use the official collision-probability calculator." },
+        { problem: "Custom alphabet output isn't uniformly random", solution: "Nano ID uses modular bias avoidance under the hood — output is uniformly distributed. Run a frequency test if you suspect otherwise." },
+        { problem: "Some characters in the URL look strange", solution: "Default alphabet includes `_` and `-`. Pass a stricter alphabet (alphanumeric only) if your URL system rejects those." },
+      ],
+    },
   },
   {
     id: 'slug-generator-advanced',
@@ -5655,12 +9412,38 @@ export const tools: Tool[] = [
         answer: 'Aim for 3–5 meaningful words (under ~60 characters). Long slugs get truncated in search results and are less shareable. The tool lets you cap maximum length and trim trailing partial words.',
       },
     ],
-    exampleOutput: {
-      input: 'Hello World! This is an Advanced Slug Generator 2024',
-      output: 'hello-world-this-is-an-advanced-slug-generator-2024',
-      description: 'Example of URL-friendly slug with hyphens and lowercase',
-    },
     relatedTools: ['slug-generator', 'text-case-converter', 'url-encode'],
+    howToUse: [
+      "Paste text or a title",
+      "Choose separator (- / _ / .)",
+      "Pick rules (lowercase, transliterate accents, strip stopwords)",
+      "Copy slug — preview shows live as you type",
+    ],
+    exampleOutput: {
+      input: "Cách Học Tiếng Việt Hiệu Quả 2026!",
+      output: "cach-hoc-tieng-viet-hieu-qua-2026",
+      description: "A clean URL slug with Vietnamese accents transliterated, punctuation stripped, and spaces converted to hyphens.",
+    },
+    seoContent: {
+      intro: "Convert any title or sentence into a clean URL slug — lowercase, hyphenated, accent-stripped, and free of special characters. Handles transliteration for Vietnamese, Chinese, Russian, Arabic, and 50+ other scripts so non-Latin titles still become readable Latin slugs. Optional stopword removal keeps slugs short and SEO-friendly.",
+      examples: [
+        { title: "Vietnamese blog post", body: "`Cách Học Tiếng Việt Hiệu Quả 2026!` → `cach-hoc-tieng-viet-hieu-qua-2026` — accents removed, ready for the URL." },
+        { title: "SEO-clean stopword stripping", body: "`The Ultimate Guide to the Best Tools` → `ultimate-guide-best-tools` (stopwords `the` / `to` removed)." },
+        { title: "Product SKU slug", body: "`Air Jordan 1 — Retro High OG 2026` → `air-jordan-1-retro-high-og-2026` for a clean product URL." },
+      ],
+      useCases: [
+        "Blog post / article URLs",
+        "Product / category page URLs",
+        "Filename normalisation",
+        "YouTube / podcast episode slugs",
+        "GitHub Pages / Jekyll permalinks",
+      ],
+      troubleshooting: [
+        { problem: "CJK characters dropped to empty slug", solution: "Enable \"transliterate CJK\" — by default the tool keeps original characters; transliteration converts 你好 → ni-hao." },
+        { problem: "Slug is too long for URL field", solution: "Set max length (default 60). Tool truncates at the last separator before the limit so words stay intact." },
+        { problem: "Hyphens replaced with underscores unexpectedly", solution: "Check separator setting. Default is `-`; if you switched to `_` once, it persists. Reset to defaults if needed." },
+      ],
+    },
   },
 
   // ==================== OFFICE TOOLS ====================
@@ -5784,6 +9567,31 @@ export const tools: Tool[] = [
       'Click "Convert to Excel" button',
       'Download the .xlsx file',
     ],
+    exampleOutput: {
+      input: "orders.csv (12,400 rows, comma-delimited with quoted addresses)",
+      output: "orders.xlsx — typed columns, header row, opens directly in Excel",
+      description: "Real .xlsx workbook with inferred number/date/boolean column types, generated locally in your browser.",
+    },
+    seoContent: {
+      intro: "Convert CSV files to real Microsoft Excel workbooks (.xlsx) right in your browser — no upload, no account, no row limits beyond what fits in memory. The converter follows RFC 4180 quoting rules, auto-detects delimiters, and infers numeric/date/boolean column types so Excel opens the result as a properly typed spreadsheet instead of a wall of text.",
+      examples: [
+        { title: "Sales export from a SaaS dashboard", body: "A 50k-row CSV with mixed numeric, date, and currency columns becomes a typed .xlsx — pivot tables and SUM() work without retyping any column." },
+        { title: "Quoted multi-line fields", body: "Customer addresses wrapped in double quotes containing commas and newlines are parsed correctly per RFC 4180 — one cell per address, no row drift." },
+        { title: "Bulk product catalogue", body: "A pipe-delimited inventory file is converted by selecting the pipe delimiter; output keeps leading zeros on SKU codes by forcing the column to text." },
+      ],
+      useCases: [
+        "Importing analytics exports (Stripe, Google Analytics, Shopify) into Excel for reporting",
+        "Sharing data with non-technical teammates who only have Excel",
+        "Preparing CSV downloads for upload into accounting software that requires .xlsx",
+        "Quickly inspecting large CSVs in Excel without breaking column types",
+        "Converting database dumps for offline analysis",
+      ],
+      troubleshooting: [
+        { problem: "Leading zeros disappear from ID columns (e.g. 00123 → 123)", solution: "Force the column to text in the column-type override before converting. CSV is untyped, but Excel auto-coerces numbers — text mode keeps every character literal." },
+        { problem: "Rows look misaligned after conversion", solution: "The delimiter was probably wrong — pick the correct one (comma/semicolon/tab/pipe). Also check that quoted fields use straight \" and not curly \" \" quotes." },
+        { problem: "Date column shows as a number", solution: "Excel stored it as a serial number — format the column as Date in Excel, or pre-format the CSV dates as ISO 8601 (YYYY-MM-DD) so the converter recognises them." },
+      ],
+    },
   },
   {
     id: 'excel-to-json',
@@ -5825,6 +9633,31 @@ export const tools: Tool[] = [
       'Choose JSON format (array of objects)',
       'Download or copy the JSON output',
     ],
+    exampleOutput: {
+      input: "employees.xlsx (Sheet1, 1,800 rows × 9 columns)",
+      output: "employees.json — array of 1,800 objects keyed by the first-row headers",
+      description: "Pretty-printed JSON array. Each cell becomes a property typed as string/number/boolean/null based on the underlying Excel cell type.",
+    },
+    seoContent: {
+      intro: "Convert Excel spreadsheets (.xlsx, .xls) into clean JSON arrays without uploading the file anywhere. The converter reads the chosen sheet, treats row 1 as the keys, and preserves Excel cell types (numbers stay numbers, dates become ISO strings, blanks become null) so the output drops straight into APIs, databases, or front-end apps.",
+      examples: [
+        { title: "API seed data", body: "A product catalogue maintained in Excel becomes a JSON array your seed script can post to /products in one curl loop." },
+        { title: "Multi-sheet workbook", body: "Pick which sheet to convert; the others are ignored. Useful when finance keeps `Inputs` and `Outputs` in the same file." },
+        { title: "Nested keys via dot notation", body: "Headers like `address.city` and `address.zip` are turned into nested objects automatically — no manual restructuring needed." },
+      ],
+      useCases: [
+        "Loading Excel-maintained data into a JavaScript or Python app",
+        "Feeding spreadsheet content to a REST/GraphQL API",
+        "Seeding a database from a non-technical owner's workbook",
+        "Generating fixtures for unit and integration tests",
+        "Powering charts and dashboards in front-end apps",
+      ],
+      troubleshooting: [
+        { problem: "Dates appear as numbers like 45200", solution: "Excel stores dates as serial numbers. Toggle the \"convert dates to ISO 8601\" option so 45200 becomes \"2023-09-26\"." },
+        { problem: "Some rows are missing from the JSON", solution: "Hidden rows or filtered rows are skipped if \"include hidden rows\" is off. Re-run with that option enabled." },
+        { problem: "Duplicate keys in the output", solution: "Your header row has duplicate column names. Rename them in Excel — JSON object keys must be unique." },
+      ],
+    },
   },
   {
     id: 'json-to-excel',
@@ -5866,6 +9699,31 @@ export const tools: Tool[] = [
       'Click "Convert to Excel" button',
       'Download the .xlsx file',
     ],
+    exampleOutput: {
+      input: "API response array (250 user objects, 12 fields each)",
+      output: "users.xlsx — header row + 250 rows, columns auto-sized",
+      description: "Real .xlsx workbook. Nested objects are flattened with dot-notation column headers; arrays are JSON-stringified into a single cell.",
+    },
+    seoContent: {
+      intro: "Convert any JSON array of objects into a downloadable Excel workbook (.xlsx) instantly. The tool flattens one level of nesting using dot-notation headers (`user.email` → column `user.email`), preserves numeric and boolean types, and lets you reorder or rename columns before exporting.",
+      examples: [
+        { title: "REST API response → finance team", body: "A 5,000-element JSON array from your `/orders` endpoint is converted with one click for the finance lead who only opens Excel." },
+        { title: "Nested objects", body: "`{ user: { name, email } }` flattens to columns `user.name` and `user.email` — no manual reshaping." },
+        { title: "Mixed types", body: "Numbers stay numeric, booleans become TRUE/FALSE, ISO dates can be auto-converted to Excel date cells via a toggle." },
+      ],
+      useCases: [
+        "Sharing API output with non-developers",
+        "Generating downloadable reports from a SaaS dashboard",
+        "Backing up JSON data into a tangible spreadsheet",
+        "Importing API data into accounting / CRM systems that only accept Excel",
+        "Auditing a JSON payload visually before pushing to production",
+      ],
+      troubleshooting: [
+        { problem: "Array fields show as `[object Object]` or raw JSON", solution: "Excel cells hold one value — nested arrays are JSON-stringified by design. Pre-flatten the array in JSON before converting, or use the \"expand arrays as rows\" option." },
+        { problem: "Column order is unpredictable", solution: "JSON objects don't guarantee key order across rows. Use the column reorder dialog to pin the columns you want, then re-export." },
+        { problem: "Numbers stored as strings stay as text", solution: "JSON `\"42\"` is a string. Wrap numeric values without quotes (`42`) in your source, or enable the \"coerce numeric-looking strings\" toggle." },
+      ],
+    },
   },
   {
     id: 'excel-to-xml',
@@ -5907,6 +9765,31 @@ export const tools: Tool[] = [
       'Click "Convert to XML" button',
       'Download the XML file',
     ],
+    exampleOutput: {
+      input: "products.xlsx (Sheet1, 320 SKUs × 6 columns)",
+      output: "products.xml — <rows><row><sku>…</sku>…</row></rows>",
+      description: "Well-formed XML 1.0 document. Header row becomes element tag names; cell types are preserved as XML Schema datatypes when the option is on.",
+    },
+    seoContent: {
+      intro: "Convert Excel sheets into well-formed XML in seconds — useful for legacy systems that only accept XML imports (SAP, Oracle EBS, older e-invoicing endpoints). Choose your root and row element names, opt into XSD datatype hints, and the converter handles XML escaping (&, <, >, quotes) automatically.",
+      examples: [
+        { title: "SAP master-data load", body: "Material master records from an Excel template are converted to the XML envelope SAP expects, with custom `<material>` / `<materials>` tag names." },
+        { title: "E-invoice payload", body: "A 1-row invoice template becomes the XML body for an electronic-invoicing API — special characters in addresses are escaped safely." },
+        { title: "CDATA for HTML descriptions", body: "Product descriptions containing HTML are wrapped in CDATA sections via a toggle, avoiding escape clutter." },
+      ],
+      useCases: [
+        "Feeding spreadsheet data to legacy ERP/CRM systems",
+        "Generating XML payloads for B2B EDI exchanges",
+        "Producing XML config files from a maintained spreadsheet",
+        "Converting test fixtures for XML-based APIs",
+        "Migrating data into XML-based document stores",
+      ],
+      troubleshooting: [
+        { problem: "Output XML fails XSD validation", solution: "Header names are used as element tags — they must be valid XML names (no spaces, no leading digits). Rename headers like `Order Date` → `order_date`." },
+        { problem: "Special characters appear garbled", solution: "Save the source workbook as UTF-8 .xlsx (the modern default). Legacy .xls in Windows-1252 may mis-encode accented characters." },
+        { problem: "Importer rejects the file as \"not a document\"", solution: "Toggle \"include XML declaration\" so the file starts with `<?xml version=\"1.0\" encoding=\"UTF-8\"?>` — some strict parsers require it." },
+      ],
+    },
   },
   {
     id: 'excel-to-sql',
@@ -5948,6 +9831,31 @@ export const tools: Tool[] = [
       'Click "Generate SQL" button',
       'Download or copy the SQL statements',
     ],
+    exampleOutput: {
+      input: "customers.xlsx (5,400 rows × 8 columns)",
+      output: "customers.sql — CREATE TABLE + 5,400 INSERT statements",
+      description: "Ready-to-run SQL script. Column types are inferred (INTEGER, DECIMAL, VARCHAR, DATE) and values are properly escaped for the chosen dialect.",
+    },
+    seoContent: {
+      intro: "Convert Excel data into SQL INSERT statements (or a full CREATE TABLE + INSERT script) for MySQL, PostgreSQL, SQLite, or SQL Server. The converter infers column types, escapes quotes and special characters, and lets you choose batch INSERT size — handy for seeding databases or quickly importing client data.",
+      examples: [
+        { title: "Seed a dev database", body: "A 2,000-row reference workbook becomes a `seed.sql` script the team can run with `psql -f seed.sql` to populate a fresh DB." },
+        { title: "PostgreSQL-specific output", body: "Pick PostgreSQL and dates emit as `DATE '2024-03-15'`; booleans as TRUE/FALSE — no manual fixup before running." },
+        { title: "Batched INSERTs for speed", body: "Group 500 rows per INSERT statement for 10× faster import compared to one INSERT per row." },
+      ],
+      useCases: [
+        "Migrating Excel-maintained data into a production database",
+        "Seeding dev / test / staging databases from a spreadsheet",
+        "Generating SQL fixtures for automated tests",
+        "Importing client data delivered as Excel files",
+        "Bootstrapping reference / lookup tables",
+      ],
+      troubleshooting: [
+        { problem: "Apostrophes in text cells break the SQL", solution: "The tool escapes single quotes as `''` by default. If you see syntax errors, your source has unbalanced quotes — also check the dialect setting, since SQL Server uses different escaping." },
+        { problem: "Numeric IDs imported as text", solution: "In Excel, change the column format to Number before exporting. Or override the column type to INTEGER in the type panel." },
+        { problem: "NULL vs empty string confusion", solution: "Choose how blanks are emitted — `NULL` (default) or `''`. NULL is correct for missing values; empty string for \"deliberately empty\"." },
+      ],
+    },
   },
   {
     id: 'merge-excel',
@@ -5989,6 +9897,31 @@ export const tools: Tool[] = [
       'Click "Merge Files" button',
       'Download the combined Excel file',
     ],
+    exampleOutput: {
+      input: "12 monthly sales workbooks (Jan-Dec 2025), each with a Sales sheet",
+      output: "consolidated.xlsx — one workbook, sheets renamed Jan-Dec, OR a single combined Sales sheet",
+      description: "Merge mode is your choice: keep each input as a separate sheet, or stack all rows into one consolidated sheet with a \"source file\" column.",
+    },
+    seoContent: {
+      intro: "Combine multiple Excel workbooks into a single .xlsx file — choose between \"append as new sheets\" (each source becomes a tab) or \"stack rows\" (all sheets concatenated into one master sheet). Everything runs locally; no uploads, no row limits beyond browser memory.",
+      examples: [
+        { title: "Monthly → yearly consolidation", body: "Twelve monthly sales workbooks merge into one annual file with 12 sheets, ready for pivot-table analysis." },
+        { title: "Multi-region rollup", body: "Five regional workbooks (each with identical column layout) stack into one 50,000-row master sheet with a region column added automatically." },
+        { title: "Header alignment", body: "When sheets have slightly different column orders, enable \"align by header name\" so columns line up correctly even if positions differ." },
+      ],
+      useCases: [
+        "Monthly/quarterly financial consolidation",
+        "Merging departmental survey responses into one workbook",
+        "Combining client deliverables before reporting",
+        "Stacking exported reports from multiple tools (Stripe, HubSpot, etc.)",
+        "Building a single-source-of-truth file from many small ones",
+      ],
+      troubleshooting: [
+        { problem: "Sheet names get suffixed (Sales, Sales (2), Sales (3))", solution: "Two source files had a sheet with the same name. The merger appends `(n)` to avoid overwriting. Rename source sheets first if you want clean names." },
+        { problem: "Columns misalign in stacked mode", solution: "Enable \"align by header name\" — by default, stacking goes by column position. Header alignment matches `Email` to `Email` regardless of column order." },
+        { problem: "Formulas disappear after merge", solution: "Cell values are merged, but formulas referencing other sheets break. Convert formulas to values (Paste Special → Values) in each source before merging." },
+      ],
+    },
   },
 
   // Word Tools
@@ -6190,6 +10123,31 @@ export const tools: Tool[] = [
       'View the extracted text',
       'Download as TXT file',
     ],
+    exampleOutput: {
+      input: "meeting-notes.docx (8 pages, headings + bullet lists + 1 table)",
+      output: "meeting-notes.txt — plain UTF-8, paragraphs separated by blank lines, lists kept as `- item`",
+      description: "Headings stay on their own line, bullet/numbered lists are flattened to `- item` / `1. item`, tables become TSV rows. All formatting is stripped.",
+    },
+    seoContent: {
+      intro: "Extract every word from a .docx into a clean UTF-8 plain-text file — useful for grep-friendly archives, feeding LLMs, version control, or pasting into systems that reject formatted text. Lists, headings, and tables are preserved structurally even though all visual formatting is gone.",
+      examples: [
+        { title: "LLM context dump", body: "A 40-page contract is reduced to a token-efficient plain-text file you can paste into ChatGPT or Claude without burning tokens on formatting noise." },
+        { title: "Searchable archive", body: "Convert hundreds of .docx files to .txt for fast `grep`/`ripgrep` searches across the entire archive." },
+        { title: "Version-controlled writing", body: "Storing drafts as .txt in git produces meaningful diffs — .docx is a zip of XML, so git diffs are useless." },
+      ],
+      useCases: [
+        "Preparing documents for LLM ingestion",
+        "Building a searchable plain-text corpus",
+        "Tracking writing drafts in version control",
+        "Stripping tracked changes and comments before sharing",
+        "Feeding text into command-line pipelines (awk, sed, grep)",
+      ],
+      troubleshooting: [
+        { problem: "Vietnamese / CJK characters look broken", solution: "Open the .txt in UTF-8 mode. Notepad on older Windows defaults to ANSI — switch to Notepad++ or VS Code, both auto-detect UTF-8." },
+        { problem: "Tables flattened into one long line", solution: "Toggle \"tables as TSV\" so each row becomes a tab-separated line. Default mode collapses cells with spaces; TSV is better for re-importing into Excel." },
+        { problem: "Embedded images are gone", solution: "That's expected — plain text holds no images. Use the Extract Images from Word tool if you need them separately." },
+      ],
+    },
   },
   {
     id: 'merge-word',
@@ -6231,6 +10189,31 @@ export const tools: Tool[] = [
       'Click "Merge Documents" button',
       'Download the combined Word file',
     ],
+    exampleOutput: {
+      input: "6 chapter .docx files (chapters 1-6 of a manuscript)",
+      output: "manuscript.docx — single document, chapters separated by page breaks",
+      description: "Real .docx output. Inserts a page break between sources by default and preserves each source's styles (Heading 1, Normal, etc.) intact.",
+    },
+    seoContent: {
+      intro: "Combine multiple Word documents into one .docx without losing formatting, styles, or images. The merger inserts a page break between sources by default, keeps each document's heading hierarchy, and produces a real Microsoft Word file you can keep editing afterwards.",
+      examples: [
+        { title: "Book manuscript", body: "Six chapter files (one per .docx) merge into a single manuscript ready for an editor — page breaks separate chapters, heading levels stay consistent." },
+        { title: "Proposal assembly", body: "Cover letter + intro + 3 case studies + pricing → one polished proposal document, in order." },
+        { title: "Class notes", body: "A semester's worth of weekly note files becomes one searchable, scrollable document for revision." },
+      ],
+      useCases: [
+        "Assembling book chapters into a manuscript",
+        "Combining proposal/SOW sections written by different authors",
+        "Consolidating weekly meeting notes into a quarter recap",
+        "Merging legal contract clauses into a single agreement",
+        "Assembling student assignments into one submission",
+      ],
+      troubleshooting: [
+        { problem: "Headings look inconsistent after merge", solution: "Each source defined Heading 1 differently. In the output, redefine Heading 1 once (Home → Styles) and Word will normalise all sources." },
+        { problem: "Images shifted or got cropped", solution: "Switch image anchoring from \"in line with text\" to \"wrap text\" in the source files before merging — floating images survive merges better." },
+        { problem: "Page breaks too aggressive", solution: "Toggle the page-break-between-sources option off and the merger will only insert a section break, which respects the next paragraph's before-break setting." },
+      ],
+    },
   },
   {
     id: 'split-word',
@@ -6272,6 +10255,31 @@ export const tools: Tool[] = [
       'Click "Split Document" button',
       'Download the split files',
     ],
+    exampleOutput: {
+      input: "annual-report.docx (84 pages, 6 chapter headings)",
+      output: "6 .docx files — one per chapter, named after the heading text",
+      description: "Splits at Heading 1 by default (configurable). Each output .docx preserves the original styles and inherits the heading text as its filename.",
+    },
+    seoContent: {
+      intro: "Split a long Word document into multiple smaller .docx files by heading level, page count, or fixed page range. The original styles and images survive; each output is a real .docx you can hand off to a different reviewer or upload to a CMS individually.",
+      examples: [
+        { title: "Annual report by chapter", body: "An 80-page report splits on Heading 1 into 6 chapter files, each named after the heading text — easy to route to different stakeholders." },
+        { title: "Manual into modules", body: "A 200-page training manual splits every 20 pages so each module fits inside a learning-management system's upload limit." },
+        { title: "Single-page extracts", body: "Need only pages 12-15 of a 100-page document? Use page-range mode and download a 4-page .docx." },
+      ],
+      useCases: [
+        "Distributing chapters of a report to different reviewers",
+        "Breaking up a long manual into LMS-uploadable modules",
+        "Extracting specific page ranges from a contract",
+        "Splitting compiled drafts back into per-author sections",
+        "Reducing file size for email-attachment limits",
+      ],
+      troubleshooting: [
+        { problem: "Wrong split points — splits inside a paragraph", solution: "Page-mode splits at page boundaries, which can land mid-paragraph if a long paragraph straddles a page. Use heading mode instead for clean breaks." },
+        { problem: "Output files have weird filenames", solution: "Heading text becomes the filename; if a heading contains slashes, colons, or other forbidden filename characters, the tool replaces them with `_`. Rename headings for cleaner output." },
+        { problem: "Page count differs after split", solution: "Each output .docx renders with default margins/font, which may flow slightly differently. Open in Word and the page counts re-flow — the content is intact." },
+      ],
+    },
   },
   {
     id: 'word-word-counter',
@@ -6313,6 +10321,31 @@ export const tools: Tool[] = [
       'See reading time estimate',
       'Copy statistics to clipboard',
     ],
+    exampleOutput: {
+      input: "thesis-draft.docx (32 pages)",
+      output: "Words: 9,847 • Characters (no spaces): 51,302 • Sentences: 612 • Paragraphs: 248 • Reading time: ~39 min",
+      description: "Live statistics for a .docx: words, characters, sentences, paragraphs, average words per sentence, estimated reading time, and Flesch reading-ease score.",
+    },
+    seoContent: {
+      intro: "Get accurate word, character, sentence, paragraph, and reading-time counts for any .docx — without opening Microsoft Word. Includes Flesch reading-ease score for readability checks, and lets you exclude headers, footers, footnotes, or comments from the count if you only care about the body text.",
+      examples: [
+        { title: "Thesis word-limit check", body: "Compare the body-only count against your university's strict 10,000-word limit, with footnotes excluded." },
+        { title: "Freelance billing", body: "Charge per-word translation work; the counter gives you the exact billable word count from the client's .docx." },
+        { title: "Readability audit", body: "Aim for Flesch 60-70 (plain English). The tool flags passages above grade-12 reading level so you can simplify them." },
+      ],
+      useCases: [
+        "Academic word-limit verification (thesis, dissertation, journal article)",
+        "Translation and freelance writing billing",
+        "SEO content length validation",
+        "Readability tuning for marketing copy",
+        "NaNoWriMo / novel-draft progress tracking",
+      ],
+      troubleshooting: [
+        { problem: "Count differs from Microsoft Word", solution: "Word counts hyphenated words as one; some tools count them as two. Check the \"hyphen handling\" setting. Also confirm footnote/header inclusion matches between the two tools." },
+        { problem: "Reading-ease score seems wrong for non-English text", solution: "Flesch is English-only. For Vietnamese, French, etc., word/character counts are accurate but the readability score is not meaningful." },
+        { problem: "Tracked changes inflate the count", solution: "Accept or reject all tracked changes in Word first, or toggle \"ignore tracked-change deletions\" so the counter ignores struck-through text." },
+      ],
+    },
   },
   {
     id: 'extract-images-word',
@@ -6354,6 +10387,31 @@ export const tools: Tool[] = [
       'Preview extracted images',
       'Download individual or all images',
     ],
+    exampleOutput: {
+      input: "product-catalog.docx (24 pages, 47 product photos embedded)",
+      output: "images.zip — 47 files at original resolution (image1.jpg, image2.png…)",
+      description: "All embedded images are extracted at their original resolution and format — no re-encoding, no quality loss. Delivered as a ZIP for one-click download.",
+    },
+    seoContent: {
+      intro: "Extract every image embedded in a Word document at its original resolution and format. Each image is recovered byte-for-byte from the .docx archive (which is really a ZIP of XML and media), so there is zero quality loss — exactly the file the author dropped in.",
+      examples: [
+        { title: "Recover catalog photos", body: "A 24-page product catalog gives back all 47 product photos at full resolution for re-use on a website." },
+        { title: "Slide reuse", body: "Diagrams pasted into a Word doc by a co-worker can be pulled out and reused in your own presentation without re-screenshotting." },
+        { title: "Cropped vs. original", body: "Word displays a cropped view of the original. The extractor returns the uncropped source — useful when you need the full image back." },
+      ],
+      useCases: [
+        "Recovering original artwork from a finalised document",
+        "Reusing diagrams across slide decks",
+        "Migrating Word content to a CMS that needs separate image files",
+        "Auditing what images a third party embedded in a doc",
+        "Building an image library from a long manual",
+      ],
+      troubleshooting: [
+        { problem: "Some images look low-resolution", solution: "The author inserted a screenshot/compressed version, not a high-res original. Word doesn't magically upscale — what you extract is what was embedded." },
+        { problem: "Image filenames are generic (image1, image2…)", solution: "Word doesn't store original filenames inside .docx. The tool numbers them in document order. Rename them after download." },
+        { problem: "A photo appears multiple times in the ZIP", solution: "The same image was embedded multiple times in the doc (e.g. as a header on each page). Use the \"deduplicate identical files\" option to keep only one copy." },
+      ],
+    },
   },
 
   // PDF Tools
@@ -6397,6 +10455,31 @@ export const tools: Tool[] = [
       'See document dimensions',
       'Copy information to clipboard',
     ],
+    exampleOutput: {
+      input: "contract.pdf",
+      output: "Pages: 42 • File size: 3.1 MB • Encrypted: No • PDF version: 1.7",
+      description: "Instant page count plus useful metadata (file size, PDF version, encryption status, average pages per MB).",
+    },
+    seoContent: {
+      intro: "Get an accurate page count for any PDF — including encrypted, scanned, or hybrid PDFs — without opening it in Adobe Reader. The counter also reports file size, PDF version, encryption flag, and average pages per MB, so you can quickly judge whether a file fits an email attachment limit or a print-shop quote.",
+      examples: [
+        { title: "Print-shop quoting", body: "Drop 10 PDFs in at once and get a list of page counts to feed into the print quote without opening each file." },
+        { title: "Encrypted contracts", body: "Even password-protected PDFs return their page count (you don't need to unlock to read metadata)." },
+        { title: "Email-limit check", body: "See file size and page count side-by-side to decide if the PDF needs splitting before sending." },
+      ],
+      useCases: [
+        "Print-shop estimating",
+        "Bulk-checking page counts before merging or splitting",
+        "Validating page counts in legal/regulatory submissions",
+        "Auditing whether a PDF meets a \"max N pages\" rule",
+        "Programmatic file triage for downstream pipelines",
+      ],
+      troubleshooting: [
+        { problem: "Count seems off for a scanned PDF", solution: "The counter reports the actual page count in the PDF. If a single scan was split into multiple PDFs and re-merged, the count is still accurate — open the file to verify." },
+        { problem: "Encrypted PDF returns \"0 pages\"", solution: "A few PDFs encrypt even their metadata. Unlock with a password (PDF Unlock tool) first, then recount." },
+        { problem: "Two PDFs with the same content show different counts", solution: "Different rendering — one may have blank trailing pages from a print-to-PDF driver. Strip blank pages with the Split PDF tool." },
+      ],
+    },
   },
   {
     id: 'extract-text-pdf',
@@ -6438,6 +10521,31 @@ export const tools: Tool[] = [
       'View and copy extracted text',
       'Download as TXT file',
     ],
+    exampleOutput: {
+      input: "whitepaper.pdf (28 pages, mixed text + figures)",
+      output: "whitepaper.txt — full UTF-8 text, paragraphs preserved, page numbers as `--- Page N ---`",
+      description: "Extracted text in reading order with optional page markers. Works for text-based PDFs; scanned PDFs need OCR first.",
+    },
+    seoContent: {
+      intro: "Extract all text from a PDF into a clean .txt or .md file — paragraphs in reading order, optional page-break markers, and UTF-8 throughout so non-Latin scripts (Vietnamese, CJK, Arabic) come out intact. Ideal for feeding LLMs, building a searchable archive, or copying content out of a locked PDF.",
+      examples: [
+        { title: "LLM context preparation", body: "A 200-page report becomes a token-efficient .txt you can paste into Claude/GPT for summarisation." },
+        { title: "Searchable research archive", body: "Extract text from hundreds of academic PDFs to make the whole library `grep`-able." },
+        { title: "Bypassing copy restrictions", body: "Some PDFs disable copy-paste; extraction reads the underlying text stream regardless (you still own the file or have rights)." },
+      ],
+      useCases: [
+        "Feeding PDFs to LLMs for summarisation/QA",
+        "Building searchable text corpora from PDFs",
+        "Migrating PDF content into a CMS",
+        "Cross-referencing facts across multiple documents",
+        "Translating large PDFs (paste text into a translator)",
+      ],
+      troubleshooting: [
+        { problem: "Output is empty or gibberish", solution: "The PDF is scanned images, not text. Use an OCR tool first (Tesseract or an OCR-capable PDF tool), then re-extract." },
+        { problem: "Two-column layouts mix lines together", solution: "Enable \"respect columns\" mode — the default linear extraction can interleave columns. Column mode walks each column top-to-bottom first." },
+        { problem: "Vietnamese / CJK characters are mojibake", solution: "The PDF embeds the font but uses custom encoding. Toggle \"use Unicode mapping\" (cmap-aware) — most modern PDFs ship a `/ToUnicode` table." },
+      ],
+    },
   },
   {
     id: 'extract-images-pdf',
@@ -6479,6 +10587,31 @@ export const tools: Tool[] = [
       'Preview extracted images',
       'Download individual or all images',
     ],
+    exampleOutput: {
+      input: "catalogue.pdf (48 pages, ~120 product photos)",
+      output: "images.zip — 120 files at embedded resolution (page-N-img-M.jpg/png)",
+      description: "All raster images are extracted at their original resolution and format. Vector graphics and text are skipped — use a PDF-to-image tool if you want page screenshots.",
+    },
+    seoContent: {
+      intro: "Pull every embedded raster image out of a PDF at its original resolution. The extractor reads the PDF's raw image streams — no re-rendering, no quality loss. Use this when you need the source photos back from a finalised PDF, or when migrating a catalog into a website.",
+      examples: [
+        { title: "Catalog image recovery", body: "A 48-page product catalog yields ~120 full-resolution product photos — exactly the JPGs the designer dropped in." },
+        { title: "Auditing a third-party document", body: "See every image in a long PDF at a glance to spot copyright violations or branding issues." },
+        { title: "CMS migration", body: "Move PDF content to a web CMS by extracting images separately and re-pairing them with the text." },
+      ],
+      useCases: [
+        "Recovering original images from a finalised PDF",
+        "Migrating PDF brochures to a website / CMS",
+        "Building a slide deck from PDF assets",
+        "Auditing visual content in long documents",
+        "Reusing diagrams without re-screenshotting pages",
+      ],
+      troubleshooting: [
+        { problem: "Images look smaller than they did in the PDF", solution: "PDFs scale images to page coordinates; the extracted file is the original embedded resolution, which may be smaller. Use the PDF-to-image tool if you want page-sized renders." },
+        { problem: "Same image extracted many times", solution: "A logo or background that repeats on every page is embedded once but referenced many times. Enable \"deduplicate by hash\" to keep only one copy." },
+        { problem: "Vector logos missing from the ZIP", solution: "Vectors aren't raster images. Use a PDF-to-SVG tool or extract them via Illustrator — this tool only handles raster." },
+      ],
+    },
   },
   {
     id: 'pdf-to-excel',
@@ -6520,6 +10653,31 @@ export const tools: Tool[] = [
       'Click "Convert to Excel" button',
       'Download the .xlsx file',
     ],
+    exampleOutput: {
+      input: "bank-statement.pdf (12 pages of tabular transactions)",
+      output: "bank-statement.xlsx — one sheet per page, columns auto-detected (Date, Description, Amount, Balance)",
+      description: "Tables are detected by column geometry and reconstructed in Excel with proper number/date types. Non-tabular text is skipped or placed on a separate sheet.",
+    },
+    seoContent: {
+      intro: "Convert tables inside a PDF into editable Excel sheets. The converter uses column-geometry detection (not raw text extraction) so even tables without visible borders come out aligned. Numbers, dates, and currencies are preserved as proper Excel types — not text — so SUM() and filters work immediately.",
+      examples: [
+        { title: "Bank-statement reconciliation", body: "A 12-page PDF statement becomes an Excel workbook ready for reconciliation against your accounting system." },
+        { title: "Multi-table report", body: "A research PDF with 8 separate tables outputs one Excel sheet per table, named by detected caption." },
+        { title: "Currency-aware cells", body: "Cells like `$1,234.56` and `€987,65` are parsed into numeric cells with the appropriate currency format applied." },
+      ],
+      useCases: [
+        "Reconciling bank/credit-card statements",
+        "Extracting financial reports from quarterly PDFs",
+        "Migrating data trapped in PDF reports into Excel",
+        "Pulling lab/test results out of PDF deliverables",
+        "Quickly editing tables that arrived as PDFs",
+      ],
+      troubleshooting: [
+        { problem: "Columns are merged or misaligned", solution: "The PDF's columns are too close together for geometry detection. Try the \"force grid\" mode and set the column count manually." },
+        { problem: "Numbers come out as text", solution: "The PDF used commas as thousands separators that the parser couldn't auto-detect. Set the locale (US / EU) in advanced options before converting." },
+        { problem: "Scanned PDF produces empty cells", solution: "OCR the PDF first — this tool reads the text layer, which scans don't have. Run an OCR pass, then re-convert." },
+      ],
+    },
   },
   {
     id: 'pdf-to-csv',
@@ -6561,6 +10719,31 @@ export const tools: Tool[] = [
       'Click "Convert to CSV" button',
       'Download the CSV file',
     ],
+    exampleOutput: {
+      input: "invoice-batch.pdf (50 invoices, one table per page)",
+      output: "invoices.csv — 50 rows merged from each page's table, header row preserved once",
+      description: "Each detected table on each page is appended to one CSV. The first header row is kept; subsequent identical headers are skipped automatically.",
+    },
+    seoContent: {
+      intro: "Pull tables out of any PDF and download them as a CSV — comma, semicolon, tab, or pipe delimited. Useful for piping PDF tables into command-line tools, databases, or any system that prefers CSV over Excel. Column geometry detection means borderless tables still come out aligned.",
+      examples: [
+        { title: "Batch invoice processing", body: "50-page invoice PDF becomes one CSV the bookkeeping software can ingest in a single import." },
+        { title: "Data-science pipeline", body: "Drop the resulting CSV into pandas (`pd.read_csv`) for instant analysis — no manual data entry." },
+        { title: "Quoted multi-line cells", body: "Cell content that spans multiple PDF lines is joined with spaces and properly quoted in CSV per RFC 4180." },
+      ],
+      useCases: [
+        "Feeding PDF tables into data-analysis pipelines (pandas, R, Power BI)",
+        "Bulk-importing PDF reports into a database",
+        "Preparing PDF data for command-line tools (`csvkit`, `xsv`)",
+        "Sharing PDF tables with collaborators using non-Office tools",
+        "Backing up PDF reports as text-based archives",
+      ],
+      troubleshooting: [
+        { problem: "Wrong delimiter splits cells", solution: "Pick a delimiter that does NOT appear inside your cells. If addresses contain commas, use tab or pipe instead." },
+        { problem: "Some rows have fewer columns than expected", solution: "The PDF's table had merged cells or trailing blanks. Enable \"pad short rows\" so every row has the same column count as the header." },
+        { problem: "Special characters look wrong in CSV", solution: "Open the CSV as UTF-8. Excel's default CSV import on Windows uses Windows-1252; use Data → From Text/CSV and pick UTF-8." },
+      ],
+    },
   },
   {
     id: 'pdf-to-ppt',
@@ -6602,6 +10785,31 @@ export const tools: Tool[] = [
       'Preview the slides',
       'Download the .pptx file',
     ],
+    exampleOutput: {
+      input: "report.pdf (24 pages)",
+      output: "report.pptx — 24 slides (one per page) at 16:9, page rendered as a high-res background image",
+      description: "Each PDF page becomes one slide. Page contents are rendered as a background image (faithful to the PDF) with editable text boxes overlaid where text is detected.",
+    },
+    seoContent: {
+      intro: "Convert a PDF into a PowerPoint deck — one slide per page. Each page is rendered as a high-resolution image (so the layout looks identical to the original) with detected text overlaid as editable text boxes. Great for reusing a PDF in a presentation or annotating someone else's document on screen.",
+      examples: [
+        { title: "Annotate a research paper live", body: "Open a paper as PowerPoint and add arrows, callouts, and notes during a journal-club meeting without altering the original PDF." },
+        { title: "Repurpose a report for a webinar", body: "A 20-page client report becomes a 20-slide deck — present directly instead of screen-sharing a PDF reader." },
+        { title: "Editable text overlay", body: "Text boxes mirror PDF text positions, so you can correct a typo by editing the slide before showing it." },
+      ],
+      useCases: [
+        "Repurposing PDFs as presentation decks",
+        "Live-annotating documents during meetings",
+        "Building slide bases from existing PDF reports",
+        "Migrating archived presentations stuck in PDF form",
+        "Layering speaker notes onto a third-party PDF",
+      ],
+      troubleshooting: [
+        { problem: "Slides look blurry on a 4K display", solution: "Increase render DPI (default 150) to 300 in advanced options. The trade-off is a larger .pptx file size." },
+        { problem: "Editable text overlay misaligned", solution: "The PDF embeds a font PowerPoint doesn't have, so text reflows on the slide. Toggle \"lock text positions\" or convert to non-editable raster only." },
+        { problem: "Aspect ratio looks wrong", solution: "PDF pages are usually A4 / Letter (portrait); slides are 16:9 (landscape). Choose \"match PDF\" to use the same aspect, or \"fit to slide\" to add side bands." },
+      ],
+    },
   },
   {
     id: 'merge-pdf',
@@ -6643,6 +10851,31 @@ export const tools: Tool[] = [
       'Click "Merge PDFs" button',
       'Download the combined PDF',
     ],
+    exampleOutput: {
+      input: "8 PDFs (resumes, certificates, work samples — total 35 pages)",
+      output: "application.pdf — 35 pages in chosen order, all bookmarks and metadata preserved",
+      description: "Real merged PDF (not a ZIP). Drag-and-drop reordering, optional bookmark generation per source file, and metadata from the first PDF by default.",
+    },
+    seoContent: {
+      intro: "Combine multiple PDF files into a single document with drag-and-drop ordering, no file-count limit, and zero quality loss. Each source contributes its real pages — no re-rendering, no compression — so a merged PDF is byte-for-byte equivalent to the originals stitched together. Optional bookmarks make navigation easy.",
+      examples: [
+        { title: "Job application bundle", body: "Resume + cover letter + 3 work samples + 2 reference letters merge into one `application.pdf` for a single upload." },
+        { title: "Legal exhibit binder", body: "Twenty-five exhibits combine into one PDF with bookmarks named after each source — judge can navigate to any exhibit instantly." },
+        { title: "Scanned-paper archive", body: "Daily scans throughout a month merge into one monthly archive PDF for clean filing." },
+      ],
+      useCases: [
+        "Submitting multi-document applications (jobs, grants, admissions)",
+        "Building legal exhibit binders",
+        "Archiving daily/weekly scans as a single file",
+        "Combining chapters or reports from multiple authors",
+        "Producing single-PDF deliverables for clients",
+      ],
+      troubleshooting: [
+        { problem: "Output file is huge", solution: "Sources were already large. Run the merged file through a PDF compressor afterwards. The merger doesn't re-encode (by design) so it can't shrink the source pages." },
+        { problem: "Bookmarks missing", solution: "Source PDFs without internal bookmarks contribute nothing. Toggle \"create one bookmark per source file\" so each file gets a top-level bookmark labelled with its filename." },
+        { problem: "Form fields stop working after merge", solution: "Two sources used the same field names — the merge flattens duplicates. Rename fields uniquely in each source PDF, or flatten the fields before merging." },
+      ],
+    },
   },
   {
     id: 'split-pdf',
@@ -6684,6 +10917,31 @@ export const tools: Tool[] = [
       'Click "Split PDF" button',
       'Download the split files',
     ],
+    exampleOutput: {
+      input: "annual-report.pdf (84 pages)",
+      output: "Multiple files: pages 1-12, 13-32, 33-58, 59-84 (or 84 single-page PDFs)",
+      description: "Split modes: by page range, every N pages, at bookmarks, or one file per page. Each output is a real PDF with the original page content intact.",
+    },
+    seoContent: {
+      intro: "Split a PDF into smaller files by page range, at every Nth page, at bookmarks, or one PDF per page. The original page content is preserved exactly — no rasterising, no quality loss. Useful when only a few pages of a big PDF are needed, or for breaking a long document into emailable chunks.",
+      examples: [
+        { title: "Extract one chapter", body: "Pages 33-58 of an 84-page report download as a 26-page PDF — the rest is discarded." },
+        { title: "One file per page", body: "A multi-page invoice batch splits into 50 single-page invoice PDFs ready for individual customer dispatch." },
+        { title: "Split at bookmarks", body: "A PDF with chapter bookmarks splits into one file per chapter automatically — the bookmark name becomes the filename." },
+      ],
+      useCases: [
+        "Extracting specific pages from a large PDF",
+        "Distributing invoices/payslips individually",
+        "Breaking long PDFs into emailable chunks",
+        "Splitting reports by chapter for parallel review",
+        "Isolating sensitive pages before sharing the rest",
+      ],
+      troubleshooting: [
+        { problem: "Page numbers in the output don't match the source", solution: "Page numbering shown is positional (1, 2, 3…), not the PDF's \"displayed\" page numbers (which may include roman-numeral front matter). Count from page 1 of the file, not the printed cover." },
+        { problem: "Bookmark split produced one huge file and several tiny ones", solution: "Only top-level bookmarks split by default. Enable \"split at heading level 2\" if your PDF's structure is deeper." },
+        { problem: "Form fields don't work after splitting", solution: "Form data references are kept, but if a form spans pages and you split mid-form, fields on the other side are gone. Keep all form pages together with custom ranges." },
+      ],
+    },
   },
 
   // PowerPoint Tools
@@ -6727,6 +10985,31 @@ export const tools: Tool[] = [
       'See presentation details',
       'Copy information to clipboard',
     ],
+    exampleOutput: {
+      input: "pitch-deck.pptx",
+      output: "Slides: 42 • Slide size: 13.33×7.5 in (16:9) • Hidden slides: 3 • Images: 78 • Speaker-note pages: 36",
+      description: "Counts visible vs. hidden slides, image count, speaker-note pages, embedded media, and slide-master count.",
+    },
+    seoContent: {
+      intro: "Get a fast inventory of any .pptx — total slides, hidden slides, image count, speaker-note coverage, embedded videos/audio, and slide-master count — without opening PowerPoint. Useful for QA-ing decks before sending, estimating presentation length, or auditing what assets a deck includes.",
+      examples: [
+        { title: "QA before client send", body: "Spot 3 hidden slides that shouldn't ship and 4 slides without speaker notes that need them." },
+        { title: "Time estimation", body: "At ~2 min/slide, a 42-slide deck = ~85 min — handy for fitting a webinar into a 90-minute slot." },
+        { title: "Media audit", body: "Confirm a deck contains the 6 expected embedded videos before the offsite venue (no Wi-Fi available)." },
+      ],
+      useCases: [
+        "QA-ing decks before delivery (hidden slides, missing notes)",
+        "Estimating presentation duration",
+        "Auditing media assets in a deck",
+        "Bulk-checking slide counts across a folder of decks",
+        "Verifying compliance with \"max N slides\" submission rules",
+      ],
+      troubleshooting: [
+        { problem: "Slide count differs from PowerPoint", solution: "PowerPoint counts hidden slides in the total; the counter reports visible/hidden separately. Add the two to match." },
+        { problem: "Speaker-note count seems low", solution: "Empty notes (with the placeholder text only) aren't counted as real notes. The counter looks at note length > 0 characters." },
+        { problem: "Image count includes background art", solution: "Slide-master backgrounds count as images. Toggle \"exclude master images\" to count only content images." },
+      ],
+    },
   },
   {
     id: 'extract-text-ppt',
@@ -6768,6 +11051,31 @@ export const tools: Tool[] = [
       'View text from all slides',
       'Download as TXT file',
     ],
+    exampleOutput: {
+      input: "training.pptx (38 slides)",
+      output: "training.txt — title + body + notes per slide, separated by `--- Slide N: <title> ---`",
+      description: "Slide title, all text-box content, and speaker notes are extracted in slide order. Optionally exclude masters/hidden slides/notes.",
+    },
+    seoContent: {
+      intro: "Pull all text out of a PowerPoint file — slide titles, body text, speaker notes, and (optionally) hidden slides or master text — into a clean .txt or .md file. Each slide is delimited by a header line so you can easily diff, search, or feed the content to an LLM for summarisation.",
+      examples: [
+        { title: "Generate a written summary", body: "A 50-slide training deck becomes a 4-page text outline that a trainee can read in 10 minutes." },
+        { title: "Searchable speaker notes", body: "Extract notes only to grep for promises made in last year's sales decks." },
+        { title: "Translation prep", body: "Pull all text into one file, translate it, then re-import to the deck — no clicking through 50 slides." },
+      ],
+      useCases: [
+        "Feeding decks to LLMs for summarisation",
+        "Building searchable archives of presentation content",
+        "Extracting speaker notes for transcript-style sharing",
+        "Preparing slide text for translation",
+        "Auditing whether decks contain specific keywords",
+      ],
+      troubleshooting: [
+        { problem: "Some slides missing from the output", solution: "Hidden slides are excluded by default. Toggle \"include hidden slides\" if you need them." },
+        { problem: "Text inside images / WordArt missing", solution: "The extractor reads text frames, not pixels. Run OCR on slide screenshots if you need text trapped inside images." },
+        { problem: "Tables collapsed into a single paragraph", solution: "Toggle \"tables as TSV\" so each cell becomes tab-separated. Default mode joins cells with spaces." },
+      ],
+    },
   },
   {
     id: 'extract-images-ppt',
@@ -6809,6 +11117,31 @@ export const tools: Tool[] = [
       'Preview extracted images',
       'Download individual or all images',
     ],
+    exampleOutput: {
+      input: "product-launch.pptx (28 slides, 65 embedded images)",
+      output: "images.zip — 65 files at original resolution (slide-3-img-1.png, slide-3-img-2.jpg…)",
+      description: "All embedded media is extracted at original resolution and format. Filenames include the slide number where each asset appears.",
+    },
+    seoContent: {
+      intro: "Recover every image embedded in a PowerPoint deck at its original resolution. The .pptx format is a ZIP of XML and media, so extraction is lossless — exactly the JPG/PNG/SVG the designer dropped in. Filenames include the slide number so it's easy to see where each asset was used.",
+      examples: [
+        { title: "Reclaim original artwork", body: "A product-launch deck gives back all 65 product photos at full resolution for re-use across web and print." },
+        { title: "Re-screenshot avoidance", body: "Diagrams pasted into a slide can be pulled out and reused without re-screenshotting." },
+        { title: "Track asset usage", body: "Filenames like `slide-12-img-2.png` show exactly which slide each image came from." },
+      ],
+      useCases: [
+        "Recovering original artwork from a finalised deck",
+        "Building an asset library from a deck",
+        "Reusing diagrams across other documents",
+        "Auditing what images a third party embedded",
+        "Migrating slide content to a CMS that needs separate images",
+      ],
+      troubleshooting: [
+        { problem: "Images look smaller than on the slide", solution: "PowerPoint scales images to slide dimensions; the extracted file is the original embedded size. The slide rendered it larger via stretching." },
+        { problem: "Background images on every slide appear many times", solution: "Same image referenced on multiple slides creates multiple references but usually one stored copy. Enable \"deduplicate by hash\" to keep one copy." },
+        { problem: "Embedded video files are in the ZIP too", solution: "Default behaviour. Filter to images only via the file-type checkbox if you don't want video/audio." },
+      ],
+    },
   },
   {
     id: 'ppt-to-images',
@@ -6850,6 +11183,31 @@ export const tools: Tool[] = [
       'Click "Convert to Images" button',
       'Download images as ZIP',
     ],
+    exampleOutput: {
+      input: "webinar-slides.pptx (35 slides, 16:9)",
+      output: "slides.zip — 35 PNG/JPG files at 1920×1080, named slide-01.png…slide-35.png",
+      description: "Each slide is rendered to a high-resolution image. Choose format (PNG/JPG/WebP), resolution, and whether to include hidden slides.",
+    },
+    seoContent: {
+      intro: "Convert every slide of a PowerPoint deck into a high-resolution image — PNG, JPG, or WebP — at whatever resolution you specify (up to 4K). Useful for embedding slides into web pages or blog posts, sharing decks with people who don't have PowerPoint, or feeding slides into a video editor.",
+      examples: [
+        { title: "Blog-post embeds", body: "Each slide becomes a 1920×1080 PNG you can drop into a CMS for a \"screenshot tour\" of the deck." },
+        { title: "Slide-as-video", body: "Drop the PNG sequence into a video editor with 5-second per slide to produce a self-running version." },
+        { title: "No-PowerPoint sharing", body: "Mail a recipient a PDF or image folder so they can view slides without needing Office." },
+      ],
+      useCases: [
+        "Embedding individual slides into blog/web pages",
+        "Building \"slide tours\" for newsletters",
+        "Producing video-ready slide sequences",
+        "Sharing slides with non-PowerPoint users",
+        "Archiving slides as flat images alongside the source .pptx",
+      ],
+      troubleshooting: [
+        { problem: "Text in some slides is blurry", solution: "Increase render DPI / resolution. Default is 1920×1080 — bump to 4K for crisp text on large displays." },
+        { problem: "Fonts replaced with similar-looking ones", solution: "A custom font in the deck isn't available on the renderer. Embed fonts in the .pptx (File → Options → Save → Embed fonts) and re-export." },
+        { problem: "Animations missing", solution: "Images are static snapshots — they can't capture animations. Use the PowerPoint-to-video export instead if you need animated output." },
+      ],
+    },
   },
   {
     id: 'ppt-to-pdf',
@@ -6891,6 +11249,31 @@ export const tools: Tool[] = [
       'Preview the PDF output',
       'Download the PDF file',
     ],
+    exampleOutput: {
+      input: "quarterly-review.pptx (52 slides, 16:9, embedded fonts)",
+      output: "quarterly-review.pdf — 52 pages, fonts preserved, hyperlinks clickable",
+      description: "Real PDF (not a ZIP of images). Text stays selectable, hyperlinks work, slide notes optionally included on each page.",
+    },
+    seoContent: {
+      intro: "Convert PowerPoint decks (.pptx, .ppt) into PDF — text stays selectable, hyperlinks remain clickable, embedded fonts survive, and you can optionally include speaker notes below each slide. The whole conversion runs locally without uploading the file anywhere.",
+      examples: [
+        { title: "Client-ready deliverable", body: "A 52-slide quarterly review becomes a polished PDF the recipient can read on any device without PowerPoint." },
+        { title: "Speaker-note handout", body: "Toggle \"include notes below slides\" to produce a printable handout for in-person attendees." },
+        { title: "Locked deck distribution", body: "PDF makes editing harder than a .pptx — useful when sending to external reviewers who shouldn't alter the source." },
+      ],
+      useCases: [
+        "Distributing decks to non-PowerPoint users",
+        "Creating printable handouts with speaker notes",
+        "Producing client-ready PDF deliverables",
+        "Archiving decks in a portable, version-stable format",
+        "Submitting slides for conferences that require PDF",
+      ],
+      troubleshooting: [
+        { problem: "Fonts replaced after conversion", solution: "The source .pptx didn't embed its custom fonts. In PowerPoint: File → Options → Save → \"Embed fonts in the file\" → re-save → reconvert." },
+        { problem: "Animations and transitions lost", solution: "PDF is static — transitions can't survive. Export as video (or use the PPT-to-Images tool then stitch) if motion matters." },
+        { problem: "Aspect ratio looks wrong", solution: "Mismatched page size. Pick \"match slide size\" so the PDF page matches the slide (16:9 → A4 landscape, etc.) instead of forcing Letter portrait." },
+      ],
+    },
   },
   {
     id: 'merge-ppt',
@@ -6932,6 +11315,31 @@ export const tools: Tool[] = [
       'Click "Merge PPTs" button',
       'Download the combined PPT file',
     ],
+    exampleOutput: {
+      input: "4 .pptx files (intro, product, demo, Q&A — total 38 slides)",
+      output: "combined.pptx — 38 slides in order, each source's theme preserved per section",
+      description: "Real .pptx output. Slides keep their original masters/themes; you can optionally normalise to the first deck's theme for visual consistency.",
+    },
+    seoContent: {
+      intro: "Combine multiple PowerPoint decks into one .pptx with drag-and-drop ordering. Each source's slides preserve their layouts, animations, and embedded media — or normalise everything to the first deck's theme for a single cohesive look. The combined file is a real .pptx you can keep editing.",
+      examples: [
+        { title: "Conference talk assembly", body: "Intro deck + 3 co-presenter decks merge into one master deck for a panel session — speakers can still control their own sections." },
+        { title: "Sales playbook compilation", body: "Five product decks merge into a single 80-slide playbook for new-hire training." },
+        { title: "Theme normalisation", body: "Toggle \"apply first deck's theme to all\" so heterogeneous source decks share one consistent visual style." },
+      ],
+      useCases: [
+        "Assembling panel/joint presentations",
+        "Compiling sales playbooks from product decks",
+        "Combining course-module decks into a full-course deck",
+        "Building investor decks from team contributions",
+        "Reusing slide libraries by appending into a master",
+      ],
+      troubleshooting: [
+        { problem: "Slides look mismatched after merge", solution: "Each source brought its own master. Toggle \"apply first deck's theme\" to normalise, or fix the master in PowerPoint after merging." },
+        { problem: "Embedded videos broken", solution: "Videos must be embedded (not linked) in each source. Re-embed in the originals if they were linked, then re-merge." },
+        { problem: "Slide numbers reset oddly", solution: "Toggle \"renumber slides sequentially across sources\" — by default each section keeps its source numbering." },
+      ],
+    },
   },
   {
     id: 'split-ppt',
@@ -6973,6 +11381,31 @@ export const tools: Tool[] = [
       'Click "Split PPT" button',
       'Download the split files',
     ],
+    exampleOutput: {
+      input: "training-course.pptx (96 slides, 6 sections marked)",
+      output: "6 .pptx files — one per section, named after the section title",
+      description: "Split modes: at sections, every N slides, by slide range, or one file per slide. Each output is a real .pptx with theme and animations intact.",
+    },
+    seoContent: {
+      intro: "Split a long PowerPoint into smaller decks by section, every N slides, by slide range, or one .pptx per slide. Themes, animations, embedded media, and speaker notes are preserved in each output file — no quality loss, no re-rendering.",
+      examples: [
+        { title: "Course-module distribution", body: "A 96-slide training course splits into 6 module decks for parallel delivery by different trainers." },
+        { title: "Pitch-deck variants", body: "A 40-slide master pitch splits into a 10-slide \"exec summary\" and a 30-slide \"deep dive\" via custom slide ranges." },
+        { title: "Per-slide files for review", body: "Splitting one slide per .pptx gives reviewers tiny files they can mark up individually." },
+      ],
+      useCases: [
+        "Distributing course modules to different trainers",
+        "Creating multiple-length variants of a master deck",
+        "Sending individual slides for parallel review",
+        "Reducing file size to email limits",
+        "Isolating sensitive slides before broader sharing",
+      ],
+      troubleshooting: [
+        { problem: "Section split missed obvious section breaks", solution: "PowerPoint sections must be explicit (Home → Section → Add Section). Headings inside slides aren't recognised — use the slide-range mode instead." },
+        { problem: "Theme broken in some outputs", solution: "A custom master used only on some slides. Re-export with \"include all masters\" toggled on so each output gets the masters its slides need." },
+        { problem: "Animations lost", solution: "They shouldn't be — animations are slide-local. If lost, the source had cross-slide animations (rare); rebuild them in each output." },
+      ],
+    },
   },
   // ==================== VIDEO TOOLS ====================
   {
@@ -7015,6 +11448,31 @@ export const tools: Tool[] = [
       'Click "Convert to GIF" to start processing',
       'Download the generated GIF file',
     ],
+    exampleOutput: {
+      input: "product-demo.mp4 (12s clip @ 1920×1080, 30fps)",
+      output: "product-demo.gif — 12s @ 480×270, 15fps, ~2.4 MB",
+      description: "Optimised GIF: resized to web-friendly width, frame rate halved, palette reduced to keep file size sane while preserving smooth motion.",
+    },
+    seoContent: {
+      intro: "Turn any video clip into an optimised animated GIF entirely in your browser — no upload, no account. Pick the segment, width, frame rate, and palette size, and the encoder produces a GIF small enough to drop into emails, GitHub issues, Slack, or blog posts without external image hosting.",
+      examples: [
+        { title: "Bug-report GIF", body: "A 6-second screen recording becomes a 480-px-wide, 12 fps GIF under 1 MB — easy to paste straight into a GitHub issue." },
+        { title: "Product showcase loop", body: "Trim a 12-second demo highlight and export at 15 fps for a smooth, attention-grabbing loop on a landing page." },
+        { title: "Slack reaction GIF", body: "Pick the funny 2-second moment from a longer clip, set 320 px width, and the GIF is light enough to drop into any chat." },
+      ],
+      useCases: [
+        "Visual bug reports in GitHub / Jira / Linear",
+        "Product demo loops on landing pages and emails",
+        "Lightweight tutorials embedded in docs (no video player needed)",
+        "Reaction GIFs / memes for team chat",
+        "Auto-playing previews for portfolios and case studies",
+      ],
+      troubleshooting: [
+        { problem: "GIF is huge (>10 MB)", solution: "Reduce width to 480 or 320 px, drop frame rate to 10-15 fps, or shorten the clip. GIF compression scales badly with resolution and frame count." },
+        { problem: "Colours look posterised / banded", solution: "Bump the palette size from 64 to 128 or 256 colours. GIF is limited to 256 colours per frame — gradient-heavy clips need the full palette." },
+        { problem: "Motion looks jerky", solution: "Increase frame rate (try 15-20 fps) and avoid trimming the source frame rate too aggressively. Below 10 fps fast motion becomes choppy." },
+      ],
+    },
   },
   {
     id: 'compress-video',
@@ -7056,6 +11514,31 @@ export const tools: Tool[] = [
       'Click "Compress Video" to process',
       'Download the compressed video',
     ],
+    exampleOutput: {
+      input: "vacation.mp4 (1.2 GB, 1080p H.264, CRF 18)",
+      output: "vacation-compressed.mp4 (240 MB, 1080p H.264, CRF 28) — 80% smaller",
+      description: "Re-encodes with a tunable CRF (Constant Rate Factor). 23-28 is the sweet spot — visually near-lossless at half the size or less.",
+    },
+    seoContent: {
+      intro: "Shrink video file size without uploading the file anywhere. The tool runs FFmpeg in your browser via WebAssembly, re-encoding with H.264 (or H.265 / VP9) at a quality level you control. Typical 4-10× size reduction with no perceptible quality loss at CRF 23-28.",
+      examples: [
+        { title: "Email-attachment fit", body: "A 1.2 GB phone clip compresses to 90 MB — fits inside a 100 MB Gmail attachment limit with quality intact." },
+        { title: "Cloud-storage savings", body: "A folder of 50 family videos halves in size after batch compression, freeing GB of Google Drive / iCloud space." },
+        { title: "Faster uploads", body: "A 4K screen recording shrinks 75% before uploading to YouTube — same final quality, 4× faster upload." },
+      ],
+      useCases: [
+        "Fitting videos into email / chat attachment limits",
+        "Reducing cloud-storage footprint",
+        "Speeding up uploads to YouTube / Vimeo / social media",
+        "Preparing videos for low-bandwidth viewers",
+        "Archiving home videos without losing quality",
+      ],
+      troubleshooting: [
+        { problem: "Output looks soft or blocky", solution: "CRF is too high — lower it (smaller number = better quality). Try CRF 23 for visually lossless, 28 for \"good enough\" web quality." },
+        { problem: "Compression takes forever", solution: "WASM FFmpeg is single-threaded. For large 4K files, drop resolution to 1080p before compressing, or use the \"fast\" preset (smaller savings, much faster)." },
+        { problem: "Audio out of sync after compression", solution: "Switch container to MP4 (not MKV) and pick AAC audio. Rare A/V drift is usually a container-level issue, not codec-level." },
+      ],
+    },
   },
   {
     id: 'mp4-to-mp3',
@@ -7097,6 +11580,31 @@ export const tools: Tool[] = [
       'Click "Convert to MP3"',
       'Download the MP3 audio file',
     ],
+    exampleOutput: {
+      input: "lecture.mp4 (1h20m, 720p with narration)",
+      output: "lecture.mp3 (1h20m, 128 kbps stereo, ~73 MB)",
+      description: "Audio extracted and re-encoded as MP3 at your chosen bitrate (96-320 kbps). Original video discarded — output is audio-only.",
+    },
+    seoContent: {
+      intro: "Extract the audio track from any MP4 video and save it as an MP3 — perfect for turning lectures, podcasts, interviews, and music videos into audio-only files you can listen to on a phone, in a car, or in any media player. Runs locally; nothing uploaded.",
+      examples: [
+        { title: "Lecture-as-podcast", body: "A 1h20m university lecture becomes a 73 MB MP3 you can sync to a phone for commute listening." },
+        { title: "Interview transcription prep", body: "Strip a 2-hour interview down to audio-only and feed it to a transcription service (Whisper, Otter, etc.) at a fraction of the file size." },
+        { title: "Music-video → MP3", body: "Pull the audio out of a music video for your personal listening collection (only for content you own / have rights to)." },
+      ],
+      useCases: [
+        "Converting lectures and tutorials into podcasts",
+        "Preparing interviews for transcription services",
+        "Listening to video content during commute / exercise",
+        "Reducing storage by keeping only the audio",
+        "Extracting music from concert recordings (own content)",
+      ],
+      troubleshooting: [
+        { problem: "MP3 file is huge", solution: "Lower the bitrate. 128 kbps is fine for spoken word; 192-256 kbps for music. 320 kbps is overkill for most non-music content." },
+        { problem: "Output sounds muffled", solution: "Bitrate too low (e.g. 64 kbps). Bump to 128+ kbps. If the source video already had bad audio, MP3 can't fix it." },
+        { problem: "Only one channel has sound", solution: "Source was mono with sound on one channel. Toggle \"downmix to mono\" so the output plays through both channels." },
+      ],
+    },
   },
   {
     id: 'trim-video',
@@ -7138,6 +11646,31 @@ export const tools: Tool[] = [
       'Preview the selection',
       'Click "Trim Video" and download',
     ],
+    exampleOutput: {
+      input: "meeting-recording.mp4 (1h05m total)",
+      output: "meeting-key-moment.mp4 — pages 00:12:30 to 00:15:45 (3m15s, MP4)",
+      description: "Lossless stream-copy trim when start/end land on keyframes (instant). Otherwise re-encodes the trimmed section with same codec settings.",
+    },
+    seoContent: {
+      intro: "Cut a precise segment out of any video without re-encoding the rest of the file. The trimmer uses stream-copy when possible (instant, zero quality loss) and falls back to frame-accurate re-encoding only for the boundary frames. Enter times in hh:mm:ss or scrub on the timeline.",
+      examples: [
+        { title: "Highlight clip", body: "Pull the 3-minute key moment out of a 1-hour meeting recording for the project Slack channel." },
+        { title: "Social-media cut", body: "Trim a 90-second hook from a longer YouTube video to repost on Instagram Reels / TikTok." },
+        { title: "Remove intro/outro", body: "Cut a 5-second sponsor outro off the end of every episode before archiving." },
+      ],
+      useCases: [
+        "Pulling highlights from long meetings / lectures",
+        "Creating short clips for social media",
+        "Removing intros / outros / ad breaks",
+        "Extracting interviewable soundbites",
+        "Building demo reels from longer footage",
+      ],
+      troubleshooting: [
+        { problem: "Output starts a few frames before the requested time", solution: "Stream-copy trims snap to the previous keyframe to avoid re-encoding. Enable \"frame-accurate\" mode to re-encode the boundary for exact timing." },
+        { problem: "Times entered in seconds get rejected", solution: "The input expects hh:mm:ss (or mm:ss). Type 00:01:30 for 1m30s, not 90. The format matches the player's timeline display." },
+        { problem: "Audio glitch at the start of the trim", solution: "Audio frames don't align perfectly with video keyframes. Re-encode with frame-accurate mode to clean up the boundary." },
+      ],
+    },
   },
   {
     id: 'crop-video',
@@ -7179,6 +11712,31 @@ export const tools: Tool[] = [
       'Preview the cropped area',
       'Click "Crop Video" and download',
     ],
+    exampleOutput: {
+      input: "landscape-footage.mp4 (1920×1080, 16:9)",
+      output: "vertical-cut.mp4 (608×1080, 9:16) — centre column cropped",
+      description: "Drag the crop rectangle directly on the preview frame or enter exact pixel coordinates. Common aspect-ratio presets (9:16, 1:1, 4:5, 4:3) included.",
+    },
+    seoContent: {
+      intro: "Crop unwanted edges from a video — black bars, off-camera framing mistakes, or reformatting from landscape to vertical for social media. Drag the crop rectangle directly on the preview, or enter pixel-perfect coordinates. Includes aspect-ratio presets for Instagram (1:1, 4:5), TikTok / Reels (9:16), and YouTube (16:9).",
+      examples: [
+        { title: "Landscape → vertical reel", body: "A 1920×1080 horizontal video crops to 608×1080 9:16 for an Instagram Reel, keeping the centre column where the subject is framed." },
+        { title: "Square Instagram post", body: "A 16:9 video crops to 1:1 (1080×1080) for an in-feed Instagram post — black bars avoided." },
+        { title: "Remove watermark", body: "Crop out a corner watermark by setting the crop box just outside it (only for content you own / have rights to alter)." },
+      ],
+      useCases: [
+        "Reformatting horizontal videos for TikTok / Reels",
+        "Producing square videos for Instagram / LinkedIn feeds",
+        "Cropping out black bars from letterboxed source",
+        "Removing off-frame distractions",
+        "Tight-framing the subject for thumbnail-style clips",
+      ],
+      troubleshooting: [
+        { problem: "Subject is off-centre after crop", solution: "Use the \"smart-centre\" toggle to auto-detect face/person and re-anchor the crop on them, instead of always using the geometric centre." },
+        { problem: "Output is the same size as the source", solution: "Pixel coordinates may have defaulted to full frame. Drag the corners inward, or pick an aspect-ratio preset." },
+        { problem: "Aspect ratio looks distorted", solution: "Crop never stretches — it only removes pixels. If video looks squished, the source has non-square pixel aspect ratio; enable \"fix PAR\" before cropping." },
+      ],
+    },
   },
   {
     id: 'resize-video',
@@ -7220,6 +11778,31 @@ export const tools: Tool[] = [
       'Choose to maintain aspect ratio or not',
       'Click "Resize Video" and download',
     ],
+    exampleOutput: {
+      input: "screen-recording.mp4 (3840×2160, 4K, 280 MB)",
+      output: "screen-recording.mp4 (1920×1080, 1080p, ~78 MB)",
+      description: "Resizes to your chosen resolution or scale percentage, preserving aspect ratio. Bicubic / Lanczos filter for sharp downscales.",
+    },
+    seoContent: {
+      intro: "Resize any video to a specific resolution (1080p, 720p, 480p) or a percentage of the original — useful for shrinking 4K clips to a web-friendly 1080p, generating multiple sizes for adaptive streaming, or simply reducing file size. Bicubic / Lanczos scaling preserves sharpness on downscales.",
+      examples: [
+        { title: "4K → 1080p web version", body: "A 280 MB 4K screen recording becomes a 78 MB 1080p clip — looks identical on most displays at a fraction of the size." },
+        { title: "Multiple sizes for ABR", body: "Generate 1080p, 720p, and 480p renditions from one source for adaptive bitrate streaming on your own site." },
+        { title: "50% downscale", body: "A 1920×1080 input scales to 960×540 (quarter the pixels) in one click — quick for previews and thumbnails." },
+      ],
+      useCases: [
+        "Reducing 4K footage for web playback",
+        "Producing multiple resolutions for adaptive streaming",
+        "Shrinking video to fit upload limits",
+        "Generating previews / thumbnails from full-resolution sources",
+        "Standardising mixed-resolution footage to one target size",
+      ],
+      troubleshooting: [
+        { problem: "Output looks soft", solution: "Switch the scaler from \"bilinear\" to \"Lanczos\" or \"bicubic\" for sharper downscales. Bilinear is fast but blurs detail." },
+        { problem: "Aspect ratio looks squashed", solution: "Enable \"preserve aspect ratio\" — otherwise entering both width and height stretches the video. Set only one, and let the other compute." },
+        { problem: "File size barely changed", solution: "Resizing alone doesn't guarantee smaller files if bitrate stays high. Combine with re-encoding (CRF 23-28) for big savings." },
+      ],
+    },
   },
   {
     id: 'merge-videos',
@@ -7261,6 +11844,31 @@ export const tools: Tool[] = [
       'Click "Merge Videos"',
       'Download the combined video',
     ],
+    exampleOutput: {
+      input: "4 MP4 clips (1080p H.264, 30 fps each — 2m total)",
+      output: "merged.mp4 — 2m, 1080p, seamless concatenation",
+      description: "Lossless stream-copy concatenation when all sources share codec/resolution/fps. Otherwise transcodes to a common format with no perceptible quality loss.",
+    },
+    seoContent: {
+      intro: "Concatenate multiple video clips into a single file with drag-and-drop ordering. When all sources match codec, resolution, and frame rate, merging is instant and lossless (stream-copy). When they differ, the tool transcodes to a common format automatically — no manual conversion required.",
+      examples: [
+        { title: "Compilation reel", body: "Four short product highlights merge into one continuous 2-minute demo for a sales page." },
+        { title: "Multi-camera edit", body: "Stitch sequential clips from a single shoot into one continuous take." },
+        { title: "Wedding montage", body: "Twenty short clips from a guest's phone merge in chronological order into one shareable video." },
+      ],
+      useCases: [
+        "Building demo reels from short clips",
+        "Compiling tutorial segments into one lesson",
+        "Stitching split phone recordings back together",
+        "Creating wedding / event montages",
+        "Producing single-file deliverables for clients",
+      ],
+      troubleshooting: [
+        { problem: "Audio drifts out of sync between clips", solution: "Sources have different sample rates. Enable \"normalise audio\" — the tool will resample all to 48 kHz before merging." },
+        { problem: "Visible jump at clip boundaries", solution: "Sources have different resolutions/fps so a transcode pass was needed; use the cross-fade option (0.5s default) to smooth boundaries." },
+        { problem: "Merge fails with \"incompatible codecs\"", solution: "Switch to \"force transcode\" mode. Stream-copy only works when every source shares the same codec; transcode converts everything to a common H.264/AAC base." },
+      ],
+    },
   },
   {
     id: 'rotate-video',
@@ -7302,6 +11910,31 @@ export const tools: Tool[] = [
       'Preview the rotated video',
       'Click "Rotate Video" and download',
     ],
+    exampleOutput: {
+      input: "phone-clip.mp4 (1080×1920, recorded sideways)",
+      output: "phone-clip-rotated.mp4 (1920×1080, rotated 90° clockwise)",
+      description: "Rotates by 90° / 180° / 270° or any custom angle. 90/180/270 are lossless (metadata flag); arbitrary angles re-encode the frames.",
+    },
+    seoContent: {
+      intro: "Fix sideways or upside-down phone clips by rotating them by 90°, 180°, 270°, or any custom angle. The 90° presets are lossless — only the orientation metadata changes, with no re-encoding. Arbitrary angles render the rotated frames at full quality.",
+      examples: [
+        { title: "Fix portrait → landscape", body: "A clip accidentally recorded in portrait rotates 90° clockwise into a proper 1920×1080 landscape video in seconds." },
+        { title: "Upside-down GoPro", body: "A 180° flip corrects footage from a GoPro mounted upside-down." },
+        { title: "Slight tilt correction", body: "Enter 2.5° to straighten a slightly tilted clip — the tool re-renders frames and crops to remove the resulting empty corners." },
+      ],
+      useCases: [
+        "Correcting sideways phone clips",
+        "Fixing flipped action-camera footage",
+        "Straightening tilted handheld shots",
+        "Standardising mixed-orientation footage before merging",
+        "Repurposing landscape footage as vertical (90° + crop)",
+      ],
+      troubleshooting: [
+        { problem: "Player still shows the video sideways", solution: "Some players ignore the rotation metadata flag. Pick \"apply rotation by re-encoding\" so the rotation is baked into the pixels and shows correctly everywhere." },
+        { problem: "Black bars after custom-angle rotation", solution: "Rotating an image by a non-90° angle leaves triangular gaps. Enable \"auto-crop to fit\" to remove them (slight zoom-in is unavoidable)." },
+        { problem: "Aspect ratio looks wrong after 90° rotate", solution: "That's correct — 1920×1080 becomes 1080×1920. If you want to keep the original aspect, use the resize tool afterwards." },
+      ],
+    },
   },
   {
     id: 'change-video-speed',
@@ -7343,6 +11976,31 @@ export const tools: Tool[] = [
       'Preview the speed change',
       'Click "Change Speed" and download',
     ],
+    exampleOutput: {
+      input: "tutorial.mp4 (12m, 1× speed)",
+      output: "tutorial-1.5x.mp4 (8m, 1.5× speed, pitch-corrected audio)",
+      description: "Speed range 0.25× to 4×. Audio is time-stretched with pitch correction so 1.5× speech still sounds natural, not chipmunk-y.",
+    },
+    seoContent: {
+      intro: "Speed up or slow down a video while keeping audio natural — the tool time-stretches audio with pitch correction so 1.5× tutorial speech sounds like a normal-pitch fast talker, not a chipmunk. Speed range 0.25× (4× slow-motion) to 4× (4× fast-forward).",
+      examples: [
+        { title: "Tutorial fast-forward", body: "A 12-minute tutorial at 1.5× is 8 minutes; viewers still understand every word because pitch is preserved." },
+        { title: "Slow-motion analysis", body: "A 60 fps sports clip at 0.25× becomes a smooth 240-fps-feel slow-motion replay for technique review." },
+        { title: "Mute + 2× speedrun", body: "For a silent demo-reel intro, set 2× speed with audio muted for a sped-up \"fast-cut\" feel." },
+      ],
+      useCases: [
+        "Fast-forwarding tutorials and lectures",
+        "Slow-motion analysis (sports, dance, science)",
+        "Creating \"speed-up\" social-media intros",
+        "Time-lapse-style condensations of long content",
+        "Trimming runtime to fit broadcast slots",
+      ],
+      troubleshooting: [
+        { problem: "Audio sounds chipmunk-y at high speed", solution: "Pitch correction is off — enable \"preserve pitch\" so 1.5× speech retains normal voice pitch." },
+        { problem: "Slow-motion looks choppy", solution: "Source is 30 fps. For smooth slow-motion you need a high-fps source (60 / 120 / 240 fps), or enable \"frame interpolation\" to synthesise intermediate frames." },
+        { problem: "A/V drift accumulates over a long clip", solution: "Re-encode container as MP4 with AAC audio. MKV or older codecs can drift on extreme speed changes." },
+      ],
+    },
   },
   {
     id: 'extract-audio',
@@ -7384,6 +12042,31 @@ export const tools: Tool[] = [
       'Click "Extract Audio"',
       'Download the audio file',
     ],
+    exampleOutput: {
+      input: "concert.mp4 (45 min, 1080p, 192 kbps audio)",
+      output: "concert.mp3 (45 min, 192 kbps, ~62 MB) — or .wav / .aac / .ogg",
+      description: "Demuxes and (optionally) re-encodes the audio track. Stream-copy when output format matches source codec — instant, lossless.",
+    },
+    seoContent: {
+      intro: "Pull the audio track out of any video file into MP3, WAV, AAC, OGG, or FLAC. When the output format matches the source codec, the extraction is a lossless stream-copy (instant); otherwise the tool re-encodes at a bitrate you choose. Useful for podcasts, transcription prep, or simply listening on the go.",
+      examples: [
+        { title: "Podcast from a Zoom recording", body: "Pull AAC audio out of a meeting MP4 as a lossless M4A — no re-encoding, identical quality, smaller file." },
+        { title: "Music WAV for editing", body: "Extract uncompressed WAV from a concert MP4 for editing in Audacity / Logic Pro." },
+        { title: "Transcription source", body: "Strip audio to FLAC and feed it to Whisper for the smallest input file that's still lossless." },
+      ],
+      useCases: [
+        "Converting video lectures into audio podcasts",
+        "Preparing source audio for transcription",
+        "Extracting music for editing or sampling (own content)",
+        "Reducing storage when only audio matters",
+        "Creating audio-only versions for low-bandwidth listeners",
+      ],
+      troubleshooting: [
+        { problem: "Output bitrate is lower than the source", solution: "Pick \"match source bitrate\" instead of fixed 128 kbps. The default cap of 128 is conservative — bump to 192-320 for music." },
+        { problem: "Multiple audio tracks — got the wrong one", solution: "Pick the audio-track index in advanced options. Default is track 0; track 1 is usually the second language / commentary." },
+        { problem: "Output file too large", solution: "Switch from WAV/FLAC (lossless, huge) to MP3 / AAC (lossy, 10× smaller). 128 kbps MP3 is fine for spoken word." },
+      ],
+    },
   },
   {
     id: 'mute-video',
@@ -7425,6 +12108,31 @@ export const tools: Tool[] = [
       'Preview the silent video',
       'Download the muted video',
     ],
+    exampleOutput: {
+      input: "screen-recording.mp4 (5m, 1080p with system audio)",
+      output: "screen-recording-muted.mp4 (5m, 1080p, audio track removed)",
+      description: "Strips the audio track entirely — no silent track, just video. Lossless: the video stream is stream-copied unchanged.",
+    },
+    seoContent: {
+      intro: "Remove the audio track from any video — completely strip it, not just silence it. The video stream is stream-copied unchanged (lossless, instant), only the audio track is dropped. Output file is smaller and has no audio at all.",
+      examples: [
+        { title: "Silent screen recording", body: "Strip the keyboard-clack audio from a 5-minute screen recording for a clean tutorial that someone else will narrate." },
+        { title: "Background-music replacement prep", body: "Mute the original soundtrack of a clip before adding your own music in an editor." },
+        { title: "Privacy redaction", body: "Mute a video to remove an embarrassing background conversation before sharing it." },
+      ],
+      useCases: [
+        "Cleaning up screen recordings before voice-over",
+        "Removing background noise from family videos",
+        "Stripping copyrighted music before re-uploading",
+        "Preparing video for replacement audio track",
+        "Quick privacy fix for accidentally-captured speech",
+      ],
+      troubleshooting: [
+        { problem: "Output still plays sound", solution: "A second audio track may still be present. Toggle \"remove ALL audio tracks\" instead of \"remove primary track only\"." },
+        { problem: "File size barely smaller after muting", solution: "Most of a video's size is the video stream — audio is usually 5-10% of total. The savings are small unless the source had a high-bitrate audio track." },
+        { problem: "Some players show \"no audio device\" warning", solution: "Toggle \"add silent audio track\" — a few players require an audio track to exist (even if silent) for normal playback." },
+      ],
+    },
   },
   {
     id: 'video-to-images',
@@ -7466,6 +12174,31 @@ export const tools: Tool[] = [
       'Click "Extract Frames"',
       'Download images as ZIP',
     ],
+    exampleOutput: {
+      input: "short-clip.mp4 (5s @ 30 fps)",
+      output: "frames.zip — 150 JPG frames at 1920×1080 (frame-001.jpg…frame-150.jpg)",
+      description: "Extracts every frame, every Nth frame, or one frame per second. Output format JPG / PNG / WebP; quality slider for JPG.",
+    },
+    seoContent: {
+      intro: "Extract video frames as individual still images — every frame, every Nth frame, or one frame per second. Output in JPG (small) / PNG (lossless) / WebP (modern). Useful for thumbnails, animation studies, machine-learning datasets, or grabbing a perfect freeze-frame from action footage.",
+      examples: [
+        { title: "Build a sprite sheet", body: "Extract every 3rd frame of a 10-second animation to assemble a sprite sheet for a game UI." },
+        { title: "ML training dataset", body: "One frame per second from an hour of dashcam footage = 3,600 labelled images for an object-detection model." },
+        { title: "Hero frame search", body: "Extract all frames of a 3-second clip, browse them as thumbnails, and pick the perfect one for a thumbnail." },
+      ],
+      useCases: [
+        "Building ML training datasets from video",
+        "Finding the perfect thumbnail / cover frame",
+        "Creating sprite sheets for animation / games",
+        "Frame-by-frame motion analysis (sports, science)",
+        "Generating storyboard contact sheets",
+      ],
+      troubleshooting: [
+        { problem: "Got 30,000 files from a short clip", solution: "\"Every frame\" at 30 fps × 1 min = 1,800 frames. Use \"every Nth frame\" or \"1 per second\" instead unless you truly need every frame." },
+        { problem: "Frames look soft", solution: "Bump JPG quality to 95+, or switch to PNG / WebP-lossless. JPG at 75 is a default trade-off — fine for previews, not archival." },
+        { problem: "Extracted frames have weird timing", solution: "Use \"key-frames only\" if frames need to match scene cuts exactly. Otherwise extraction is uniform by timestamp." },
+      ],
+    },
   },
   {
     id: 'reverse-video',
@@ -7507,6 +12240,31 @@ export const tools: Tool[] = [
       'Preview the reversed video',
       'Download the result',
     ],
+    exampleOutput: {
+      input: "jump.mp4 (4s — person jumping up)",
+      output: "jump-reversed.mp4 (4s — person landing back upward, audio also reversed)",
+      description: "Frame-by-frame reversal. Audio is reversed too (toggle to mute audio if reversed speech sounds disturbing).",
+    },
+    seoContent: {
+      intro: "Play a video backwards — for boomerang loops, magic-trick effects, \"unbreaking\" clips, or simply a fun reverse edit. Every frame is reversed in order, and audio is reversed too (with an option to mute it instead, since reversed speech can sound creepy).",
+      examples: [
+        { title: "Boomerang loop", body: "Concatenate the original clip + reversed clip → a seamless ping-pong loop, perfect for Instagram Boomerang-style posts." },
+        { title: "Unbreaking effect", body: "A clip of someone breaking a vase, reversed, becomes \"vase reassembling itself\" — classic visual gag." },
+        { title: "Splash physics", body: "Reverse a splash to make liquid leap back into a glass — viral-content fodder." },
+      ],
+      useCases: [
+        "Boomerang / ping-pong loops for social media",
+        "Magic-trick / \"unbreaking\" visual gags",
+        "Reverse-motion sports analysis",
+        "Creative video edits and transitions",
+        "Reversing time-lapses (e.g. flower closing back up)",
+      ],
+      troubleshooting: [
+        { problem: "Reversed clip is huge", solution: "Reversal requires storing every frame in memory. Trim to a shorter segment (under 30s) before reversing, then merge with the original." },
+        { problem: "Audio sounds disturbing", solution: "Toggle \"mute reversed audio\" — reversed speech and laughter often sound unsettling. Add new audio in an editor after." },
+        { problem: "Output stutters", solution: "Variable-frame-rate (VFR) source. Pre-convert to constant frame rate (CFR) with the resize/re-encode tool first, then reverse." },
+      ],
+    },
   },
   {
     id: 'loop-video',
@@ -7548,6 +12306,31 @@ export const tools: Tool[] = [
       'Click "Loop Video"',
       'Download the looped video',
     ],
+    exampleOutput: {
+      input: "fireplace-loop.mp4 (30s clip designed to loop)",
+      output: "fireplace-loop-1h.mp4 (60 min — 120 repeats of the source)",
+      description: "Specify number of loops OR total target duration; the tool concatenates the source as many times as needed.",
+    },
+    seoContent: {
+      intro: "Loop a short video to a target duration or number of repeats — useful for ambient background videos (fireplaces, aquariums, rain), seamless GIFs, signage displays, or filling time in livestream pre-rolls. Looping is stream-copy concatenation: instant, lossless, no re-encoding.",
+      examples: [
+        { title: "1-hour fireplace background", body: "A perfect 30-second fireplace loop becomes a 1-hour ambient video for streaming on a TV." },
+        { title: "Signage loop", body: "A 10-second promo clip loops to 5 minutes for a retail display monitor running unattended." },
+        { title: "Boomerang × N", body: "Combine with the reverse tool: original + reversed, then loop 10× for a long ping-pong background." },
+      ],
+      useCases: [
+        "Ambient background videos (fire, water, rain)",
+        "Retail / event signage that needs to fill time",
+        "Livestream pre-roll waiting screens",
+        "Long-form versions of short artistic loops",
+        "Yoga / meditation timer videos",
+      ],
+      troubleshooting: [
+        { problem: "Visible jump at the loop point", solution: "Source isn't a perfect loop — its last frame doesn't match its first. Trim a few frames at the end and try again, or cross-fade between loops." },
+        { problem: "Output is enormous", solution: "Loops don't actually duplicate the video stream in some containers (MP4 supports edit lists); but most players need a concatenated file. Compress source before looping." },
+        { problem: "Audio click between loops", solution: "Audio waveform doesn't end at zero crossing. Toggle \"audio fade across joins\" (default 50ms) to mask the discontinuity." },
+      ],
+    },
   },
   {
     id: 'video-thumbnail',
@@ -7589,6 +12372,31 @@ export const tools: Tool[] = [
       'Click "Extract Thumbnail"',
       'Download the thumbnail image',
     ],
+    exampleOutput: {
+      input: "tutorial.mp4 (12 min, 1080p)",
+      output: "thumbnail.jpg — 1920×1080 at the chosen timestamp (e.g. 00:02:30)",
+      description: "Single-frame still at a chosen time, or auto-pick the most visually interesting frame. Output JPG / PNG / WebP at full source resolution.",
+    },
+    seoContent: {
+      intro: "Generate a cover image / thumbnail from any video. Pick an exact timestamp on the timeline, or let the tool auto-select the frame with the most visual variance (avoiding black frames and blurry transitions). Output at full source resolution — no upscaling artefacts.",
+      examples: [
+        { title: "YouTube thumbnail draft", body: "Pick a strong frame at 2:30 of a tutorial, export at 1920×1080, then add text in any image editor." },
+        { title: "Auto-cover for a video gallery", body: "Batch-generate auto-picked thumbnails for 50 videos so a gallery page has visually distinct previews." },
+        { title: "Hero shot for a portfolio", body: "Choose the perfect freeze-frame from a 30-second showreel for a portfolio website header." },
+      ],
+      useCases: [
+        "YouTube / Vimeo thumbnail creation",
+        "Cover images for video CMS galleries",
+        "Hero shots for portfolio sites",
+        "Preview frames in chat / social link unfurls",
+        "Quick stills for press kits or blog posts",
+      ],
+      troubleshooting: [
+        { problem: "Auto-pick selected a blurry frame", solution: "Switch from \"variance\" to \"sharpness\" auto-pick mode, or just scrub the timeline to pick manually." },
+        { problem: "Thumbnail is darker than the video looks", solution: "Source has metadata-level brightness adjustments. Toggle \"apply video filters before snapshot\" so the frame matches what the player shows." },
+        { problem: "Output is too low-resolution", solution: "Thumbnail matches source resolution. For higher-res, upscale the source first (or use an image-upscaler tool on the thumbnail)." },
+      ],
+    },
   },
   {
     id: 'split-video',
@@ -7630,6 +12438,31 @@ export const tools: Tool[] = [
       'Click "Split Video"',
       'Download video parts as ZIP',
     ],
+    exampleOutput: {
+      input: "webinar.mp4 (1h30m, 1080p)",
+      output: "9 MP4 files — each ~10 min, named webinar-part-01.mp4 … part-09.mp4",
+      description: "Split modes: every N minutes/seconds, by file size, at exact timestamps, or by N equal segments. Stream-copy when possible (instant).",
+    },
+    seoContent: {
+      intro: "Split a long video into smaller files — by time interval, by target file size, at exact timestamps, or into N equal segments. Stream-copy when the split lands on a keyframe (instant, lossless); otherwise frame-accurate re-encoding at the boundary.",
+      examples: [
+        { title: "Upload-limit split", body: "A 4 GB webinar splits into 4 × 1 GB chunks that fit any upload limit, then merge again on the other end." },
+        { title: "Course-module split", body: "A 90-minute course splits at exact chapter timestamps (00:15:00, 00:35:00, 01:05:00) into module files." },
+        { title: "Equal segments for distribution", body: "A 60-min interview splits into 6 × 10-min parts for distribution on a platform that caps individual videos at 10 minutes." },
+      ],
+      useCases: [
+        "Splitting long videos to fit upload limits",
+        "Breaking a course / webinar into modules",
+        "Producing short segments for social media",
+        "Distributing parts for parallel transcription",
+        "Reducing per-file size for email sharing",
+      ],
+      troubleshooting: [
+        { problem: "Each split file is slightly different in size despite \"equal segments\"", solution: "Splits snap to keyframes. Enable \"frame-accurate\" mode for exact equal segments (re-encodes boundaries)." },
+        { problem: "Audio glitch at split boundaries", solution: "Audio frames don't align with video keyframes. Frame-accurate mode re-encodes the boundary to fix the glitch — slower, but clean." },
+        { problem: "Output files don't open in some players", solution: "Switch container to MP4 with H.264. Stream-copy preserves whatever codec the source used; some players are picky." },
+      ],
+    },
   },
   {
     id: 'add-text-to-video',
@@ -7671,6 +12504,31 @@ export const tools: Tool[] = [
       'Set text position on video',
       'Click "Add Text" and download',
     ],
+    exampleOutput: {
+      input: "product-demo.mp4 (15s, 1080p)",
+      output: "product-demo-titled.mp4 — same clip with \"New in 2026\" overlay text bottom-centre",
+      description: "Add text overlays at chosen position, font, size, colour, and on-screen duration. Multiple overlays with different timings supported.",
+    },
+    seoContent: {
+      intro: "Overlay text on a video — titles, captions, call-outs, watermarks. Pick the position, font, size, colour, background, and on-screen time range for each overlay. Multiple overlays with independent timings let you build simple subtitle tracks or call-out sequences without a full editor.",
+      examples: [
+        { title: "Title card", body: "Add \"New in 2026\" as a 3-second title at the start of a product demo, large centred white text on a dark band." },
+        { title: "Caption track", body: "Add 30 timed text overlays as a basic subtitle track for accessibility — no need to upload to YouTube's caption editor." },
+        { title: "Call-out arrows", body: "Combine text + emoji arrow (e.g. \"👉 Click here\") synced to specific moments in a tutorial." },
+      ],
+      useCases: [
+        "Adding title cards and end cards",
+        "Building accessibility subtitles for short videos",
+        "Tutorial call-outs and pointers",
+        "Branding videos with channel names / URLs",
+        "Adding context (date, location, attribution)",
+      ],
+      troubleshooting: [
+        { problem: "Text is hard to read against busy backgrounds", solution: "Add a semi-transparent background bar behind the text (toggle in style options). Or use a thick text stroke / drop shadow." },
+        { problem: "Custom font isn't rendering", solution: "Embed the font file in the tool's font picker, or pick one of the bundled fonts. Browser font cache doesn't reach the WASM encoder." },
+        { problem: "Vietnamese / CJK characters show as boxes", solution: "Pick a font that includes the required glyphs (e.g. Noto Sans / Noto Sans CJK). The default font may be Latin-only." },
+      ],
+    },
   },
   {
     id: 'add-watermark-to-video',
@@ -7712,6 +12570,31 @@ export const tools: Tool[] = [
       'Set watermark position and opacity',
       'Click "Add Watermark" and download',
     ],
+    exampleOutput: {
+      input: "portfolio-clip.mp4 + logo.png",
+      output: "portfolio-clip-watermarked.mp4 — logo overlaid in top-right at 30% opacity",
+      description: "Image (PNG with transparency) or text watermark, with position, opacity, size, and on-screen duration controls.",
+    },
+    seoContent: {
+      intro: "Add a logo or text watermark to a video — protect ownership, brand uploads, or add a \"Sample / Preview\" stamp before sharing draft footage. Choose position, opacity, size, and on-screen duration; transparent PNG watermarks composite cleanly over any background.",
+      examples: [
+        { title: "Brand logo overlay", body: "A small logo at 30% opacity in the top-right corner, visible for the full duration of every clip in a YouTube series." },
+        { title: "\"DRAFT\" stamp", body: "A bold semi-transparent \"DRAFT - DO NOT SHARE\" text watermark across the centre of a preview clip sent to a client." },
+        { title: "Periodic flash", body: "Watermark visible only for 1 second every 30 seconds — less distracting but still impossible to remove cleanly via cropping." },
+      ],
+      useCases: [
+        "Protecting portfolio / showreel clips from theft",
+        "Branding YouTube / social uploads with channel logo",
+        "\"Preview\" stamps on client-review videos",
+        "Trade-show display videos with sponsor logos",
+        "Educational content attribution",
+      ],
+      troubleshooting: [
+        { problem: "Logo background looks white instead of transparent", solution: "Upload a real PNG with alpha channel — a JPG flattens transparency to white. Re-export the logo from your design tool with transparent background." },
+        { problem: "Watermark too big / too small", solution: "Watermark size is in % of video width — try 10-15% for a subtle logo, 40-60% for a \"DRAFT\" stamp." },
+        { problem: "Edge of logo looks pixelated", solution: "Upload a higher-resolution logo. The watermark is scaled to fit, so a tiny source PNG will look blurry on 1080p video." },
+      ],
+    },
   },
   {
     id: 'convert-video',
@@ -7753,6 +12636,31 @@ export const tools: Tool[] = [
       'Click "Convert Video"',
       'Download the converted file',
     ],
+    exampleOutput: {
+      input: "movie.mkv (1080p H.265, 2 audio tracks)",
+      output: "movie.mp4 (1080p H.264, primary audio, AAC) — universally playable",
+      description: "Convert between MP4 / MKV / MOV / WebM / AVI containers and re-encode video/audio codecs as needed. Stream-copy when codec/container are already compatible.",
+    },
+    seoContent: {
+      intro: "Convert videos between the major containers — MP4, MKV, MOV, WebM, AVI — and re-encode video and audio codecs if needed. When the source codec is already compatible with the target container, the tool stream-copies (instant, lossless). Otherwise it transcodes with sensible defaults.",
+      examples: [
+        { title: "MKV → MP4 for compatibility", body: "An MKV file plays on Linux but not on an iPad. Convert to MP4 (H.264 + AAC) and it plays everywhere." },
+        { title: "MOV → WebM for the web", body: "A QuickTime MOV becomes a WebM optimised for HTML5 `<video>` autoplay in modern browsers." },
+        { title: "AVI → MP4 for archiving", body: "A legacy AVI with DivX video converts to a modern MP4 with H.264 — smaller, more compatible, easier to play." },
+      ],
+      useCases: [
+        "Cross-device compatibility (Mac ↔ Windows ↔ iOS ↔ Android)",
+        "Preparing video for HTML5 web playback",
+        "Modernising legacy AVI / WMV files",
+        "Replacing proprietary container with open one (or vice versa)",
+        "Standardising mixed-format folders to one format",
+      ],
+      troubleshooting: [
+        { problem: "Output won't play on iOS", solution: "iOS requires H.264 video + AAC audio in MP4. Pick those explicitly instead of \"copy codec\" — the source codec may be unsupported." },
+        { problem: "Multi-channel audio collapsed to stereo", solution: "Toggle \"preserve all audio channels\" — default is to downmix surround to stereo for compatibility." },
+        { problem: "Subtitles missing after conversion", solution: "Subtitles are a separate stream. Toggle \"include subtitle streams\" to copy them. MP4 supports mov_text; for SRT, keep MKV." },
+      ],
+    },
   },
   {
     id: 'video-frame-extractor',
@@ -7794,6 +12702,31 @@ export const tools: Tool[] = [
       'Click "Extract Frames"',
       'Download the frame images',
     ],
+    exampleOutput: {
+      input: "action-clip.mp4 (10s @ 60 fps = 600 frames)",
+      output: "frames.zip — pick by frame index (e.g. frames 120, 240, 360) as PNG/JPG",
+      description: "Frame-accurate extraction by index or timestamp. PNG for lossless, JPG / WebP for smaller files. One specific frame or a list.",
+    },
+    seoContent: {
+      intro: "Extract specific frames from a video with frame-perfect accuracy — by frame index (e.g. frame 120 of 600) or exact timestamp (e.g. 00:01:23.500). Output as PNG for lossless captures or JPG / WebP for smaller files. Different from \"video to images\" — this is for picking a few precise frames, not bulk extraction.",
+      examples: [
+        { title: "Bug-report screenshot", body: "Grab the exact frame where a UI glitch appears (frame 412 of a 600-frame recording) as a lossless PNG for the issue tracker." },
+        { title: "Sports key frame", body: "Extract the exact moment a ball touches the line from a 240-fps phone clip for definitive analysis." },
+        { title: "Animation reference", body: "Pull frames 1, 5, 10, 15, 20 of a walk-cycle for use as keyframe references in a 3D animation tool." },
+      ],
+      useCases: [
+        "Bug-report screenshots from screen recordings",
+        "Sports / motion analysis at key moments",
+        "Animation key-frame references",
+        "Scientific frame capture (microscopy, high-speed footage)",
+        "Forensic / evidentiary frame extraction",
+      ],
+      troubleshooting: [
+        { problem: "Frame index seems off", solution: "Source has variable frame rate; frame N at 30 fps ≠ N at the actual VFR timing. Switch to timestamp mode for precise control." },
+        { problem: "Extracted frame is dark / motion-blurred", solution: "That's the actual frame content. Try ±1-2 frames for a sharper neighbour. Cinema / consumer-camera footage often has motion blur per frame." },
+        { problem: "PNG file is huge", solution: "Lossless PNG at 4K can be 5-10 MB per frame. Switch to JPG quality 95 for ~10% the size with no visible loss." },
+      ],
+    },
   },
   {
     id: 'video-screenshot',
@@ -7839,6 +12772,414 @@ export const tools: Tool[] = [
       'Click "Capture Screenshot"',
       'Download the captured image',
     ],
+    exampleOutput: {
+      input: "gameplay.mp4 (1080p) at 00:03:42",
+      output: "gameplay-screenshot.png (1920×1080, lossless PNG)",
+      description: "One-click freeze-frame at the current player position. PNG (lossless) or JPG (smaller). Copies to clipboard option too.",
+    },
+    seoContent: {
+      intro: "Take a clean screenshot of any video frame at full source resolution — no player UI, no compression artefacts, no manual cropping. Useful for capturing memorable moments, sharing exact frames in chat, or grabbing references for blog posts and reviews. PNG (lossless) by default; JPG / WebP available for smaller files.",
+      examples: [
+        { title: "Game-moment share", body: "Capture the exact victory screen frame from a gameplay recording — full 1080p PNG, ready to share to friends or a fan forum." },
+        { title: "Movie-quote meme", body: "Snap the perfect dialog moment from a film clip (own content) for a quote-card meme." },
+        { title: "Reference image", body: "Grab a cinematography reference frame for a blog post on lighting techniques." },
+      ],
+      useCases: [
+        "Capturing memorable gaming / sports moments",
+        "Reference frames for blog posts and reviews",
+        "Sharing exact frames in chat / email",
+        "Building meme / reaction images from clips",
+        "Documentation screenshots from video tutorials",
+      ],
+      troubleshooting: [
+        { problem: "Screenshot is darker than the playing video", solution: "Player applied HDR-to-SDR conversion that the snapshot didn't. Enable \"match player rendering\" so the snapshot matches what you see in the player." },
+        { problem: "Got a blurry / motion-blur frame", solution: "Nudge the timeline ±1 frame for the cleanest neighbouring frame. Use the dedicated frame-extractor tool for finer control." },
+        { problem: "Screenshot file is huge as PNG", solution: "Switch to JPG quality 95 — same apparent quality, ~10% the size. PNG is only essential for screenshots with sharp UI / text edges." },
+      ],
+    },
+  },
+  // ==================== AUDIO TOOLS (Session 11) ====================
+  {
+    id: 'audio-converter',
+    name: 'Audio Converter',
+    seoTitle: 'Audio Converter – Convert MP3 WAV OGG M4A FLAC Online (Free)',
+    description: 'Free online audio converter. Convert MP3, WAV, OGG, M4A, FLAC, AAC, Opus, WMA and more — choose bitrate and quality. Powered by FFmpeg WASM, runs entirely in your browser, nothing uploaded.',
+    shortDescription: 'Convert audio formats online',
+    category: 'audio',
+    slug: 'audio-converter',
+    icon: 'Music',
+    keywords: ['audio converter', 'mp3 to wav', 'wav to mp3', 'flac', 'ogg', 'm4a', 'aac', 'opus'],
+    tags: ['audio', 'convert', 'mp3', 'wav', 'flac', 'm4a'],
+    faq: [
+      { question: 'Which audio formats are supported?', answer: 'MP3, WAV, OGG (Vorbis), M4A (AAC), FLAC, AAC (ADTS), and Opus for output. Input accepts those plus WMA, WebM audio, MP4 audio, and most things FFmpeg can decode.' },
+      { question: 'Is anything uploaded?', answer: 'No. Conversion runs entirely in your browser through FFmpeg compiled to WebAssembly. Your file never leaves your device.' },
+      { question: 'What bitrate should I pick?', answer: '128 kbps is fine for voice / podcasts; 192-256 kbps is the sweet spot for music; 320 kbps is overkill for most material. WAV and FLAC are lossless — no bitrate setting.' },
+      { question: 'Why is the first conversion slow?', answer: 'FFmpeg WASM (~30 MB) downloads and initialises on first use. Subsequent conversions reuse the loaded worker and start instantly.' },
+    ],
+    relatedTools: ['audio-trimmer', 'audio-compressor', 'extract-audio'],
+    howToUse: ['Upload an audio file (drag-drop or click)', 'Pick output format (MP3/WAV/OGG/M4A/FLAC/AAC/Opus)', 'Choose bitrate for lossy formats', 'Click Convert and download the result'],
+    exampleOutput: {
+      input: 'lecture.m4a (1h, AAC 128 kbps)',
+      output: 'lecture.mp3 (1h, MP3 192 kbps, ~85 MB)',
+      description: 'A re-encoded MP3 at your chosen bitrate. Lossless formats (WAV/FLAC) skip the bitrate setting and preserve every bit.',
+    },
+    seoContent: {
+      intro: 'Convert between every major audio format right in your browser — MP3, WAV, OGG, M4A, FLAC, AAC, Opus and more. The tool uses FFmpeg compiled to WebAssembly so conversions run locally on your machine with the same engine professional audio editors use. No upload, no account, no usage caps.',
+      examples: [
+        { title: 'M4A → MP3 for an old car stereo', body: 'A new iTunes purchase comes as M4A; the car stereo only plays MP3. One conversion at 192 kbps and it works without quality loss for spoken content.' },
+        { title: 'FLAC → ALAC (M4A)', body: 'Re-encode a lossless FLAC archive into ALAC (M4A) so Apple Music / iTunes recognises it.' },
+        { title: 'WMA → universal MP3', body: 'A legacy WMA voice memo converts to MP3 so it plays on iOS, Android, web, anywhere.' },
+      ],
+      useCases: ['Format conversion between Apple / Windows / Linux ecosystems', 'Re-encoding to a smaller bitrate to save space', 'Producing universal MP3 from any source', 'Lossless archive prep (→ FLAC)', 'Preparing files for systems that only accept specific formats'],
+      troubleshooting: [
+        { problem: 'Output quality sounds worse than source', solution: 'Bitrate set too low. Use 192 kbps or higher for music; 128 kbps is fine for voice only.' },
+        { problem: 'Conversion fails with cryptic FFmpeg error', solution: 'Source may be DRM-protected (Apple Music protected AAC, Audible, etc.). DRM-free files convert fine; protected ones require removing DRM first via the original platform.' },
+        { problem: 'Vietnamese filename causes weird filename on download', solution: 'Browsers handle UTF-8 filenames inconsistently. Rename to ASCII before converting if your downstream system doesn\'t like Unicode filenames.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-trimmer',
+    name: 'Audio Trimmer',
+    seoTitle: 'Audio Trimmer – Cut MP3 WAV Online by hh:mm:ss (Free)',
+    description: 'Free online audio trimmer. Cut MP3, WAV, OGG, M4A, FLAC, AAC, Opus by precise hh:mm:ss timecodes. Plays the source so you can find the exact start / end times. Runs locally via FFmpeg WASM.',
+    shortDescription: 'Cut audio by precise timecodes',
+    category: 'audio',
+    slug: 'audio-trimmer',
+    icon: 'Scissors',
+    keywords: ['audio trimmer', 'cut mp3', 'trim audio', 'split audio', 'mp3 cutter'],
+    tags: ['audio', 'trim', 'cut', 'mp3', 'editor'],
+    faq: [
+      { question: 'What time format do I enter?', answer: 'hh:mm:ss (e.g. 00:01:30 for 1 minute 30 seconds). mm:ss and raw seconds also work. The audio player on the page shows timestamps in the same format.' },
+      { question: 'Can I get a frame-accurate cut?', answer: 'Audio doesn\'t have video keyframes, so cuts are sample-accurate by default. You can trim to the millisecond if you provide that precision (e.g. 00:01:30.500).' },
+      { question: 'Is the output re-encoded?', answer: 'Yes — FFmpeg re-encodes the trimmed range to the output format you pick. This is necessary for accurate boundary handling on lossy codecs.' },
+    ],
+    relatedTools: ['audio-converter', 'audio-merger', 'trim-video'],
+    howToUse: ['Upload an audio file (the page plays it so you can scrub)', 'Enter Start in hh:mm:ss', 'Enter End (leave blank to trim to end of file)', 'Pick output format and click Trim Audio'],
+    exampleOutput: {
+      input: 'podcast.mp3 (1h05m), trim 00:12:30 → 00:18:45',
+      output: 'podcast-trimmed.mp3 (6m15s)',
+      description: 'Just the requested segment of the source, re-encoded to the chosen output format. Original file is unchanged.',
+    },
+    seoContent: {
+      intro: 'Trim audio files to a precise segment using hh:mm:ss timecodes — perfect for extracting a podcast highlight, isolating a song section, or cutting silence from the start of a voice memo. The built-in player shows the timestamp in the same format as the inputs so you can hear-and-mark instead of guessing.',
+      examples: [
+        { title: 'Podcast highlight clip', body: 'Trim a 2-hour podcast down to the 5-minute segment where a key topic comes up, ready to share.' },
+        { title: 'Ringtone from a song', body: 'Cut the catchy 30-second hook out of an MP3 to use as a phone ringtone.' },
+        { title: 'Remove silence at start', body: 'A voice memo starts with 8 seconds of throat-clearing — set start = 00:00:08 and the trimmed file is publish-ready.' },
+      ],
+      useCases: ['Podcast highlight clips', 'Ringtones from songs (own content)', 'Trimming silence from voice memos', 'Extracting a specific segment of a lecture', 'Isolating a quote from an interview'],
+      troubleshooting: [
+        { problem: 'Output starts a moment after the requested time', solution: 'Some lossy codecs (e.g. MP3) only allow boundary cuts at frame edges (~26 ms). Re-encode to WAV first if you need sample-accurate cuts.' },
+        { problem: 'Times entered as seconds get rejected', solution: 'Raw seconds work (`90` = 1m30s). If it\'s rejected, you may have a stray space or letter — the input expects digits + colons only.' },
+        { problem: 'End time before start time', solution: 'The tool can\'t produce negative-length output. Swap the values, or leave End blank to trim from Start to the file\'s end.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-merger',
+    name: 'Audio Merger',
+    seoTitle: 'Audio Merger – Combine MP3 WAV Files Online (Free)',
+    description: 'Free online audio merger. Combine multiple MP3, WAV, OGG, M4A, FLAC, AAC, Opus files into one. Drag-and-drop ordering, lossless concat when codecs match. Runs locally via FFmpeg WASM.',
+    shortDescription: 'Combine multiple audio files',
+    category: 'audio',
+    slug: 'audio-merger',
+    icon: 'Combine',
+    keywords: ['audio merger', 'combine mp3', 'merge audio', 'concat audio', 'join mp3'],
+    tags: ['audio', 'merge', 'combine', 'concat', 'join'],
+    faq: [
+      { question: 'Does order matter?', answer: 'Yes — files are joined in the order you list them. Use the ↑ / ↓ buttons to reorder before merging.' },
+      { question: 'What if the sources have different codecs / sample rates?', answer: 'The tool transparently transcodes to a common format if codecs differ. When they match, you get a lossless concat.' },
+      { question: 'Is there a limit on the number of files?', answer: 'Limited by browser memory. 50+ files typically work fine; for very large batches, split into smaller merges and combine the results.' },
+    ],
+    relatedTools: ['audio-trimmer', 'audio-converter', 'merge-videos'],
+    howToUse: ['Add 2+ audio files (drag-drop or click)', 'Reorder them with ↑/↓ to set the play order', 'Pick output format', 'Click Merge Audio and download'],
+    exampleOutput: {
+      input: '4 MP3 chapters (10 min each, same bitrate)',
+      output: 'merged.mp3 (40 min, single seamless file)',
+      description: 'One combined audio file with all sources concatenated in your chosen order.',
+    },
+    seoContent: {
+      intro: 'Combine multiple audio files into one — perfect for stitching podcast chapters, joining recorded segments, or building a long-form mix from short clips. The tool uses FFmpeg\'s concat demuxer for lossless merging when sources match codec/rate, and transparently transcodes when they differ.',
+      examples: [
+        { title: 'Audiobook chapters', body: '12 chapter MP3s of an audiobook merge into one continuous file for easier listening on a single play queue.' },
+        { title: 'Voice-memo log', body: 'Daily voice memos for a week merge into one weekly file for archiving.' },
+        { title: 'Multi-segment recording', body: 'A long recording captured as 3 separate WAV files (battery / app interruptions) merges back into one seamless WAV.' },
+      ],
+      useCases: ['Audiobook chapter assembly', 'Voice-memo archival', 'Stitching split recordings', 'Building long-form mixes from clips', 'Conference panel assembly'],
+      troubleshooting: [
+        { problem: 'Audible click between merged segments', solution: 'Sources have different sample rates — re-encode all to 44.1 kHz first, or just trust the auto-transcode that happens when rates differ.' },
+        { problem: 'Output is huge', solution: 'Pick a lossy output (MP3 / OGG / Opus) at a sensible bitrate. WAV / FLAC keep every source uncompressed and grow with total duration.' },
+        { problem: 'One file refuses to merge', solution: 'It\'s probably a non-audio file or DRM-protected. Convert it to a plain MP3/WAV first, then re-merge.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-compressor',
+    name: 'Audio Compressor',
+    seoTitle: 'Audio Compressor – Reduce MP3 File Size Online (Free)',
+    description: 'Free online audio compressor. Reduce MP3 / WAV file size by lowering bitrate, sample rate, or channel count. Live size comparison after compression. Runs locally via FFmpeg WASM.',
+    shortDescription: 'Shrink audio file size',
+    category: 'audio',
+    slug: 'audio-compressor',
+    icon: 'Archive',
+    keywords: ['audio compressor', 'mp3 compressor', 'reduce mp3 size', 'shrink audio'],
+    tags: ['audio', 'compress', 'shrink', 'reduce', 'mp3'],
+    faq: [
+      { question: 'How small can I make a file?', answer: 'Voice content compresses well to 64 kbps mono at 22 kHz (about 10× smaller than CD quality). Music needs 128+ kbps to sound good.' },
+      { question: 'Does this work on WAV files?', answer: 'Yes. Compression converts to MP3 by default. WAV is uncompressed PCM — converting to MP3 typically shrinks 10× with no audible loss at 192 kbps.' },
+      { question: 'Will my podcast still sound good at 96 kbps?', answer: 'For spoken word, yes. 96 kbps mono is plenty for voice. For music podcasts with intro/outro music, 128-160 kbps is safer.' },
+    ],
+    relatedTools: ['audio-converter', 'compress-video'],
+    howToUse: ['Upload an audio file', 'Pick bitrate (lower = smaller file)', 'Optionally reduce sample rate (22050 Hz fine for voice) and channels (mono for voice)', 'Click Compress — size comparison shown after'],
+    exampleOutput: {
+      input: 'lecture.wav (1h, 44.1 kHz stereo, ~660 MB)',
+      output: 'lecture-compressed.mp3 (1h, 96 kbps mono 22 kHz, ~42 MB) — 94% smaller',
+      description: 'Same content, dramatically smaller file. Voice content like lectures and podcasts compresses especially well.',
+    },
+    seoContent: {
+      intro: 'Shrink an audio file dramatically without making it unlistenable. Pick a target bitrate, sample rate, and channel count — the tool re-encodes to MP3 with your settings and shows the size comparison. Voice content can shrink 10-15× with no audible loss; music needs slightly higher settings.',
+      examples: [
+        { title: 'Lecture archive', body: 'A 1-hour WAV lecture (660 MB) compresses to 42 MB MP3 — fits in email, drops onto a phone, sounds identical.' },
+        { title: 'Podcast for low-bandwidth listeners', body: 'Encode at 64 kbps mono 22 kHz for fast download over slow connections — voice still clear, file size halved.' },
+        { title: 'Field recording space saving', body: 'Hours of WAV nature recording compress to FLAC or 256 kbps MP3, freeing GBs without losing what matters.' },
+      ],
+      useCases: ['Lecture / podcast archive shrinking', 'Email-attachment fit', 'Phone-storage savings', 'Bandwidth-friendly streaming files', 'Speeding up uploads'],
+      troubleshooting: [
+        { problem: 'Voice sounds muffled at 64 kbps', solution: 'Increase to 96 or 128 kbps. 64 kbps is the lower edge of "listenable" for voice; women\'s and children\'s voices in particular benefit from a bit more bitrate.' },
+        { problem: 'Music sounds washed out', solution: 'Music needs 128+ kbps minimum. Try 192 kbps stereo 44.1 kHz — still saves most of the file size vs lossless.' },
+        { problem: 'File still too large after compression', solution: 'Reduce all three knobs: lower bitrate, drop to mono, and reduce sample rate to 22050. Combined, voice files easily fit under 1 MB / minute.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-volume',
+    name: 'Audio Volume / Normalizer',
+    seoTitle: 'Audio Volume & Normalizer – Adjust dB or EBU R128 Online (Free)',
+    description: 'Free online audio volume and normalizer. Apply manual gain (−30 to +30 dB) or auto-normalize to the EBU R128 broadcast loudness target (−16 LUFS). Runs locally via FFmpeg WASM.',
+    shortDescription: 'Adjust audio volume or normalize loudness',
+    category: 'audio',
+    slug: 'audio-volume',
+    icon: 'Volume2',
+    keywords: ['audio volume', 'normalize audio', 'increase volume', 'ebu r128', 'loudness'],
+    tags: ['audio', 'volume', 'normalize', 'gain', 'loudness'],
+    faq: [
+      { question: 'Manual gain vs auto-normalize — which to use?', answer: 'Use manual gain (+6 dB ≈ 2× louder) when you know exactly how much louder you want it. Use EBU R128 normalize when you have multiple files and want them all to sound similarly loud — same standard Spotify, Apple Podcasts and YouTube target.' },
+      { question: 'Why use EBU R128 specifically?', answer: '−16 LUFS is the loudness target that podcast and broadcast platforms use. Normalizing to it means your content plays at the same perceived loudness as everything else — no jarring volume jumps for listeners.' },
+      { question: 'Will normalize make my audio clip?', answer: 'The R128 algorithm includes True Peak limiting (−1.5 dB ceiling by default) — clipping is prevented even when bringing quiet content up to target.' },
+    ],
+    relatedTools: ['noise-reducer', 'audio-converter'],
+    howToUse: ['Upload an audio file', 'Pick Manual gain (slide −30 to +30 dB) or Auto-normalize EBU R128', 'Choose output format', 'Click Apply Gain / Normalize and download'],
+    exampleOutput: {
+      input: 'quiet-recording.wav (peak around −24 dBFS, hard to hear)',
+      output: 'quiet-recording-normalized.wav (target −16 LUFS, broadcast-ready)',
+      description: 'Audio brought up to professional broadcast loudness without clipping. Listeners no longer need to crank their volume.',
+    },
+    seoContent: {
+      intro: 'Adjust audio loudness with either a precise dB slider or a one-click EBU R128 normalization to the broadcast standard. Manual mode is great for small tweaks; normalize mode automates the calculation — calculate the integrated loudness, scale to −16 LUFS, and apply True Peak limiting so nothing clips. Same algorithm pros use in podcast post-production.',
+      examples: [
+        { title: 'Voice memo too quiet', body: 'A phone voice memo recorded at low input level is brought up by +12 dB so it\'s comfortably audible without headphones.' },
+        { title: 'Podcast normalization', body: 'A 10-episode podcast batch gets normalized to −16 LUFS so each episode plays at the same loudness in listener apps.' },
+        { title: 'Music mastering finish', body: 'A self-produced track is normalized to −14 LUFS (Spotify\'s target) for distribution-ready loudness.' },
+      ],
+      useCases: ['Bringing quiet voice memos up to listenable level', 'Podcast and broadcast loudness compliance', 'Matching loudness across multi-source content', 'Self-released music loudness targeting', 'Audiobook chapter consistency'],
+      troubleshooting: [
+        { problem: 'Audio sounds distorted after applying big gain', solution: 'You\'re clipping. Use auto-normalize instead — it applies True Peak limiting. Or reduce the gain value until distortion goes away.' },
+        { problem: 'Normalize made it quieter, not louder', solution: 'Source was already louder than −16 LUFS. The algorithm brings loud audio DOWN as well as quiet audio UP — that\'s by design.' },
+        { problem: 'Files still sound different after normalize', solution: 'EBU R128 measures integrated loudness across the whole file. If one file has quiet stretches and loud peaks vs another with steady volume, perceived loudness can still differ. Use dynamic-range compression first for highly variable content.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-speed',
+    name: 'Audio Speed Changer',
+    seoTitle: 'Audio Speed Changer – Speed Up MP3 with Pitch Preserved (Free)',
+    description: 'Free online audio speed changer. Speed up or slow down MP3, WAV, OGG, M4A from 0.25× to 4× with pitch preservation (no chipmunk effect). Runs locally via FFmpeg WASM.',
+    shortDescription: 'Change audio speed without affecting pitch',
+    category: 'audio',
+    slug: 'audio-speed',
+    icon: 'FastForward',
+    keywords: ['audio speed', 'speed up audio', 'slow down audio', 'change tempo', 'atempo'],
+    tags: ['audio', 'speed', 'tempo', 'mp3'],
+    faq: [
+      { question: 'Will my voice sound chipmunk-y at 2×?', answer: 'No — pitch is preserved by default (FFmpeg\'s atempo filter). The audio plays faster but pitch stays normal, so 2× speech sounds like a fast talker not a chipmunk.' },
+      { question: 'What if I want the chipmunk effect?', answer: 'Toggle "Preserve pitch" off — the tool then uses asetrate which is the classic pitch-up-with-speed effect.' },
+      { question: 'Range of speeds?', answer: '0.25× (¼ speed) to 4× (4× faster). Quick presets at 0.5×, 0.75×, 1×, 1.25×, 1.5×, 2× for common cases.' },
+    ],
+    relatedTools: ['change-video-speed', 'audio-converter'],
+    howToUse: ['Upload an audio file', 'Drag the speed slider or pick a preset (1.5×, 2×, etc.)', 'Keep "Preserve pitch" on for natural-sounding voice', 'Click Apply and download'],
+    exampleOutput: {
+      input: 'lecture.mp3 (1h00m at 1×)',
+      output: 'lecture-1.5x.mp3 (40m at 1.5×, pitch preserved)',
+      description: 'A faster-paced version of the original — same speaker, just speaking faster. Saves listening time without comprehension loss.',
+    },
+    seoContent: {
+      intro: 'Speed up tutorials and podcasts to save time, or slow down music to learn parts note-by-note. By default pitch is preserved (FFmpeg\'s atempo filter), so speech at 1.5× sounds like a fast talker, not a chipmunk. Range is 0.25× to 4×.',
+      examples: [
+        { title: 'Tutorial fast-forward', body: 'A 90-minute coding tutorial at 1.5× takes 60 minutes and you understand every word.' },
+        { title: 'Music transcription', body: 'A guitar solo at 0.5× makes individual notes audible enough to transcribe accurately.' },
+        { title: 'Boomerang prep', body: 'Speed a clip to 2× and reverse it for a chaotic comedy effect.' },
+      ],
+      useCases: ['Fast-forwarding lectures and podcasts', 'Slowing down music for transcription practice', 'Language learning (slow → fast as skill improves)', 'Reducing dead air in recorded meetings', 'Creative speed effects for content'],
+      troubleshooting: [
+        { problem: 'Audio sounds weird at extreme speeds (4×, 0.25×)', solution: 'atempo introduces some artifacts at the edges of its range. For pristine extreme speeds, chain two passes (e.g. 2× then 2× again instead of 4× in one pass).' },
+        { problem: 'Want the chipmunk / deep-voice effect', solution: 'Uncheck "Preserve pitch" — that switches to asetrate which is the speed-changes-pitch classic effect.' },
+        { problem: 'Output is unexpectedly long', solution: 'Speed and duration are inversely proportional: 0.5× speed = 2× duration. The slider position 0.5 gives a file twice as long as the original.' },
+      ],
+    },
+  },
+  {
+    id: 'audio-reverse',
+    name: 'Audio Reverse',
+    seoTitle: 'Audio Reverse – Play Audio Backwards Online (Free)',
+    description: 'Free online audio reverser. Play any MP3, WAV, OGG, M4A, FLAC file backwards in seconds. Useful for boomerang loops, hidden messages, and creative edits. Runs locally via FFmpeg WASM.',
+    shortDescription: 'Play audio backwards',
+    category: 'audio',
+    slug: 'audio-reverse',
+    icon: 'Rewind',
+    keywords: ['reverse audio', 'play backwards', 'audio reverser', 'reverse mp3'],
+    tags: ['audio', 'reverse', 'backwards', 'mp3'],
+    faq: [
+      { question: 'Will it work on any audio length?', answer: 'Yes, up to your browser memory. Multi-hour files take longer but work — the tool streams samples through FFmpeg\'s areverse filter.' },
+      { question: 'What format is the output?', answer: 'Same format as input by default, or any output format you pick.' },
+      { question: 'Why does reversed speech sound creepy?', answer: 'Speech evolved to be heard forwards. Reversed phonemes hit the ear in an unfamiliar order, which the brain registers as "wrong" — perfect for horror and Halloween edits.' },
+    ],
+    relatedTools: ['reverse-video', 'audio-speed'],
+    howToUse: ['Upload an audio file', 'Pick output format (defaults to source format)', 'Click Reverse Audio and download'],
+    exampleOutput: {
+      input: 'phrase.mp3 ("hello world")',
+      output: 'phrase-reversed.mp3 ("dlrow olleh" with phonemes reversed)',
+      description: 'Audio played sample-by-sample in reverse. Speech becomes a mirror of itself, music reveals its tail-to-head shape.',
+    },
+    seoContent: {
+      intro: 'Reverse any audio file in seconds — for boomerang loops, hidden messages, horror effects, or just to hear what your favourite song sounds like backwards. Sample-perfect reversal, no quality loss.',
+      examples: [
+        { title: 'Boomerang music loop', body: 'Original + reversed version concatenated = a seamless palindrome loop for ambient backgrounds.' },
+        { title: 'Hidden-message gag', body: 'Record a phrase, reverse it, ask friends to play it backwards to "hear the secret".' },
+        { title: 'Halloween / horror sting', body: 'Reversed laughter or speech makes for an unsettling sound design element.' },
+      ],
+      useCases: ['Boomerang / palindrome audio loops', 'Hidden-message recordings', 'Horror / Halloween sound design', 'Creative music composition', 'DJ / remix preparation'],
+      troubleshooting: [
+        { problem: 'Output sounds the same as input', solution: 'Symmetrical audio (sine waves, sustained tones) sounds nearly identical reversed. Reverse a recording with transient sounds (speech, drums) to clearly hear the effect.' },
+        { problem: 'Long files take forever', solution: 'areverse needs to buffer the entire audio in memory. Files over an hour may be slow; consider splitting into chunks first.' },
+      ],
+    },
+  },
+  {
+    id: 'noise-reducer',
+    name: 'Audio Noise Reducer',
+    seoTitle: 'Audio Noise Reducer – Remove Background Hiss Online (Free)',
+    description: 'Free online audio noise reducer powered by FFmpeg\'s afftdn FFT-based denoiser. Removes background hiss, hum, fan noise from recordings. Adjustable strength + optional high-pass filter. Runs locally.',
+    shortDescription: 'Remove background noise from audio',
+    category: 'audio',
+    slug: 'noise-reducer',
+    icon: 'Wind',
+    keywords: ['noise reducer', 'remove background noise', 'denoise audio', 'audio cleanup', 'afftdn'],
+    tags: ['audio', 'denoise', 'noise', 'cleanup', 'podcast'],
+    faq: [
+      { question: 'What kind of noise does this remove?', answer: 'Steady background noise: fan hum, room tone, hiss, AC noise, low rumble. The afftdn FFT denoiser learns the noise floor from quieter regions and subtracts it.' },
+      { question: 'Will it remove voices in the background?', answer: 'Not effectively — afftdn targets steady background noise, not transient interruptions like another speaker. For voice isolation you need specialized AI tools (separate scope).' },
+      { question: 'Light / Medium / Strong — which to pick?', answer: 'Start with Medium. Use Light if Medium adds underwater artifacts; use Strong for very noisy recordings where some artifacts are acceptable.' },
+    ],
+    relatedTools: ['audio-volume', 'audio-converter'],
+    howToUse: ['Upload an audio file', 'Pick strength (start with Medium — 20 dB)', 'Optional: enable 80 Hz high-pass to cut rumble', 'Click Reduce Noise and listen to compare'],
+    exampleOutput: {
+      input: 'interview.wav (with fan / AC noise in background)',
+      output: 'interview-denoised.wav (background noise lowered ~20 dB, voice intact)',
+      description: 'Voice clarity improves while steady background noise drops noticeably. Medium setting handles most podcast / Zoom recordings.',
+    },
+    seoContent: {
+      intro: 'Clean up noisy recordings — fan hum, AC drone, room tone, microphone hiss — without sending audio to a paid SaaS. The tool uses FFmpeg\'s afftdn filter, an FFT-based spectral denoiser that learns the noise profile from quiet regions and subtracts it from the whole signal. Three strength presets cover most real-world recordings.',
+      examples: [
+        { title: 'Home-office podcast cleanup', body: 'A WFH podcast recording has an audible AC fan. Medium denoise + 80 Hz high-pass gives a noticeably cleaner episode.' },
+        { title: 'Zoom interview', body: 'A recorded Zoom call has compression artifacts and steady codec noise. Light denoise smooths them out without losing voice character.' },
+        { title: 'Old cassette transfer', body: 'A digitised cassette tape full of hiss cleans up dramatically with Strong denoise — some music sparkle is lost but speech becomes intelligible.' },
+      ],
+      useCases: ['Podcast / Zoom recording cleanup', 'Audiobook narration polish', 'Old tape / vinyl digitisation', 'Field recording denoising', 'Voice-over track prep'],
+      troubleshooting: [
+        { problem: 'Voice sounds "underwater" after denoise', solution: 'Reduce strength to Light. Aggressive denoise introduces frequency-domain artifacts; the trade-off between noise removal and naturalness is unavoidable.' },
+        { problem: 'Noise is still audible', solution: 'Bump to Strong (30 dB) and enable high-pass. For very harsh noise (chair squeak, door slam), denoise alone won\'t cut it — those are transient, not stationary.' },
+        { problem: 'High-pass removes too much bass', solution: '80 Hz is a typical voice / podcast setting. Unfortunately the tool currently only offers the 80 Hz preset; for music with bass, leave high-pass off.' },
+      ],
+    },
+  },
+  // ==================== AI IMAGE TOOLS (Session 12) ====================
+  {
+    id: 'background-remover',
+    name: 'Background Remover (AI)',
+    seoTitle: 'AI Background Remover – Remove Image Background Online (Free)',
+    description: 'Free online AI background remover. Drops the background from any photo (people, products, pets) in one click. Powered by a local ONNX model — image never leaves your browser, no signup, no watermark.',
+    shortDescription: 'Remove image background with AI',
+    category: 'image',
+    slug: 'background-remover',
+    icon: 'Scissors',
+    keywords: ['background remover', 'remove background', 'transparent png', 'ai background removal', 'rembg'],
+    tags: ['image', 'background', 'ai', 'transparent', 'png'],
+    faq: [
+      { question: 'How accurate is the AI?', answer: 'Powered by @imgly/background-removal which runs an ONNX model in your browser. Works very well on people, products, and pets against most backgrounds. Tricky on hair-against-busy-background and translucent objects (glasses, glass).' },
+      { question: 'Is my image uploaded?', answer: 'No. The model runs entirely in your browser via WebAssembly. The image never leaves your device.' },
+      { question: 'Why is the first run slow?', answer: 'The AI model (~80 MB) downloads on first use from CDN, then is cached by the browser. Subsequent runs are fast.' },
+      { question: 'Does it watermark the result?', answer: 'No watermark, no signup, no usage limits. The output is a clean PNG with transparent background.' },
+    ],
+    relatedTools: ['image-upscaler', 'crop-image', 'image-to-base64'],
+    howToUse: ['Upload an image (PNG / JPG / WebP up to 30 MB)', 'Wait for the AI to load (first time only — ~80 MB)', 'Click Remove Background', 'Download the transparent PNG'],
+    exampleOutput: {
+      input: 'portrait.jpg (1080×1080, person against busy office background)',
+      output: 'portrait-nobg.png (1080×1080 PNG with transparent background)',
+      description: 'Subject cleanly isolated with hair edges preserved. Drop straight onto any new background in Photoshop, Canva, Figma.',
+    },
+    seoContent: {
+      intro: 'Remove the background from any image in seconds with AI — entirely in your browser, no upload, no signup, no watermark. Powered by an ONNX model that runs via WebAssembly directly on your device. Works on people, products, pets, anything with a clear foreground.',
+      examples: [
+        { title: 'E-commerce product photo', body: 'A product photo shot on a wooden table becomes a clean transparent PNG ready for white-background listings on Amazon / Shopify.' },
+        { title: 'LinkedIn portrait', body: 'A casual portrait drops its busy living-room background — composite onto a clean grey or your office for a more professional look.' },
+        { title: 'Pet sticker', body: 'A dog photo becomes a transparent PNG sticker for chat / social media.' },
+      ],
+      useCases: ['E-commerce product photography (white background prep)', 'Professional headshots / LinkedIn photos', 'Marketing creative compositing', 'Pet portraits and stickers', 'Removing backgrounds before importing into Canva / Figma'],
+      troubleshooting: [
+        { problem: 'Hair edges look chopped', solution: 'Hair against a busy or low-contrast background is the AI\'s hardest case. Try a higher-resolution source — more pixels = more confidence at hair edges.' },
+        { problem: 'Translucent objects (glass, water) come through wrong', solution: 'AI models assume opaque foregrounds. Translucent objects need manual masking in Photoshop / GIMP. The tool will treat them as opaque.' },
+        { problem: 'First run took 30+ seconds', solution: 'The ~80 MB AI model is downloading from CDN on first use. After that, your browser caches it and subsequent runs are fast (~1-3s for 1080p).' },
+      ],
+    },
+  },
+  {
+    id: 'image-upscaler',
+    name: 'Image Upscaler (Lanczos)',
+    seoTitle: 'Image Upscaler – Enlarge Images 2x 3x 4x Online (Free)',
+    description: 'Free online image upscaler. Enlarge any PNG, JPG, WebP by 2×, 3×, or 4× using high-quality Lanczos-3 resampling. Much sharper than browser default. Runs entirely in your browser.',
+    shortDescription: 'Enlarge images with sharp Lanczos resampling',
+    category: 'image',
+    slug: 'image-upscaler',
+    icon: 'ZoomIn',
+    keywords: ['image upscaler', 'enlarge image', 'upscale photo', 'lanczos', 'sharp resize'],
+    tags: ['image', 'upscale', 'enlarge', 'resize', 'lanczos'],
+    faq: [
+      { question: 'Is this AI upscaling?', answer: 'No — this is high-quality Lanczos-3 resampling, the algorithm pro photo editors use for sharp resizing. AI upscalers (Real-ESRGAN, SwinIR) need a 100+ MB model; Lanczos works on any device with zero downloads.' },
+      { question: 'Will it create new detail?', answer: 'No algorithm can invent detail that isn\'t there. Lanczos preserves existing detail sharply without the blur of bilinear or the jagged edges of nearest-neighbour. Use it on icons, logos, screenshots, and anything where sharpness matters.' },
+      { question: 'What\'s the maximum output size?', answer: '8000 pixels on either side. Larger than that risks browser memory exhaustion. Downscale source first if you need extreme enlargements.' },
+    ],
+    relatedTools: ['resize-image-percentage', 'background-remover', 'image-resize'],
+    howToUse: ['Upload an image (PNG / JPG / WebP up to 30 MB)', 'Pick a scale (2×, 3×, or 4×)', 'Choose output format (PNG lossless, JPG/WebP for smaller)', 'Click Upscale and download'],
+    exampleOutput: {
+      input: 'logo.png (512×512)',
+      output: 'logo-2x.png (1024×1024, sharp edges, no blur)',
+      description: 'Lanczos-3 resampling produces noticeably sharper enlargements than the browser\'s default bilinear scaling.',
+    },
+    seoContent: {
+      intro: 'Enlarge images by 2×, 3×, or 4× with Lanczos-3 resampling — the same algorithm used by Photoshop, GIMP, and ffmpeg for sharp resizing. The output is meaningfully sharper than the browser\'s default bilinear scaling, especially on text, edges, and graphic art. No AI model required, runs on any device.',
+      examples: [
+        { title: 'Tiny screenshot blown up', body: 'A 400×300 documentation screenshot upscales to 1600×1200 with text still readable — bilinear would smear it.' },
+        { title: 'Logo enlargement', body: 'A 256×256 brand logo becomes a 1024×1024 PNG for a hero section, edges remain crisp.' },
+        { title: 'Pixel-art preservation', body: 'For sharp pixel art, use a different algorithm — but for photo-realistic upscales, Lanczos is industry-standard.' },
+      ],
+      useCases: ['Enlarging screenshots for documentation', 'Upscaling logos for high-DPI use', 'Photo prints from web-resolution sources', 'Making thumbnail sources into full-size headers', 'Anywhere you\'d use Photoshop\'s "Bicubic Sharper" today'],
+      troubleshooting: [
+        { problem: 'Upscaled photo still looks soft', solution: 'Lanczos preserves existing detail — it can\'t create what isn\'t there. For "AI-style" detail enhancement, you need a true neural upscaler (Real-ESRGAN, SwinIR), not Lanczos.' },
+        { problem: 'Output is huge as PNG', solution: 'PNG is lossless and high-res files get big. Switch to JPG quality 95 or WebP 90 — 5-10× smaller for negligible quality loss on photos.' },
+        { problem: '4× output rejected as too large', solution: 'There\'s an 8000 px guardrail to avoid mobile-browser OOM. Downscale the source first if you need 4× of a 3000px input.' },
+      ],
+    },
   },
 ];
 

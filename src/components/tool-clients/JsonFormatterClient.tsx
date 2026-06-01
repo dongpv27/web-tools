@@ -2,10 +2,25 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
+import { JSONPath } from 'jsonpath-plus';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 import { ToolError, ToolEmpty } from '@/components/tools/ToolFeedback';
 import { formatJSON, minifyJSON, validateJSON } from '@/lib/utils';
+
+// Recursively sort object keys alphabetically. Arrays keep their order
+// (sorting array elements would silently corrupt user data).
+function sortKeysDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortKeysDeep);
+  if (value !== null && typeof value === 'object') {
+    const sorted: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+      sorted[key] = sortKeysDeep((value as Record<string, unknown>)[key]);
+    }
+    return sorted;
+  }
+  return value;
+}
 
 // ─── Tree view ─────────────────────────────────────────────────────────────
 // Collapsible JSON viewer. Keeps recursion shallow by reusing a single component
@@ -111,6 +126,8 @@ export default function JsonFormatterClient() {
   const [error, setError] = useState('');
   const [indent, setIndent] = useState(2);
   const [viewMode, setViewMode] = useState<ViewMode>('formatted');
+  const [jsonPath, setJsonPath] = useState('');
+  const [jsonPathError, setJsonPathError] = useState('');
 
   const handleFormat = () => {
     setError('');
@@ -130,6 +147,53 @@ export default function JsonFormatterClient() {
       setOutput(formatted);
     } catch (e) {
       setError(`Error formatting JSON: ${(e as Error).message}`);
+    }
+  };
+
+  // Evaluate JSONPath against the input. Output the matched values as a JSON
+  // array so users can keep formatting / minifying the result downstream.
+  const handleJsonPath = () => {
+    setError('');
+    setJsonPathError('');
+    if (!input.trim()) {
+      setError('Please enter some JSON first');
+      return;
+    }
+    if (!jsonPath.trim()) {
+      setJsonPathError('Enter a JSONPath expression (e.g. $..name)');
+      return;
+    }
+    const validation = validateJSON(input);
+    if (!validation.valid) {
+      setError(`Invalid JSON: ${validation.error}`);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(input);
+      const results = JSONPath({ path: jsonPath, json: parsed });
+      setOutput(JSON.stringify(results, null, indent === 1 ? '\t' : indent));
+    } catch (e) {
+      setJsonPathError(`Invalid JSONPath: ${(e as Error).message}`);
+    }
+  };
+
+  const handleSortKeys = () => {
+    setError('');
+    if (!input.trim()) {
+      setError('Please enter some JSON to sort');
+      return;
+    }
+    const validation = validateJSON(input);
+    if (!validation.valid) {
+      setError(`Invalid JSON: ${validation.error}`);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(input);
+      const sorted = sortKeysDeep(parsed);
+      setOutput(JSON.stringify(sorted, null, indent === 1 ? '\t' : indent));
+    } catch (e) {
+      setError(`Error sorting keys: ${(e as Error).message}`);
     }
   };
 
@@ -217,12 +281,19 @@ export default function JsonFormatterClient() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={handleFormat}
             className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
             Format
+          </button>
+          <button
+            onClick={handleSortKeys}
+            className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+            title="Sort object keys alphabetically (recursive). Array order is preserved."
+          >
+            Sort Keys
           </button>
           <button
             onClick={handleMinify}
@@ -237,6 +308,28 @@ export default function JsonFormatterClient() {
             Clear
           </button>
         </div>
+      </div>
+
+      {/* JSONPath Query — filter/extract values from the input */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-gray-700">JSONPath Query (optional)</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={jsonPath}
+            onChange={(e) => { setJsonPath(e.target.value); setJsonPathError(''); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleJsonPath(); }}
+            placeholder="e.g. $..name  •  $.address.city  •  $.hobbies[0]"
+            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleJsonPath}
+            className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors"
+          >
+            Query
+          </button>
+        </div>
+        {jsonPathError && <p className="text-xs text-red-600">{jsonPathError}</p>}
       </div>
 
       {/* Error Message */}

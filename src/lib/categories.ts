@@ -1,4 +1,4 @@
-import { Code, FileText, Image, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Video } from 'lucide-react';
+import { Code, FileText, Image, Palette, ArrowLeftRight, Wrench, FileSpreadsheet, Video, Music } from 'lucide-react';
 
 export interface Category {
   id: string;
@@ -34,7 +34,7 @@ export const categories: Category[] = [
       "Text tools take the tedious cleanup out of working with copied text. Anyone who has ever pasted content from a PDF, a chat thread, an email, or a spreadsheet knows the pain: smart quotes turn into squares, line breaks land in awkward places, lists arrive as inconsistent bullets, and you spend more time fixing whitespace than reading. This category brings together 24+ utilities that fix those problems in one click — and like every tool on the site, they run entirely in your browser, so the text you paste never leaves your device.\n\nThe collection covers the full spectrum of text manipulation: counting characters, words, sentences and reading time; converting between camelCase, snake_case, kebab-case, Title Case, UPPERCASE and lowercase; removing duplicate lines, empty lines, line breaks, HTML tags, extra spaces and ASCII artefacts; sorting lines alphabetically or numerically; reversing text; comparing two blocks to find differences; generating Lorem Ipsum, random names, random text and slugs; translating to Morse code, ROT13, ASCII; and bulk find-and-replace. Whether you're cleaning data before importing it, prepping copy for a website, or just running a quick word count, the right tool is one click away — no installs, no logins, no waiting for an API to respond.",
     icon: 'FileText',
     slug: 'text',
-    toolCount: 24,
+    toolCount: 23,
   },
   {
     id: 'image',
@@ -45,7 +45,18 @@ export const categories: Category[] = [
       "Image tools handle the everyday tasks that would otherwise mean opening Photoshop, paying for a subscription, or uploading sensitive screenshots to a stranger's server. This category collects 28+ in-browser utilities that resize, convert, compress, crop, rotate, flip, blur, pixelate, adjust brightness, extract colours, and apply borders to images — all without ever sending your file to a backend. Drop an image in, tweak the settings, and download the result; nothing is logged, stored, or transmitted anywhere.\n\nThe tools cover most realistic image workflows: converting between PNG, JPG, WebP, GIF, SVG and ICO; compressing PNG / JPEG / GIF for the web; resizing to specific dimensions or by percentage; cropping to a fixed aspect ratio; generating favicons in every standard size; making ICO multi-size icons; turning a series of frames into a GIF; converting images to and from Base64; picking colours straight from an image; and extracting a clean palette from a photograph. Because everything runs locally with the browser's Canvas and image APIs, the tools work offline once the page is loaded, never count against an API quota, and are safe to use on private screenshots, draft assets, or anything you'd rather not upload. They're built for designers, developers, content creators, and anyone who just needs to clean up an image in a hurry.",
     icon: 'Image',
     slug: 'image',
-    toolCount: 28,
+    toolCount: 30,
+  },
+  {
+    id: 'audio',
+    name: 'Audio Tools',
+    description:
+      'Free online audio utilities — convert, trim, merge, compress, normalize, change speed, reduce noise. All run locally via FFmpeg WASM.',
+    longDescription:
+      "Audio tools cover the everyday work of converting, trimming, and cleaning up sound files without ever uploading them to a third-party service. The category brings together 8+ utilities that use FFmpeg compiled to WebAssembly under the hood — the same engine that powers professional audio editors, running directly inside your browser. Drop in an MP3, WAV, OGG, M4A, FLAC, AAC or Opus file and the conversion, trim, or filter happens locally on your machine. Nothing is uploaded, nothing is logged, and you don't need an account.\n\nThe collection includes a universal audio converter (any → MP3 / WAV / OGG / M4A / FLAC / AAC / Opus with bitrate control), a precise trimmer that accepts hh:mm:ss timecodes, a merger for concatenating multiple files into one, a compressor with bitrate / sample-rate / channel control, a volume tool that handles both manual gain and automatic EBU R128 normalization (the broadcast loudness standard Spotify and YouTube target), a speed changer with pitch preservation (atempo filter), a reverse-audio tool for boomerang and creative edits, and a noise reducer powered by FFmpeg's afftdn FFT-based denoiser with optional high-pass filtering for podcast and voiceover cleanup. The first conversion is slower because FFmpeg WASM has to download (~30 MB) and warm up, but every subsequent operation runs near-native speed on your CPU.",
+    icon: 'Music',
+    slug: 'audio',
+    toolCount: 8,
   },
   {
     id: 'video',
@@ -100,7 +111,7 @@ export const categories: Category[] = [
       "Office tools handle the everyday document conversions and edits that usually mean firing up Microsoft Office, paying for a desktop converter, or — worse — uploading a confidential file to an unknown SaaS. This category collects 27+ utilities for Word, Excel, PowerPoint and PDF that all run entirely in your browser. Nothing is uploaded, nothing is stored, and you don't need an account to use any of them.\n\nThe collection covers the conversions most people actually need: Excel ↔ CSV / JSON / XML / SQL, Word ↔ PDF / TXT, PDF ↔ Excel / CSV / Word / PowerPoint, and PowerPoint ↔ PDF / images. There are merge and split tools for every major office format (combine multiple Word documents, split a PDF by page range, merge several Excel sheets into one workbook, divide a PowerPoint deck), and extractor tools that pull text, images, or page counts out of any office file. CSV imports auto-detect encoding (UTF-8, Shift_JIS, GB18030, EUC-KR, Big5, Vietnamese) so files exported from Asian-language Excel installations don't turn into mojibake. PDF tools use pdf.js under the hood, Excel tools use SheetJS, Word and PowerPoint tools parse and rebuild the underlying OOXML zip. Everything stays on your machine — open the tool, drop the file, get the result.",
     icon: 'FileSpreadsheet',
     slug: 'office',
-    toolCount: 27,
+    toolCount: 29,
   },
 ];
 

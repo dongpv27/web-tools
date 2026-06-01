@@ -191,7 +191,7 @@ Bob Johnson,35,bob@example.com,Chicago`);
           >
             <option value=",">Comma (,)</option>
             <option value=";">Semicolon (;)</option>
-            <option value="\t">Tab</option>
+            <option value={'\t'}>Tab</option>
           </select>
         </div>
       </div>
