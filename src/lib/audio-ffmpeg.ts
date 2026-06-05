@@ -5,10 +5,13 @@ import { getFFmpeg, readOutputFile } from '@/lib/ffmpeg';
 
 export type AudioFormat = 'mp3' | 'wav' | 'ogg' | 'm4a' | 'flac' | 'aac' | 'opus';
 
+export type AudioStage = 'loading-engine' | 'reading-input' | 'processing' | 'reading-output';
+
 export interface AudioRunOptions {
   inputName?: string;     // virtual FS path for the input. Default 'input.<ext>'
   outputName?: string;    // virtual FS path for the output. Default 'output.<ext>'
-  onProgress?: (ratio: number) => void; // 0..1
+  onProgress?: (ratio: number) => void; // 0..1 — only during processing stage
+  onStage?: (stage: AudioStage) => void; // coarse-grained step indicator
 }
 
 // Map an output format to a sensible default codec/container for FFmpeg.
@@ -64,7 +67,9 @@ export async function runFFmpegAudio(
   filterAndCodecArgs: string[],
   opts: AudioRunOptions = {},
 ): Promise<Blob> {
+  opts.onStage?.('loading-engine');
   const ffmpeg = await getFFmpeg(opts.onProgress);
+  opts.onStage?.('reading-input');
   const inName = opts.inputName ?? `input.${extOf(input.name)}`;
   const outName = opts.outputName ?? `output.${outputFormat}`;
   await ffmpeg.writeFile(inName, await fetchFile(input));
@@ -73,8 +78,10 @@ export async function runFFmpegAudio(
     ? []
     : codecArgsFor(outputFormat);
 
+  opts.onStage?.('processing');
   await ffmpeg.exec(['-i', inName, ...filterAndCodecArgs, ...codecArgs, '-y', outName]);
 
+  opts.onStage?.('reading-output');
   const bytes = await readOutputFile(ffmpeg, outName);
   try { await ffmpeg.deleteFile(inName); } catch {}
   try { await ffmpeg.deleteFile(outName); } catch {}
@@ -90,9 +97,12 @@ export async function concatFFmpegAudio(
   files: File[],
   outputFormat: AudioFormat,
   onProgress?: (ratio: number) => void,
+  onStage?: (stage: AudioStage) => void,
 ): Promise<Blob> {
   if (files.length === 0) throw new Error('No input files');
+  onStage?.('loading-engine');
   const ffmpeg = await getFFmpeg(onProgress);
+  onStage?.('reading-input');
   const inputs: string[] = [];
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
@@ -100,6 +110,7 @@ export async function concatFFmpegAudio(
     await ffmpeg.writeFile(n, await fetchFile(f));
     inputs.push(n);
   }
+  onStage?.('processing');
 
   // Build args: -i in0 -i in1 ... -filter_complex "[0:a][1:a]concat=...:a=1[a]" -map [a]
   const args: string[] = [];

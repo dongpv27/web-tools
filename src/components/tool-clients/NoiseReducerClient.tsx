@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { runFFmpegAudio, validateAudioFile, type AudioFormat } from '@/lib/audio-ffmpeg';
+import { runFFmpegAudio, validateAudioFile, type AudioFormat, type AudioStage } from '@/lib/audio-ffmpeg';
 
 type Strength = 'light' | 'medium' | 'strong';
 
@@ -16,6 +16,7 @@ export default function NoiseReducerClient() {
   const [outputFormat, setOutputFormat] = useState<AudioFormat>('mp3');
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<AudioStage | null>(null);
   const [downloadUrl, setDownloadUrl] = useState('');
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +32,7 @@ export default function NoiseReducerClient() {
   const run = async () => {
     if (!file) return;
     setProcessing(true); setProgress(0); setError('');
+    setStage('loading-engine');
     try {
       // Chain: optional highpass (rumble cut) → afftdn FFT-based denoise.
       const filters: string[] = [];
@@ -38,11 +40,13 @@ export default function NoiseReducerClient() {
       filters.push(`afftdn=nr=${STRENGTH_NR[strength]}:nf=-25`);
       const blob = await runFFmpegAudio(file, outputFormat, ['-af', filters.join(',')], {
         onProgress: (r) => setProgress(Math.round(r * 100)),
+        onStage: (s) => setStage(s),
       });
       setDownloadUrl(URL.createObjectURL(blob));
     } catch (e) {
       setError(`Failed: ${(e as Error).message}`);
-    } finally { setProcessing(false); }
+    } finally { setProcessing(false);
+      setStage(null); }
   };
 
   const download = () => {
@@ -97,8 +101,16 @@ export default function NoiseReducerClient() {
 
       {processing && (
         <div>
-          <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Reducing noise…</span><span>{progress}%</span></div>
-          <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{ width: `${progress}%` }} /></div>
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>{stage === 'loading-engine' ? 'Loading FFmpeg engine (first run downloads ~30 MB)…' : stage === 'reading-input' ? 'Reading file into engine…' : stage === 'reading-output' ? 'Finalising output…' : 'Reducing noise…'}</span>
+            {stage === 'processing' && <span>{progress}%</span>}
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className={`h-2 rounded-full ${stage === 'processing' ? 'bg-blue-600' : 'bg-blue-400 animate-pulse'}`} style={{ width: stage === 'processing' ? `${progress}%` : '100%' }} />
+          </div>
+          {stage === 'loading-engine' && (
+            <p className="text-xs text-amber-700 mt-2">⏳ First-time setup: FFmpeg WASM (~30 MB) is downloading. Only happens once — subsequent runs start instantly.</p>
+          )}
         </div>
       )}
 

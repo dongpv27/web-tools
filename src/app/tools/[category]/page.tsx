@@ -148,12 +148,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
 
-      <p className="text-gray-600 mb-6 max-w-3xl">
+      <p className="text-gray-600 mb-6">
         {category.description}
       </p>
 
-      {/* Long-form intro (200+ words, SEO depth + visitor context) */}
-      <section className="prose prose-sm max-w-3xl text-gray-600 mb-8 space-y-4">
+      {/* Long-form intro (200+ words, SEO depth + visitor context).
+          Same container width as the short description above — rows stack
+          full width within the page's max-w-7xl container. */}
+      <section className="text-sm text-gray-600 leading-relaxed space-y-4 mb-8">
         {category.longDescription.split('\n\n').map((para, i) => (
           <p key={i}>{para}</p>
         ))}

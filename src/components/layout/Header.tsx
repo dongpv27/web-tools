@@ -52,7 +52,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             <Link
               href="/"
               className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
@@ -146,13 +146,13 @@ export default function Header() {
           </nav>
 
           {/* Search Bar */}
-          <div className="hidden md:block w-56">
+          <div className="hidden lg:block w-56">
             <SearchBar />
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -161,7 +161,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 animate-in slide-in-from-top-2 duration-200">
+          <div className="lg:hidden py-4 border-t border-gray-200 animate-in slide-in-from-top-2 duration-200">
             <div className="mb-4">
               <SearchBar />
             </div>

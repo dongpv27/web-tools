@@ -15,8 +15,12 @@ interface ImageItem {
   compressedBlob?: Blob;
   compressedSize?: number;
   compressedUrl?: string;
+  appliedQuality?: number;
+  metTarget?: boolean;
   error?: string;
 }
+
+type CompressionMode = 'quality' | 'target-size';
 
 type OutputFormat = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif';
 
@@ -59,48 +63,103 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const compressOne = (file: File, format: OutputFormat, quality: number): Promise<Blob> => {
+// Encode an already-decoded image at the given quality. Returns the blob.
+const encodeAt = (
+  img: HTMLImageElement,
+  format: OutputFormat,
+  quality: number,
+): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
+    if (format === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(img, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return reject(new Error('Compression produced no output'));
+        if (blob.type && blob.type !== format) {
+          return reject(new Error(`Browser fell back to ${blob.type}`));
+        }
+        resolve(blob);
+      },
+      format,
+      format === 'image/png' ? undefined : quality / 100,
+    );
+  });
+};
+
+const loadImage = (file: File): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.onload = (e) => {
       const img = new window.Image();
       img.onerror = () => reject(new Error('Failed to decode image'));
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
-        // JPEG has no alpha — pre-fill white so transparent pixels don't go black.
-        if (format === 'image/jpeg') {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) return reject(new Error('Compression produced no output'));
-            // Safety check — if the browser fell back to a different format
-            // (e.g. AVIF on Safari), surface that so the user isn't misled.
-            if (blob.type && blob.type !== format) {
-              return reject(new Error(`Browser fell back to ${blob.type}`));
-            }
-            resolve(blob);
-          },
-          format,
-          format === 'image/png' ? undefined : quality / 100,
-        );
-      };
+      img.onload = () => resolve(img);
       img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   });
 };
 
+const compressOne = async (file: File, format: OutputFormat, quality: number): Promise<Blob> => {
+  const img = await loadImage(file);
+  return encodeAt(img, format, quality);
+};
+
+/**
+ * Binary-search the highest quality that produces output ≤ targetBytes.
+ * PNG ignores quality so falls through to a single encode. Returns the
+ * smallest blob found if no quality meets the target.
+ */
+const compressToTarget = async (
+  file: File,
+  format: OutputFormat,
+  targetBytes: number,
+): Promise<{ blob: Blob; quality: number; metTarget: boolean }> => {
+  const img = await loadImage(file);
+  if (format === 'image/png') {
+    const blob = await encodeAt(img, format, 100);
+    return { blob, quality: 100, metTarget: blob.size <= targetBytes };
+  }
+  // Binary search in 5-point increments — toBlob is the slow step so we cap
+  // iterations. Up to ~6 encodes per image.
+  let lo = 10, hi = 100;
+  let best: Blob | null = null;
+  let bestQ = 10;
+  let metTarget = false;
+  for (let iter = 0; iter < 7 && hi - lo > 4; iter++) {
+    const mid = Math.round((lo + hi) / 2 / 5) * 5;
+    const blob = await encodeAt(img, format, mid);
+    if (blob.size <= targetBytes) {
+      best = blob;
+      bestQ = mid;
+      metTarget = true;
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  if (!best) {
+    // Couldn't meet target even at quality 10 — return that as the smallest.
+    best = await encodeAt(img, format, 10);
+    bestQ = 10;
+    metTarget = best.size <= targetBytes;
+  }
+  return { blob: best, quality: bestQ, metTarget };
+};
+
 export default function ImageCompressorClient() {
   const [items, setItems] = useState<ImageItem[]>([]);
+  const [mode, setMode] = useState<CompressionMode>('quality');
   const [quality, setQuality] = useState(80);
+  const [targetKB, setTargetKB] = useState(200);
   const [format, setFormat] = useState<OutputFormat>('image/jpeg');
   const [isProcessing, setIsProcessing] = useState(false);
   const [avifSupported, setAvifSupported] = useState(false);
@@ -175,7 +234,18 @@ export default function ImageCompressorClient() {
       if (it.status === 'done') continue;
       setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: 'processing' } : x)));
       try {
-        const blob = await compressOne(it.file, format, quality);
+        let blob: Blob;
+        let appliedQuality: number | undefined;
+        let metTarget: boolean | undefined;
+        if (mode === 'target-size') {
+          const result = await compressToTarget(it.file, format, targetKB * 1024);
+          blob = result.blob;
+          appliedQuality = result.quality;
+          metTarget = result.metTarget;
+        } else {
+          blob = await compressOne(it.file, format, quality);
+          appliedQuality = quality;
+        }
         const url = URL.createObjectURL(blob);
         setItems((prev) =>
           prev.map((x) =>
@@ -186,6 +256,8 @@ export default function ImageCompressorClient() {
                   compressedBlob: blob,
                   compressedSize: blob.size,
                   compressedUrl: url,
+                  appliedQuality,
+                  metTarget,
                   error: undefined,
                 }
               : x,
@@ -262,7 +334,25 @@ export default function ImageCompressorClient() {
 
       {/* Options */}
       {items.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setMode('quality')}
+              className={`px-3 py-1.5 text-sm rounded-md ${mode === 'quality' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            >
+              Quality mode
+            </button>
+            <button
+              onClick={() => setMode('target-size')}
+              className={`px-3 py-1.5 text-sm rounded-md ${mode === 'target-size' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              disabled={format === 'image/png'}
+              title={format === 'image/png' ? 'PNG ignores quality — target-size mode unavailable' : ''}
+            >
+              Target file size
+            </button>
+          </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {mode === 'quality' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Quality: {quality}% {format === 'image/png' && <span className="text-xs text-gray-500">(PNG ignores quality)</span>}
@@ -277,6 +367,26 @@ export default function ImageCompressorClient() {
               disabled={format === 'image/png'}
             />
           </div>
+          )}
+          {mode === 'target-size' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Target size: {targetKB} KB
+            </label>
+            <input
+              type="range"
+              min="10"
+              max="2000"
+              step="10"
+              value={targetKB}
+              onChange={(e) => setTargetKB(Number(e.target.value))}
+              className="w-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Binary-searches quality (~6 encodes per image) to find the highest quality that fits under your size budget.
+            </p>
+          </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Output Format</label>
             <select
@@ -290,6 +400,7 @@ export default function ImageCompressorClient() {
               {avifSupported && <option value="image/avif">AVIF (smallest, newest)</option>}
             </select>
           </div>
+        </div>
         </div>
       )}
 
@@ -368,6 +479,11 @@ export default function ImageCompressorClient() {
                       <span className="text-blue-700">
                         ({(((it.originalSize - it.compressedSize) / it.originalSize) * 100).toFixed(1)}%)
                       </span>
+                      {it.appliedQuality !== undefined && mode === 'target-size' && (
+                        <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${it.metTarget ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                          q={it.appliedQuality}{!it.metTarget && ' (over target)'}
+                        </span>
+                      )}
                     </>
                   )}
                 </div>

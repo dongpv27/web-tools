@@ -85,7 +85,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             await page.render({ canvas, canvasContext: ctx, viewport }).promise;
-            const ocrText = await ocrImage(canvas, ocrLang);
+            const ocrText = (await ocrImage(canvas, ocrLang)).text;
             ocrText.split('\n').forEach((rawLine, idx) => {
               const text = rawLine.trim();
               if (!text) return;

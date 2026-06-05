@@ -99,14 +99,45 @@ export default function BackgroundRemoverClient() {
         </div>
       )}
 
-      {processing && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">{progressLabel} · {progress}%</p>
-          <div className="w-full bg-blue-100 rounded-full h-2 mt-2">
-            <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+      {processing && (() => {
+        // The @imgly library reports stages via `progressLabel`. Translate
+        // its internal keys into something human-readable so the user knows
+        // what's happening (especially during the long first-run model
+        // download where progress can sit at 0% for a while).
+        const isFetching = progressLabel.startsWith('fetch:');
+        const isComputing = progressLabel.startsWith('compute:') || progressLabel.includes('inference');
+        const friendlyLabel = isFetching
+          ? 'Downloading AI model from CDN…'
+          : isComputing
+            ? 'Running AI inference on image…'
+            : progressLabel || 'Initialising…';
+        return (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex justify-between text-sm text-blue-800 mb-1">
+              <span>{friendlyLabel}</span>
+              {progress > 0 && <span>{progress}%</span>}
+            </div>
+            <div className="w-full bg-blue-100 rounded-full h-2">
+              {/* Pulse animation when we have no real progress signal, so the
+                  user sees the page is still alive instead of frozen at 0%. */}
+              <div
+                className={`h-2 rounded-full ${progress > 0 ? 'bg-blue-600 transition-all' : 'bg-blue-400 animate-pulse'}`}
+                style={{ width: progress > 0 ? `${progress}%` : '100%' }}
+              />
+            </div>
+            {isFetching && (
+              <p className="text-xs text-amber-700 mt-2">
+                ⏳ First-time setup: an ~80 MB AI model (ISNet FP16) is downloading from CDN. This typically takes 30-90 seconds on a fast connection, longer on slower networks. The model is cached afterwards — subsequent runs start in 1-3 seconds.
+              </p>
+            )}
+            {isComputing && (
+              <p className="text-xs text-blue-700 mt-2">
+                Processing locally in your browser via WebAssembly. Higher-resolution images take longer (typically 2-8 seconds for 1080p, 10-30 seconds for 4K).
+              </p>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 

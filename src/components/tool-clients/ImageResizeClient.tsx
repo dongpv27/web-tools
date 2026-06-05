@@ -29,19 +29,30 @@ const MIME: Record<OutputFormat, string> = {
   webp: 'image/webp',
 };
 
-// Load an image from a File and resolve with its natural dimensions + a stable
-// object URL preview (caller is responsible for revoking).
-const loadImageMeta = (file: File): Promise<{ url: string; width: number; height: number }> =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => resolve({ url, width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Could not read image'));
-    };
-    img.src = url;
-  });
+// Load an image from a File and resolve with its EXIF-corrected dimensions
+// + a stable object URL preview (caller is responsible for revoking).
+// `createImageBitmap(file, { imageOrientation: 'from-image' })` returns the
+// already-rotated bitmap, so its width/height match what the user will see.
+const loadImageMeta = async (
+  file: File,
+): Promise<{ url: string; width: number; height: number }> => {
+  const url = URL.createObjectURL(file);
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const out = { url, width: bmp.width, height: bmp.height };
+    bmp.close();
+    return out;
+  } catch {
+    // Fallback for older browsers without createImageBitmap orientation
+    // support — natural dimensions, no EXIF correction.
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => resolve({ url, width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
+      img.src = url;
+    });
+  }
+};
 
 const targetDimensions = (
   originalW: number,
@@ -69,46 +80,55 @@ const targetDimensions = (
   }
 };
 
-const resizeOne = (
+// Decode the file via createImageBitmap with imageOrientation: 'from-image'
+// so EXIF rotation (Orientation tag 1-8) is applied automatically — phone
+// photos no longer come out sideways. Falls back to Image element on
+// browsers without the option supported (very old Safari/Firefox).
+const decodeOriented = async (file: File): Promise<CanvasImageSource & { width: number; height: number; close?: () => void }> => {
+  try {
+    return await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    const url = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new window.Image();
+      i.onload = () => resolve(i);
+      i.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to decode image')); };
+      i.src = url;
+    });
+    return Object.assign(img, { close: () => URL.revokeObjectURL(url) });
+  }
+};
+
+const resizeOne = async (
   file: File,
   w: number,
   h: number,
   format: OutputFormat,
   quality: number,
-): Promise<Blob> =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        URL.revokeObjectURL(url);
-        return reject(new Error('Canvas 2D context unavailable'));
-      }
-      if (format === 'jpeg') {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-      }
-      ctx.drawImage(img, 0, 0, w, h);
+): Promise<Blob> => {
+  const src = await decodeOriented(file);
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context unavailable');
+    if (format === 'jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.drawImage(src, 0, 0, w, h);
+    return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
-        (blob) => {
-          URL.revokeObjectURL(url);
-          if (!blob) return reject(new Error('Resize produced no output'));
-          resolve(blob);
-        },
+        (blob) => blob ? resolve(blob) : reject(new Error('Resize produced no output')),
         MIME[format],
         format === 'png' ? undefined : quality,
       );
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Failed to decode image'));
-    };
-    img.src = url;
-  });
+    });
+  } finally {
+    src.close?.();
+  }
+};
 
 export default function ImageResizeClient() {
   const [items, setItems] = useState<ImageItem[]>([]);

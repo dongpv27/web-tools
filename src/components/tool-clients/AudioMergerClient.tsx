@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { concatFFmpegAudio, validateAudioFile, type AudioFormat } from '@/lib/audio-ffmpeg';
+import { concatFFmpegAudio, validateAudioFile, type AudioFormat, type AudioStage } from '@/lib/audio-ffmpeg';
 
 export default function AudioMergerClient() {
   const [files, setFiles] = useState<File[]>([]);
   const [outputFormat, setOutputFormat] = useState<AudioFormat>('mp3');
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<AudioStage | null>(null);
   const [downloadUrl, setDownloadUrl] = useState('');
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,12 +45,14 @@ export default function AudioMergerClient() {
     setProcessing(true);
     setProgress(0);
     setError('');
+    setStage('loading-engine');
     try {
-      const blob = await concatFFmpegAudio(files, outputFormat, (r) => setProgress(Math.round(r * 100)));
+      const blob = await concatFFmpegAudio(files, outputFormat, (r) => setProgress(Math.round(r * 100)), (s) => setStage(s));
       setDownloadUrl(URL.createObjectURL(blob));
     } catch (e) {
       setError(`Merge failed: ${(e as Error).message}`);
-    } finally { setProcessing(false); }
+    } finally { setProcessing(false);
+      setStage(null); }
   };
 
   const download = () => {
@@ -81,12 +84,29 @@ export default function AudioMergerClient() {
           <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">{files.length} file(s) — order matters</div>
           <ul>
             {files.map((f, i) => (
-              <li key={i} className="flex items-center justify-between px-4 py-2 border-b border-gray-100 last:border-0">
-                <span className="text-sm text-gray-700">{i + 1}. {f.name} <span className="text-gray-400">· {(f.size / 1024 / 1024).toFixed(1)} MB</span></span>
-                <div className="flex gap-1">
-                  <button onClick={() => moveUp(i)} disabled={i === 0} className="px-2 py-0.5 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-30">↑</button>
-                  <button onClick={() => moveDown(i)} disabled={i === files.length - 1} className="px-2 py-0.5 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-30">↓</button>
-                  <button onClick={() => removeAt(i)} className="px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">×</button>
+              <li key={i} className="flex items-center justify-between gap-2 px-3 py-2 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-700 min-w-0 flex-1 truncate">
+                  {i + 1}. {f.name}{' '}
+                  <span className="text-gray-400 whitespace-nowrap">· {(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                </span>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => moveUp(i)}
+                    disabled={i === 0}
+                    aria-label="Move up"
+                    className="w-9 h-9 flex items-center justify-center text-base bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >↑</button>
+                  <button
+                    onClick={() => moveDown(i)}
+                    disabled={i === files.length - 1}
+                    aria-label="Move down"
+                    className="w-9 h-9 flex items-center justify-center text-base bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >↓</button>
+                  <button
+                    onClick={() => removeAt(i)}
+                    aria-label="Remove file"
+                    className="w-9 h-9 flex items-center justify-center text-base bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >×</button>
                 </div>
               </li>
             ))}
@@ -104,8 +124,16 @@ export default function AudioMergerClient() {
 
       {processing && (
         <div>
-          <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Merging…</span><span>{progress}%</span></div>
-          <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{ width: `${progress}%` }} /></div>
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>{stage === 'loading-engine' ? 'Loading FFmpeg engine (first run downloads ~30 MB)…' : stage === 'reading-input' ? 'Reading files into engine…' : stage === 'reading-output' ? 'Finalising output…' : 'Merging…'}</span>
+            {stage === 'processing' && <span>{progress}%</span>}
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className={`h-2 rounded-full ${stage === 'processing' ? 'bg-blue-600' : 'bg-blue-400 animate-pulse'}`} style={{ width: stage === 'processing' ? `${progress}%` : '100%' }} />
+          </div>
+          {stage === 'loading-engine' && (
+            <p className="text-xs text-amber-700 mt-2">⏳ First-time setup: FFmpeg WASM (~30 MB) is downloading. Only happens once — subsequent runs start instantly.</p>
+          )}
         </div>
       )}
 

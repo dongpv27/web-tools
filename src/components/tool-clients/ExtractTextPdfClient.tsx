@@ -71,7 +71,7 @@ export default function ExtractTextPdfClient() {
         if (needsOcr) {
           setProgressLabel(`OCR page ${i}/${pdf.numPages} (${ocrLang})…`);
           const canvas = await renderPageToCanvas(page, 2);
-          pageText = (await ocrImage(canvas, ocrLang)).trim();
+          pageText = (await ocrImage(canvas, ocrLang)).text.trim();
           usedOcr = true;
           ocrCount++;
           setOcrPagesCount(ocrCount);

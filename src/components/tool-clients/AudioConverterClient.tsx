@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { runFFmpegAudio, validateAudioFile, type AudioFormat } from '@/lib/audio-ffmpeg';
+import { runFFmpegAudio, validateAudioFile, type AudioFormat, type AudioStage } from '@/lib/audio-ffmpeg';
 
 const FORMATS: AudioFormat[] = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'opus'];
 
@@ -11,6 +11,7 @@ export default function AudioConverterClient() {
   const [bitrate, setBitrate] = useState<string>('192k');
   const [converting, setConverting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<AudioStage | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string>('');
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,10 +31,12 @@ export default function AudioConverterClient() {
     setConverting(true);
     setProgress(0);
     setError('');
+    setStage('loading-engine');
     try {
       const args = isLossless ? [] : ['-b:a', bitrate];
       const blob = await runFFmpegAudio(file, outputFormat, args, {
         onProgress: (r) => setProgress(Math.round(r * 100)),
+        onStage: (s) => setStage(s),
       });
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
@@ -41,6 +44,17 @@ export default function AudioConverterClient() {
       setError(`Conversion failed: ${(e as Error).message}`);
     } finally {
       setConverting(false);
+      setStage(null);
+    }
+  };
+
+  const stageLabel = (): string => {
+    switch (stage) {
+      case 'loading-engine': return 'Loading FFmpeg engine (first run downloads ~30 MB, please wait)…';
+      case 'reading-input': return 'Reading file into engine…';
+      case 'processing': return `Converting… ${progress}%`;
+      case 'reading-output': return 'Finalising output…';
+      default: return '';
     }
   };
 
@@ -91,8 +105,21 @@ export default function AudioConverterClient() {
 
       {converting && (
         <div>
-          <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Converting…</span><span>{progress}%</span></div>
-          <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{ width: `${progress}%` }} /></div>
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>{stageLabel()}</span>
+            {stage === 'processing' && <span>{progress}%</span>}
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${stage === 'processing' ? 'bg-blue-600' : 'bg-blue-400 animate-pulse'}`}
+              style={{ width: stage === 'processing' ? `${progress}%` : '100%' }}
+            />
+          </div>
+          {stage === 'loading-engine' && (
+            <p className="text-xs text-amber-700 mt-2">
+              ⏳ First-time setup: FFmpeg WASM (~30 MB) is downloading from CDN. This only happens once — subsequent conversions start instantly.
+            </p>
+          )}
         </div>
       )}
 
