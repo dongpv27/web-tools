@@ -5,7 +5,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "sonner";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_OG_IMAGE, TWITTER_HANDLE } from "@/lib/site";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_OG_IMAGE, TWITTER_HANDLE, IS_INDEXABLE } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,17 +54,26 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [SITE_OG_IMAGE],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
+  // On `*.vercel.app` (preview / no-domain phase) emit a site-wide noindex so
+  // these URLs stay out of search engines. Flips to index automatically once
+  // SITE_URL is a real custom domain (see IS_INDEXABLE in lib/site).
+  robots: IS_INDEXABLE
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      }
+    : {
+        index: false,
+        follow: false,
+        googleBot: { index: false, follow: false },
+      },
   icons: {
     icon: "/icon",
     apple: "/apple-icon",

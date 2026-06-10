@@ -14,6 +14,15 @@ function resolveSiteUrl(): string {
 }
 
 export const SITE_URL = resolveSiteUrl();
+
+// Whether search engines should index this deployment. We only want the real
+// production domain in the index — `*.vercel.app` deployments (the current
+// no-domain phase + every preview build) must stay out of Google to avoid
+// duplicate content against the future custom domain. Once SITE_URL resolves
+// to a non-`.vercel.app` host (custom domain added / NEXT_PUBLIC_SITE_URL set),
+// indexing turns on automatically with no code change.
+export const IS_INDEXABLE = !/\.vercel\.app$/i.test(new URL(SITE_URL).host);
+
 export const SITE_NAME = 'Love Web Tools';
 export const SITE_DESCRIPTION =
   'Free online tools for developers, designers, and everyone. JSON formatter, Base64 encoder, image/video/PDF utilities, and 100+ more — all client-side.';
