@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
 import { PASSPHRASE_WORDS } from '@/lib/passphrase-wordlist';
+import { trackToolRun } from '@/lib/analytics';
 
 type Mode = 'random' | 'passphrase';
 type Separator = '-' | '.' | '_' | ' ' | '';
@@ -96,7 +97,11 @@ export default function RandomPasswordGeneratorClient() {
     setPassword(result);
   }, [wordCount, separator, capitalize, appendDigits]);
 
-  const generate = () => (mode === 'random' ? generateRandom() : generatePassphrase());
+  const generate = () => {
+    if (mode === 'random') generateRandom();
+    else generatePassphrase();
+    trackToolRun('random-password-generator', 'generate');
+  };
 
   // Approximate Shannon entropy of the GENERATING DISTRIBUTION (not the
   // observed string). For random: log2(charsetSize) × length. For

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 import md5 from 'crypto-js/md5';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function Md5HashGeneratorClient() {
   const [input, setInput] = useState('');
@@ -20,6 +21,7 @@ export default function Md5HashGeneratorClient() {
     try {
       const hash = md5(input).toString();
       setOutput(hash);
+      trackToolRun('md5-hash-generator', 'hash');
     } catch (e) {
       setError(`Error generating hash: ${(e as Error).message}`);
     }

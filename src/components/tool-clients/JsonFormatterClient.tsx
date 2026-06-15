@@ -7,6 +7,7 @@ import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
 import { ToolError, ToolEmpty } from '@/components/tools/ToolFeedback';
 import { formatJSON, minifyJSON, validateJSON } from '@/lib/utils';
+import { trackToolRun } from '@/lib/analytics';
 
 // Recursively sort object keys alphabetically. Arrays keep their order
 // (sorting array elements would silently corrupt user data).
@@ -145,6 +146,7 @@ export default function JsonFormatterClient() {
     try {
       const formatted = formatJSON(input, indent);
       setOutput(formatted);
+      trackToolRun('json-formatter', 'format');
     } catch (e) {
       setError(`Error formatting JSON: ${(e as Error).message}`);
     }
@@ -172,6 +174,7 @@ export default function JsonFormatterClient() {
       const parsed = JSON.parse(input);
       const results = JSONPath({ path: jsonPath, json: parsed });
       setOutput(JSON.stringify(results, null, indent === 1 ? '\t' : indent));
+      trackToolRun('json-formatter', 'query');
     } catch (e) {
       setJsonPathError(`Invalid JSONPath: ${(e as Error).message}`);
     }
@@ -192,6 +195,7 @@ export default function JsonFormatterClient() {
       const parsed = JSON.parse(input);
       const sorted = sortKeysDeep(parsed);
       setOutput(JSON.stringify(sorted, null, indent === 1 ? '\t' : indent));
+      trackToolRun('json-formatter', 'sort');
     } catch (e) {
       setError(`Error sorting keys: ${(e as Error).message}`);
     }
@@ -213,6 +217,7 @@ export default function JsonFormatterClient() {
     try {
       const minified = minifyJSON(input);
       setOutput(minified);
+      trackToolRun('json-formatter', 'minify');
     } catch (e) {
       setError(`Error minifying JSON: ${(e as Error).message}`);
     }

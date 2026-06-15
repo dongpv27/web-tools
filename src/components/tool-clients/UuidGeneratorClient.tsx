@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ToolResult from '@/components/tools/ToolResult';
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
+import { trackToolRun } from '@/lib/analytics';
 
 type FormatOptions = {
   hyphens: boolean;
@@ -60,6 +61,7 @@ export default function UuidGeneratorClient() {
       newUuids.push(formatUUID(crypto.randomUUID()));
     }
     setUuids(newUuids);
+    trackToolRun('uuid-generator', 'generate');
   };
 
   const getJoinedText = () => {

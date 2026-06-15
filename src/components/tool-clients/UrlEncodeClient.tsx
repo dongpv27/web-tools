@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 type Mode = 'component' | 'uri' | 'all';
 
@@ -37,6 +38,7 @@ export default function UrlEncodeClient() {
       else if (mode === 'all') result = encodeAllBytes(input);
       else result = encodeURIComponent(input);
       setOutput(result);
+      trackToolRun('url-encode', 'encode');
     } catch (e) {
       setError(`Error encoding: ${(e as Error).message}`);
     }

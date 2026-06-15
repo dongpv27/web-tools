@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function Base64EncodeClient() {
   const [input, setInput] = useState('');
@@ -24,6 +25,7 @@ export default function Base64EncodeClient() {
       ).join('');
       const encoded = btoa(binString);
       setOutput(encoded);
+      trackToolRun('base64-encode', 'encode');
     } catch (e) {
       setError(`Error encoding: ${(e as Error).message}`);
     }

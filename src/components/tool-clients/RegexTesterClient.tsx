@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 // Tightly grouped cheatsheet: characters → quantifiers → anchors → groups → classes → escapes.
 // Each entry: token, human description. Kept short so the panel doesn't bury results.
@@ -152,6 +153,7 @@ export default function RegexTesterClient() {
       }
 
       setMatches(allMatches);
+      trackToolRun('regex-tester', 'test');
 
       // Create highlighted HTML
       let html = '';

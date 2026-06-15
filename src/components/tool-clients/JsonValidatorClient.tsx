@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function JsonValidatorClient() {
   const [input, setInput] = useState('');
@@ -84,6 +85,7 @@ export default function JsonValidatorClient() {
           arrays: stats.arrays,
         },
       });
+      trackToolRun('json-validator', 'validate');
     } catch (e) {
       const error = e as SyntaxError;
       // Try to extract position from error message

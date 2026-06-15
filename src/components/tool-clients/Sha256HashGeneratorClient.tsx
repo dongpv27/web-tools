@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function Sha256HashGeneratorClient() {
   const [input, setInput] = useState('');
@@ -30,6 +31,7 @@ export default function Sha256HashGeneratorClient() {
     try {
       const hash = await sha256(input);
       setOutput(hash);
+      trackToolRun('sha256-hash-generator', 'hash');
     } catch (e) {
       setError(`Error generating hash: ${(e as Error).message}`);
     }

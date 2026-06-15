@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function Base64DecodeClient() {
   const [input, setInput] = useState('');
@@ -24,6 +25,7 @@ export default function Base64DecodeClient() {
       const bytes = Uint8Array.from(binString, (char) => char.charCodeAt(0));
       const decoded = new TextDecoder().decode(bytes);
       setOutput(decoded);
+      trackToolRun('base64-decode', 'decode');
     } catch (e) {
       setError(`Error decoding: Invalid Base64 string`);
     }

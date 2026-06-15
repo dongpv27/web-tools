@@ -9,6 +9,7 @@ extend([mixPlugin]);
 import CopyButton from '@/components/ui/CopyButton';
 import DownloadButton from '@/components/ui/DownloadButton';
 import { hexToRgb } from '@/lib/color';
+import { trackToolRun } from '@/lib/analytics';
 
 interface ColorValues {
   hex: string;
@@ -115,6 +116,7 @@ export default function ColorConverterClient() {
       const hex = `#${rgb.r.toString(16).padStart(2, '0')}${rgb.g.toString(16).padStart(2, '0')}${rgb.b.toString(16).padStart(2, '0')}`;
 
       setColorValues({ hex: hex.toUpperCase(), rgb, hsl, cmyk });
+      trackToolRun('color-converter', 'convert');
     } catch (e) {
       setError((e as Error).message);
     }

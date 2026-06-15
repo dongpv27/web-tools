@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import JSZip from 'jszip';
+import { trackToolRun, trackToolDownload } from '@/lib/analytics';
 
 type Status = 'pending' | 'processing' | 'done' | 'error';
 
@@ -229,6 +230,7 @@ export default function ImageCompressorClient() {
   const compressAll = async () => {
     if (items.length === 0) return;
     setIsProcessing(true);
+    let anySucceeded = false;
     // Process serially so the browser doesn't OOM on large batches.
     for (const it of items) {
       if (it.status === 'done') continue;
@@ -263,6 +265,7 @@ export default function ImageCompressorClient() {
               : x,
           ),
         );
+        anySucceeded = true;
       } catch (err) {
         setItems((prev) =>
           prev.map((x) =>
@@ -273,6 +276,7 @@ export default function ImageCompressorClient() {
         );
       }
     }
+    if (anySucceeded) trackToolRun('image-compressor', 'compress');
     setIsProcessing(false);
   };
 
@@ -283,6 +287,7 @@ export default function ImageCompressorClient() {
     link.href = it.compressedUrl!;
     link.download = `${base}-compressed.${EXT[format]}`;
     link.click();
+    trackToolDownload('image-compressor');
   };
 
   const downloadAllZip = async () => {
@@ -299,6 +304,7 @@ export default function ImageCompressorClient() {
     link.href = url;
     link.download = `compressed-images.zip`;
     link.click();
+    trackToolDownload('image-compressor');
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 

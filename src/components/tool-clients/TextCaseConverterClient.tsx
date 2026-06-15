@@ -1,12 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 export default function TextCaseConverterClient() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (input.trim() && !trackedRef.current) {
+      trackedRef.current = true;
+      trackToolRun('text-case-converter', 'use');
+    }
+  }, [input]);
 
   const conversions = [
     {

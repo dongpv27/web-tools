@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import ToolInput from '@/components/tools/ToolInput';
 import ToolResult from '@/components/tools/ToolResult';
+import { trackToolRun } from '@/lib/analytics';
 
 type VerificationStatus = 'valid' | 'invalid' | 'error' | 'pending' | null;
 
@@ -290,6 +291,7 @@ export default function JwtDecoderClient() {
         payload: payloadJson,
         algorithm: headerJson.alg,
       });
+      trackToolRun('jwt-decoder', 'decode');
 
       // Check expiration
       const currentTime = Math.floor(Date.now() / 1000);
